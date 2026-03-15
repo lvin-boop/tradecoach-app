@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TradeCoach — AI Discipline Coach</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08090C;
+  --bg2:#0D0F16;
+  --bg3:#12151F;
+  --bg4:#181C28;
+  --border:#1A1E2E;
+  --border2:#222740;
+  --text:#E8EAF6;
+  --text2:#7B83A8;
+  --text3:#3D4260;
+  --green:#00E5A0;
+  --green2:#00C488;
+  --green-dim:rgba(0,229,160,0.08);
+  --red:#FF4D6A;
+  --red-dim:rgba(255,77,106,0.08);
+  --amber:#FFB547;
+  --amber-dim:rgba(255,181,71,0.08);
+  --blue:#4D7EFF;
+  --blue-dim:rgba(77,126,255,0.1);
+  --font:'Syne',sans-serif;
+  --mono:'DM Mono',monospace;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);overflow:hidden}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.015) 3px,rgba(0,0,0,0.015) 4px);pointer-events:none;z-index:9999}
+
+/* LAYOUT */
+.app{display:grid;grid-template-rows:52px auto 1fr;height:100vh}
+.app.session-on .main{grid-template-columns:1fr 320px}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--border);background:var(--bg)}
+.hdr::after{content:'';position:absolute;top:52px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,var(--green) 50%,transparent 100%);opacity:0.15}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:30px;height:30px;border:1px solid var(--green);display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0}
+.brand-mark::before{content:'';position:absolute;inset:4px;background:var(--green);opacity:0.12}
+.brand-mark svg{width:14px;height:14px;fill:var(--green);position:relative}
+.brand-name{font-size:15px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase}
+.brand-name span{color:var(--green)}
+.hdr-mid{display:flex;align-items:center;gap:2px}
+.ntab{font-family:var(--mono);font-size:10px;padding:6px 16px;border:1px solid transparent;cursor:pointer;letter-spacing:0.08em;color:var(--text3);background:transparent;text-transform:uppercase;transition:all 0.2s}
+.ntab:hover{color:var(--text2);border-color:var(--border2)}
+.ntab.active{color:var(--green);border-color:var(--border2);border-bottom-color:var(--green)}
+.hdr-right{display:flex;align-items:center;gap:14px}
+.ws-status{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;letter-spacing:0.06em}
+.ws-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);transition:all 0.3s}
+.ws-dot.connected{background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+.ws-dot.connecting{background:var(--amber);animation:pulse 1s infinite}
+.ws-label{color:var(--text3)}
+.ws-label.connected{color:var(--green)}
+.timer-wrap{font-family:var(--mono);font-size:13px;color:var(--text3);letter-spacing:0.1em;min-width:80px;text-align:center}
+.timer-wrap.active{color:var(--green)}
+.btn{font-family:var(--mono);font-size:10px;padding:8px 18px;border:1px solid var(--border2);cursor:pointer;letter-spacing:0.08em;text-transform:uppercase;transition:all 0.2s;background:transparent;color:var(--text2)}
+.btn:hover{border-color:var(--text2);color:var(--text)}
+.btn.go{border-color:var(--green);color:var(--green)}
+.btn.go:hover{background:var(--green);color:var(--bg);font-weight:600}
+.btn.stop{border-color:var(--red);color:var(--red)}
+.btn.stop:hover{background:var(--red);color:white}
+
+/* ALERT STRIP */
+.alert{display:none;align-items:center;gap:10px;padding:8px 24px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;border-bottom:1px solid}
+.alert.show{display:flex}
+.alert.danger{background:var(--red-dim);border-color:rgba(255,77,106,0.3);color:var(--red)}
+.alert.warn{background:var(--amber-dim);border-color:rgba(255,181,71,0.3);color:var(--amber)}
+.alert.info{background:var(--green-dim);border-color:rgba(0,229,160,0.2);color:var(--green)}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--border)}
+.met{padding:14px 18px;border-right:1px solid var(--border);position:relative;overflow:hidden;transition:background 0.3s}
+.met:last-child{border-right:none}
+.met-bar{position:absolute;top:0;left:0;right:0;height:2px;background:var(--border2);transition:background 0.3s}
+.met.pos .met-bar{background:var(--green)}
+.met.neg .met-bar{background:var(--red)}
+.met.warn .met-bar{background:var(--amber)}
+.met.info .met-bar{background:var(--blue)}
+.met-label{font-family:var(--mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:7px}
+.met-val{font-family:var(--mono);font-size:19px;font-weight:500;color:var(--text);transition:color 0.3s}
+.met-val.pos{color:var(--green)}
+.met-val.neg{color:var(--red)}
+.met-val.warn{color:var(--amber)}
+.met-sub{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:4px;letter-spacing:0.04em}
+
+/* MAIN */
+.main{display:grid;grid-template-columns:1fr;flex:1;overflow:hidden}
+.left{display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border)}
+
+/* TRADE LOG */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-bottom:1px solid var(--border);flex-shrink:0}
+.sec-title{font-family:var(--mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3)}
+.sec-title em{color:var(--green);font-style:normal;margin-left:8px}
+.trades-list{flex:1;overflow-y:auto;min-height:0}
+.trades-list::-webkit-scrollbar{width:2px}
+.trades-list::-webkit-scrollbar-thumb{background:var(--border2)}
+.trade-row{display:grid;grid-template-columns:90px 68px 54px 84px 1fr 72px;gap:8px;align-items:center;padding:10px 18px;border-bottom:1px solid var(--border);transition:background 0.15s;animation:fadeIn 0.4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.trade-row:hover{background:var(--bg3)}
+.trade-row.new{background:var(--green-dim)}
+.t-sym{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text)}
+.t-dir{font-family:var(--mono);font-size:10px;padding:2px 8px;letter-spacing:0.04em;text-align:center;border:1px solid}
+.t-dir.long{color:var(--green);border-color:rgba(0,229,160,0.25);background:var(--green-dim)}
+.t-dir.short{color:var(--red);border-color:rgba(255,77,106,0.25);background:var(--red-dim)}
+.t-time{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.t-pnl{font-family:var(--mono);font-size:12px;font-weight:500}
+.t-pnl.pos{color:var(--green)}
+.t-pnl.neg{color:var(--red)}
+.t-note{font-size:11px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.t-src{font-family:var(--mono);font-size:9px;text-align:right;letter-spacing:0.06em}
+.t-src.mt5{color:var(--blue)}
+.t-src.tv{color:var(--amber)}
+.t-src.manual{color:var(--text3)}
+.t-plan-badge{font-family:var(--mono);font-size:9px;padding:1px 6px;border:1px solid}
+.t-plan-badge.ok{color:var(--green);border-color:rgba(0,229,160,0.2)}
+.t-plan-badge.no{color:var(--red);border-color:rgba(255,77,106,0.2)}
+.empty{padding:40px 18px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.06em;line-height:2}
+
+/* ADD TRADE FORM */
+.add-area{padding:12px 18px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.form-grid{display:grid;grid-template-columns:1fr 80px 100px 110px auto;gap:8px;align-items:center}
+.fi{font-family:var(--mono);font-size:12px;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:8px 10px;outline:none;width:100%;transition:border-color 0.2s}
+.fi:focus{border-color:var(--green)}
+.fi::placeholder{color:var(--text3)}
+select.fi option{background:var(--bg3)}
+.add-btn{font-family:var(--mono);font-size:10px;padding:8px 16px;background:var(--green);color:var(--bg);border:none;cursor:pointer;letter-spacing:0.08em;text-transform:uppercase;font-weight:700;white-space:nowrap;transition:opacity 0.2s}
+.add-btn:hover{opacity:0.85}
+.note-row{margin-top:8px}
+.note-row .fi{width:100%}
+
+/* RULES */
+.rules-area{padding:14px 18px;border-top:1px solid var(--border);flex-shrink:0}
+.rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.rule-card{background:var(--bg3);border:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.rule-left{}
+.rule-lbl{font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:5px}
+.rule-inp-row{display:flex;align-items:center;gap:6px}
+.rule-inp{width:52px;font-family:var(--mono);font-size:12px;background:var(--bg4);border:1px solid var(--border2);color:var(--green);padding:4px 6px;text-align:center;outline:none}
+.rule-unit{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.tog{position:relative;width:30px;height:16px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0}
+.tog-sl{position:absolute;inset:0;background:var(--border2);cursor:pointer;border-radius:8px;transition:background 0.2s}
+.tog input:checked+.tog-sl{background:var(--green)}
+.tog-sl:before{content:'';position:absolute;width:10px;height:10px;top:3px;left:3px;background:white;border-radius:50%;transition:transform 0.2s}
+.tog input:checked+.tog-sl:before{transform:translateX(14px)}
+
+/* SCORE */
+.score-row{display:flex;align-items:center;gap:12px;margin-top:12px}
+.score-lbl{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;flex-shrink:0}
+.score-track{flex:1;height:3px;background:var(--bg4);overflow:hidden}
+.score-fill{height:100%;transition:width 0.6s,background 0.6s}
+.score-num{font-family:var(--mono);font-size:13px;font-weight:500;min-width:52px;text-align:right}
+
+/* LOCKED BAR */
+.locked{display:none;align-items:center;gap:10px;padding:10px 18px;background:var(--red-dim);border-top:1px solid rgba(255,77,106,0.3);font-family:var(--mono);font-size:11px;color:var(--red);letter-spacing:0.04em;flex-shrink:0}
+.locked.show{display:flex}
+
+/* RIGHT PANEL */
+.right{display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
+.coach-hdr{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.coach-pulse{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.coach-info .coach-name{font-size:13px;font-weight:600;letter-spacing:0.08em;color:var(--text)}
+.coach-info .coach-sub{font-family:var(--mono);font-size:9px;color:var(--green);letter-spacing:0.06em;margin-top:2px}
+.msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.msgs::-webkit-scrollbar{width:2px}
+.msgs::-webkit-scrollbar-thumb{background:var(--border2)}
+.msg{max-width:90%}
+.msg.coach{align-self:flex-start}
+.msg.user{align-self:flex-end}
+.msg-bbl{padding:10px 13px;font-size:12px;line-height:1.65}
+.msg.coach .msg-bbl{background:var(--bg3);color:var(--text);border-left:2px solid var(--green);border-radius:0 4px 4px 0}
+.msg.user .msg-bbl{background:var(--blue-dim);color:var(--text);border-right:2px solid var(--blue);border-radius:4px 0 0 4px}
+.msg-ts{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:4px;letter-spacing:0.04em;padding:0 2px}
+.msg.user .msg-ts{text-align:right}
+.typing-bbl{display:flex;align-items:center;gap:5px;padding:10px 13px;background:var(--bg3);border-left:2px solid var(--green);border-radius:0 4px 4px 0;width:fit-content}
+.td{width:5px;height:5px;border-radius:50%;background:var(--green);animation:tdot 1.4s infinite}
+.td:nth-child(2){animation-delay:0.2s}
+.td:nth-child(3){animation-delay:0.4s}
+@keyframes tdot{0%,80%,100%{opacity:0.2;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}
+.quick-row{display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px;border-top:1px solid var(--border);flex-shrink:0}
+.qbtn{font-family:var(--mono);font-size:10px;padding:4px 10px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;letter-spacing:0.04em;transition:all 0.2s;white-space:nowrap}
+.qbtn:hover{border-color:var(--green);color:var(--green)}
+.chat-foot{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--border);align-items:flex-end;flex-shrink:0}
+.chat-foot textarea{flex:1;font-family:var(--mono);font-size:12px;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:9px 10px;resize:none;min-height:38px;max-height:80px;outline:none;transition:border-color 0.2s;line-height:1.5}
+.chat-foot textarea:focus{border-color:var(--green)}
+.chat-foot textarea::placeholder{color:var(--text3)}
+.snd{width:38px;height:38px;background:var(--green);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity 0.2s}
+.snd:hover{opacity:0.8}
+.snd svg{width:15px;height:15px;fill:var(--bg)}
+
+/* WELCOME SCREEN */
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:24px;padding:40px}
+.welcome-title{font-size:28px;font-weight:800;letter-spacing:0.06em;text-align:center}
+.welcome-title span{color:var(--green)}
+.welcome-sub{font-family:var(--mono);font-size:12px;color:var(--text2);text-align:center;line-height:2;letter-spacing:0.04em}
+.welcome-features{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:600px}
+.feat{background:var(--bg3);border:1px solid var(--border);padding:16px;text-align:center}
+.feat-icon{font-size:20px;margin-bottom:8px}
+.feat-title{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);margin-bottom:4px}
+.feat-desc{font-size:11px;color:var(--text3);line-height:1.6}
+.welcome-btn{font-family:var(--mono);font-size:12px;padding:14px 40px;background:var(--green);color:var(--bg);border:none;cursor:pointer;letter-spacing:0.1em;text-transform:uppercase;font-weight:700;transition:opacity 0.2s;margin-top:8px}
+.welcome-btn:hover{opacity:0.85}
+.ws-info{font-family:var(--mono);font-size:10px;color:var(--text3);text-align:center;letter-spacing:0.04em}
+.ws-info span{color:var(--green)}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24"><path d="M3 3h18v2H3V3zm0 4h12v2H3V7zm0 4h18v2H3v-2zm0 4h12v2H3v-2zm0 4h18v2H3v-2z"/></svg>
+      </div>
+      <div class="brand-name">Trade<span>Coach</span></div>
+    </div>
+    <div class="hdr-mid">
+      <button class="ntab active">Session</button>
+      <button class="ntab">Historique</button>
+      <button class="ntab">Règles</button>
+    </div>
+    <div class="hdr-right">
+      <div class="ws-status">
+        <div class="ws-dot" id="ws-dot"></div>
+        <span class="ws-label" id="ws-label">Déconnecté</span>
+      </div>
+      <div class="timer-wrap" id="timer">00:00:00</div>
+      <button class="btn go" id="start-btn" onclick="startSession()">▶ Démarrer</button>
+      <button class="btn stop" id="end-btn" style="display:none" onclick="endSession()">■ Terminer</button>
+    </div>
+  </div>
+
+  <!-- ALERT -->
+  <div class="alert" id="alert-strip">
+    <span id="alert-msg"></span>
+  </div>
+
+  <!-- METRICS -->
+  <div class="metrics" id="metrics" style="display:none">
+    <div class="met" id="m-pnl">
+      <div class="met-bar"></div>
+      <div class="met-label">P&L journalier</div>
+      <div class="met-val" id="pnl-val">+0.00€</div>
+      <div class="met-sub" id="pnl-sub">0 trades</div>
+    </div>
+    <div class="met" id="m-trades">
+      <div class="met-bar"></div>
+      <div class="met-label">Trades</div>
+      <div class="met-val" id="trades-val">0</div>
+      <div class="met-sub" id="trades-sub">/ 5 max</div>
+    </div>
+    <div class="met" id="m-wr">
+      <div class="met-bar"></div>
+      <div class="met-label">Win rate</div>
+      <div class="met-val" id="wr-val">—</div>
+      <div class="met-sub" id="wr-sub">—</div>
+    </div>
+    <div class="met" id="m-consec">
+      <div class="met-bar"></div>
+      <div class="met-label">Pertes consec.</div>
+      <div class="met-val" id="consec-val">—</div>
+      <div class="met-sub">série en cours</div>
+    </div>
+    <div class="met" id="m-score">
+      <div class="met-bar"></div>
+      <div class="met-label">Discipline</div>
+      <div class="met-val" id="score-val">—</div>
+      <div class="met-sub">score du jour</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main" id="main">
+
+    <!-- WELCOME SCREEN -->
+    <div id="welcome" style="grid-column:1/-1">
+      <div class="welcome">
+        <div class="welcome-title">Ton coach <span>discipline</span><br>est prêt.</div>
+        <div class="welcome-sub">
+          Connecté à MT5 · Analyse comportementale en temps réel<br>
+          Stop au FOMO · Stop au revenge trading · Stop à l'overtrading
+        </div>
+        <div class="welcome-features">
+          <div class="feat">
+            <div class="feat-icon">🔗</div>
+            <div class="feat-title">MT5 Auto</div>
+            <div class="feat-desc">Tes trades arrivent automatiquement</div>
+          </div>
+          <div class="feat">
+            <div class="feat-icon">🧠</div>
+            <div class="feat-title">Coach IA</div>
+            <div class="feat-desc">Analyse ton comportement en direct</div>
+          </div>
+          <div class="feat">
+            <div class="feat-icon">🔒</div>
+            <div class="feat-title">Protection</div>
+            <div class="feat-desc">Verrouillage si tu dérapes</div>
+          </div>
+        </div>
+        <button class="welcome-btn" onclick="startSession()">▶ Démarrer la session</button>
+        <div class="ws-info" id="ws-info">Connexion MT5 : <span id="ws-info-status">en attente...</span></div>
+      </div>
+    </div>
+
+    <!-- LEFT PANEL -->
+    <div class="left" id="left-panel" style="display:none">
+      <div class="sec-hdr">
+        <span class="sec-title">Journal de trades<em id="trade-count-lbl"></em></span>
+        <span class="sec-title" id="plan-pct"></span>
+      </div>
+      <div class="trades-list" id="trade-list">
+        <div class="empty">[ En attente de trades ·<br>MT5 connecté · Ouvre une position ]</div>
+      </div>
+
+      <!-- ADD TRADE MANUAL -->
+      <div class="add-area" id="add-area">
+        <div class="sec-title" style="margin-bottom:10px">Ajouter manuellement</div>
+        <div class="form-grid">
+          <input class="fi" type="text" id="t-sym" placeholder="Symbole (XAUUSD, EURUSD...)"/>
+          <select class="fi" id="t-dir">
+            <option value="long">LONG ↑</option>
+            <option value="short">SHORT ↓</option>
+          </select>
+          <input class="fi" type="number" id="t-pnl" placeholder="P&L €" step="0.01"/>
+          <select class="fi" id="t-plan">
+            <option value="yes">Dans le plan</option>
+            <option value="no">Hors plan ⚠</option>
+          </select>
+          <button class="add-btn" onclick="addManualTrade()">+ Ajouter</button>
+        </div>
+        <div class="note-row">
+          <input class="fi" type="text" id="t-note" placeholder="Note : FOMO · Revenge · Overtrading · Impatience..."/>
+        </div>
+      </div>
+
+      <!-- RULES -->
+      <div class="rules-area">
+        <div class="sec-title">Règles de protection</div>
+        <div class="rules-grid">
+          <div class="rule-card">
+            <div class="rule-left">
+              <div class="rule-lbl">Perte max / jour</div>
+              <div class="rule-inp-row">
+                <input type="number" class="rule-inp" id="r-maxloss" value="200" step="10" onchange="checkRules()"/>
+                <span class="rule-unit">€</span>
+              </div>
+            </div>
+            <label class="tog"><input type="checkbox" id="r-maxloss-on" checked onchange="checkRules()"><span class="tog-sl"></span></label>
+          </div>
+          <div class="rule-card">
+            <div class="rule-left">
+              <div class="rule-lbl">Max trades / jour</div>
+              <div class="rule-inp-row">
+                <input type="number" class="rule-inp" id="r-maxtrades" value="5" min="1" onchange="checkRules()"/>
+                <span class="rule-unit">trades</span>
+              </div>
+            </div>
+            <label class="tog"><input type="checkbox" id="r-maxtrades-on" checked onchange="checkRules()"><span class="tog-sl"></span></label>
+          </div>
+          <div class="rule-card">
+            <div class="rule-left">
+              <div class="rule-lbl">Bloquer après pertes consec.</div>
+              <div class="rule-inp-row">
+                <input type="number" class="rule-inp" id="r-consec" value="2" min="1" onchange="checkRules()"/>
+                <span class="rule-unit">pertes</span>
+              </div>
+            </div>
+            <label class="tog"><input type="checkbox" id="r-consec-on" onchange="checkRules()"><span class="tog-sl"></span></label>
+          </div>
+          <div class="rule-card">
+            <div class="rule-left">
+              <div class="rule-lbl">Verrouillage strict</div>
+              <div class="rule-inp-row"><span class="rule-unit">Coupe la session auto</span></div>
+            </div>
+            <label class="tog"><input type="checkbox" id="r-enforce"><span class="tog-sl"></span></label>
+          </div>
+        </div>
+        <div class="score-row">
+          <span class="score-lbl">Discipline</span>
+          <div class="score-track"><div class="score-fill" id="score-fill" style="width:0%"></div></div>
+          <span class="score-num" id="score-num" style="color:var(--text3)">—</span>
+        </div>
+      </div>
+      <div class="locked" id="locked-bar">⛔ SESSION VERROUILLÉE — Tes règles ont été déclenchées. Ferme MT5 et repose-toi.</div>
+    </div>
+
+    <!-- RIGHT PANEL : COACH -->
+    <div class="right" id="right-panel" style="display:none">
+      <div class="coach-hdr">
+        <div class="coach-pulse"></div>
+        <div class="coach-info">
+          <div class="coach-name">COACH IA</div>
+          <div class="coach-sub">Psychologie · Discipline · Performance</div>
+        </div>
+      </div>
+      <div class="msgs" id="msgs"></div>
+      <div class="quick-row">
+        <button class="qbtn" onclick="sq('Comment est ma discipline ?')">Ma discipline</button>
+        <button class="qbtn" onclick="sq('J\'ai du FOMO')">FOMO</button>
+        <button class="qbtn" onclick="sq('Trade revenge, j\'y pense')">Revenge</button>
+        <button class="qbtn" onclick="sq('Je continue à trader ?')">Continuer ?</button>
+        <button class="qbtn" onclick="sq('Analyse mon comportement aujourd\'hui')">Analyse</button>
+      </div>
+      <div class="chat-foot">
+        <textarea id="chat-in" placeholder="Parle à ton coach..." onkeydown="hk(event)"></textarea>
+        <button class="snd" onclick="sendMsg()"><svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg></button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const BACKEND = 'https://radecoach-backend-production.up.railway.app';
+const SESSION_ID = 'ma-session';
+const WS_URL = BACKEND.replace('https','wss').replace('http','ws') + '?session=' + SESSION_ID;
+
+let sessionOn = false;
+let trades = [];
+let timer = null;
+let t0 = null;
+let locked = false;
+let hist = [];
+let ws = null;
+let wsReconnectTimer = null;
+
+// ── WebSocket ──────────────────────────────────────────────────────────────
+function connectWS() {
+  if (ws && ws.readyState === WebSocket.OPEN) return;
+  setWsStatus('connecting');
+  ws = new WebSocket(WS_URL);
+
+  ws.onopen = () => {
+    setWsStatus('connected');
+    if (wsReconnectTimer) { clearInterval(wsReconnectTimer); wsReconnectTimer = null; }
+  };
+
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'INIT') {
+      msg.trades.forEach(t => addTradeToUI(t, false));
+      updateMetrics(); checkRules();
+    }
+    if (msg.type === 'NEW_TRADE') {
+      addTradeToUI(msg.trade, true);
+      updateMetrics(); checkRules();
+      if (sessionOn) autoCoach(msg.trade);
+    }
+    if (msg.type === 'TRADE_CLOSED') {
+      const t = trades.find(x => x.id === msg.trade.id);
+      if (t) { t.pnl = msg.trade.pnl; t.status = 'closed'; }
+      renderTrades(); updateMetrics();
+    }
+  };
+
+  ws.onclose = () => {
+    setWsStatus('disconnected');
+    if (!wsReconnectTimer) {
+      wsReconnectTimer = setInterval(() => connectWS(), 5000);
+    }
+  };
+
+  ws.onerror = () => ws.close();
+}
+
+function setWsStatus(status) {
+  const dot = document.getElementById('ws-dot');
+  const lbl = document.getElementById('ws-label');
+  const info = document.getElementById('ws-info-status');
+  dot.className = 'ws-dot ' + status;
+  const labels = { connected: 'MT5 Connecté', connecting: 'Connexion...', disconnected: 'Déconnecté' };
+  const colors = { connected: 'var(--green)', connecting: 'var(--amber)', disconnected: 'var(--text3)' };
+  lbl.textContent = labels[status];
+  lbl.className = status === 'connected' ? 'ws-label connected' : 'ws-label';
+  if (info) { info.textContent = labels[status]; info.style.color = colors[status]; }
+}
+
+// ── Session ────────────────────────────────────────────────────────────────
+function startSession() {
+  sessionOn = true; locked = false; t0 = Date.now();
+  document.getElementById('welcome').style.display = 'none';
+  document.getElementById('metrics').style.display = 'grid';
+  document.getElementById('left-panel').style.display = 'flex';
+  document.getElementById('right-panel').style.display = 'flex';
+  document.getElementById('app').classList.add('session-on');
+  document.getElementById('start-btn').style.display = 'none';
+  document.getElementById('end-btn').style.display = 'inline-block';
+  timer = setInterval(() => {
+    const e = Math.floor((Date.now()-t0)/1000);
+    document.getElementById('timer').textContent =
+      String(Math.floor(e/3600)).padStart(2,'0')+':'+
+      String(Math.floor((e%3600)/60)).padStart(2,'0')+':'+
+      String(e%60).padStart(2,'0');
+    document.getElementById('timer').className = 'timer-wrap active';
+  }, 1000);
+  coachMsg("Session démarrée. Je surveille tes trades MT5 en temps réel. Quel est ton plan de trading aujourd'hui ?");
+  connectWS();
+}
+
+function endSession() {
+  sessionOn = false; clearInterval(timer);
+  document.getElementById('timer').className = 'timer-wrap';
+  document.getElementById('start-btn').style.display = 'inline-block';
+  document.getElementById('start-btn').textContent = '▶ Nouvelle session';
+  document.getElementById('end-btn').style.display = 'none';
+  bilan();
+}
+
+// ── Trades ────────────────────────────────────────────────────────────────
+function addTradeToUI(trade, isNew) {
+  if (trades.find(t => t.id === trade.id)) return;
+  trades.push(trade);
+  renderTrades(isNew ? trade.id : null);
+}
+
+function addManualTrade() {
+  if (!sessionOn || locked) return;
+  const sym = document.getElementById('t-sym').value.trim();
+  const dir = document.getElementById('t-dir').value;
+  const pnl = parseFloat(document.getElementById('t-pnl').value);
+  const plan = document.getElementById('t-plan').value;
+  const note = document.getElementById('t-note').value.trim();
+  if (!sym || isNaN(pnl)) return;
+  const trade = {
+    id: crypto.randomUUID(), symbol: sym.toUpperCase(), direction: dir,
+    pnl, plan, note, source: 'manual', status: 'closed',
+    time: new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),
+    timestamp: new Date().toISOString()
+  };
+  trades.push(trade);
+  ['t-sym','t-pnl','t-note'].forEach(id => document.getElementById(id).value = '');
+  renderTrades(trade.id);
+  updateMetrics(); checkRules(); autoCoach(trade);
+}
+
+function renderTrades(newId) {
+  const el = document.getElementById('trade-list');
+  if (!trades.length) {
+    el.innerHTML = '<div class="empty">[ En attente de trades ·<br>MT5 connecté · Ouvre une position ]</div>';
+    return;
+  }
+  el.innerHTML = trades.slice().reverse().map(t => `
+    <div class="trade-row ${t.id === newId ? 'new' : ''}">
+      <span class="t-sym">${t.symbol}</span>
+      <span class="t-dir ${t.direction}">${t.direction === 'long' ? 'LONG ↑' : 'SHORT ↓'}</span>
+      <span class="t-time">${t.time}</span>
+      <span class="t-pnl ${t.pnl >= 0 ? 'pos' : 'neg'}">${t.pnl >= 0 ? '+' : ''}${t.pnl.toFixed(2)}€</span>
+      <span class="t-note">${t.note || '—'}</span>
+      <span class="t-src ${t.source || 'manual'}">${t.source === 'tradingview' ? 'TV' : t.source === 'mt5' ? 'MT5' : 'Manuel'} · <span class="t-plan-badge ${t.plan === 'yes' ? 'ok' : 'no'}">${t.plan === 'yes' ? '✓' : '✗'}</span></span>
+    </div>`).join('');
+  if (newId) setTimeout(() => {
+    const rows = el.querySelectorAll('.trade-row.new');
+    rows.forEach(r => r.classList.remove('new'));
+  }, 2000);
+}
+
+function calcScore() {
+  if (!trades.length) return null;
+  let s = 100;
+  const bad = trades.filter(t => t.plan === 'no').length;
+  s -= bad * 15;
+  const cl = maxConsec();
+  if (cl >= 3) s -= 20; else if (cl >= 2) s -= 10;
+  const mt = parseInt(document.getElementById('r-maxtrades').value) || 5;
+  if (trades.length > mt) s -= 20;
+  const tp = trades.reduce((a, t) => a + t.pnl, 0);
+  const ml = parseFloat(document.getElementById('r-maxloss').value) || 200;
+  if (tp < -ml) s -= 25;
+  return Math.max(0, Math.min(100, s));
+}
+
+function maxConsec() {
+  let max = 0, cur = 0;
+  for (const t of trades) { if (t.pnl < 0) { cur++; max = Math.max(max, cur); } else cur = 0; }
+  return max;
+}
+
+function updateMetrics() {
+  const tp = trades.reduce((a, t) => a + t.pnl, 0);
+  const wins = trades.filter(t => t.pnl > 0).length;
+  const wr = trades.length ? Math.round(wins / trades.length * 100) : null;
+  const sc = calcScore();
+  const cl = maxConsec();
+  const mt = parseInt(document.getElementById('r-maxtrades').value) || 5;
+
+  const pEl = document.getElementById('pnl-val');
+  pEl.textContent = (tp >= 0 ? '+' : '') + tp.toFixed(2) + '€';
+  pEl.className = 'met-val ' + (tp > 0 ? 'pos' : tp < 0 ? 'neg' : '');
+  document.getElementById('m-pnl').className = 'met ' + (tp > 0 ? 'pos' : tp < 0 ? 'neg' : '');
+  document.getElementById('pnl-sub').textContent = trades.length + ' trade' + (trades.length > 1 ? 's' : '');
+
+  document.getElementById('trades-val').textContent = trades.length;
+  document.getElementById('trades-sub').textContent = '/ ' + mt + ' max';
+  document.getElementById('m-trades').className = 'met ' + (trades.length >= mt ? 'warn' : '');
+
+  document.getElementById('wr-val').textContent = wr !== null ? wr + '%' : '—';
+  document.getElementById('wr-val').className = 'met-val ' + (wr >= 50 ? 'pos' : wr !== null && wr < 50 ? 'neg' : '');
+  document.getElementById('wr-sub').textContent = wr !== null ? (wins + 'W / ' + (trades.length - wins) + 'L') : '—';
+
+  document.getElementById('consec-val').textContent = cl || '—';
+  document.getElementById('consec-val').className = 'met-val ' + (cl >= 2 ? 'neg' : '');
+  document.getElementById('m-consec').className = 'met ' + (cl >= 2 ? 'neg' : '');
+
+  if (sc !== null) {
+    document.getElementById('score-val').textContent = sc + '/100';
+    document.getElementById('score-val').className = 'met-val ' + (sc >= 70 ? 'pos' : sc >= 40 ? 'warn' : 'neg');
+    document.getElementById('m-score').className = 'met ' + (sc >= 70 ? 'pos' : sc >= 40 ? 'warn' : 'neg');
+    document.getElementById('score-fill').style.width = sc + '%';
+    document.getElementById('score-fill').style.background = sc >= 70 ? 'var(--green)' : sc >= 40 ? 'var(--amber)' : 'var(--red)';
+    document.getElementById('score-num').textContent = sc + '/100';
+    document.getElementById('score-num').style.color = sc >= 70 ? 'var(--green)' : sc >= 40 ? 'var(--amber)' : 'var(--red)';
+  }
+
+  const planOk = trades.filter(t => t.plan === 'yes').length;
+  const pp = trades.length ? Math.round(planOk / trades.length * 100) : null;
+  document.getElementById('trade-count-lbl').textContent = trades.length ? ' · ' + trades.length + ' trade' + (trades.length > 1 ? 's' : '') : '';
+  document.getElementById('plan-pct').textContent = pp !== null ? pp + '% dans le plan' : '';
+}
+
+function checkRules() {
+  if (!sessionOn) return;
+  const mlOn = document.getElementById('r-maxloss-on').checked;
+  const ml = parseFloat(document.getElementById('r-maxloss').value) || 200;
+  const mtOn = document.getElementById('r-maxtrades-on').checked;
+  const mt = parseInt(document.getElementById('r-maxtrades').value) || 5;
+  const cOn = document.getElementById('r-consec-on').checked;
+  const cv = parseInt(document.getElementById('r-consec').value) || 2;
+  const enforce = document.getElementById('r-enforce').checked;
+  const tp = trades.reduce((a, t) => a + t.pnl, 0);
+  const cl = maxConsec();
+  let alerts = [];
+  if (mlOn && tp <= -ml) alerts.push('Perte max de ' + ml + '€ atteinte');
+  if (mtOn && trades.length >= mt) alerts.push('Limite de ' + mt + ' trades atteinte');
+  if (cOn && cl >= cv) alerts.push(cv + ' pertes consécutives — risque revenge trading');
+  const strip = document.getElementById('alert-strip');
+  if (alerts.length) {
+    strip.className = 'alert show ' + (cl >= cv && cOn ? 'warn' : 'danger');
+    document.getElementById('alert-msg').textContent = '⚠ ' + alerts.join('  ·  ');
+    if (enforce && !locked) {
+      locked = true;
+      document.getElementById('locked-bar').className = 'locked show';
+      coachMsg("⛔ STOP. Tes règles de protection ont été déclenchées. Session verrouillée. Ferme MT5, prends 15 minutes. Tu fais le bon choix.");
+    }
+  } else {
+    strip.className = 'alert';
+  }
+  updateMetrics();
+}
+
+// ── Coach IA ───────────────────────────────────────────────────────────────
+const gt = () => new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+function coachMsg(txt) {
+  const d = document.createElement('div');
+  d.className = 'msg coach';
+  d.innerHTML = `<div class="msg-bbl">${txt}</div><div class="msg-ts">${gt()}</div>`;
+  const m = document.getElementById('msgs');
+  m.appendChild(d); m.scrollTop = 99999;
+  hist.push({ role: 'assistant', content: txt });
+}
+
+function userMsg(txt) {
+  const d = document.createElement('div');
+  d.className = 'msg user';
+  d.innerHTML = `<div class="msg-bbl">${txt}</div><div class="msg-ts">${gt()}</div>`;
+  const m = document.getElementById('msgs');
+  m.appendChild(d); m.scrollTop = 99999;
+}
+
+function showTyping() {
+  const d = document.createElement('div');
+  d.className = 'msg coach'; d.id = 'typi';
+  d.innerHTML = '<div class="typing-bbl"><span class="td"></span><span class="td"></span><span class="td"></span></div>';
+  const m = document.getElementById('msgs'); m.appendChild(d); m.scrollTop = 99999;
+}
+function rmTyping() { const t = document.getElementById('typi'); if (t) t.remove(); }
+
+function getCtx() {
+  const tp = trades.reduce((a, t) => a + t.pnl, 0);
+  const wins = trades.filter(t => t.pnl > 0).length;
+  const bad = trades.filter(t => t.plan === 'no').length;
+  const sc = calcScore();
+  const el = t0 ? Math.floor((Date.now() - t0) / 60000) : 0;
+  const mt5Trades = trades.filter(t => t.source === 'mt5').length;
+  return `Données session trader:
+- Durée: ${el} min | Trades: ${trades.length} (${mt5Trades} depuis MT5) | P&L: ${tp.toFixed(2)}€
+- Wins: ${wins} / Losses: ${trades.length - wins} | Hors plan: ${bad}
+- Pertes consécutives: ${maxConsec()} | Score discipline: ${sc ?? 'N/A'}/100
+- Session verrouillée: ${locked ? 'OUI' : 'non'}
+${trades.length ? '- Derniers: ' + trades.slice(-3).map(t => `${t.symbol} ${t.direction} ${t.pnl >= 0 ? '+' : ''}${t.pnl.toFixed(2)}€${t.plan === 'no' ? ' [HORS PLAN]' : ''}${t.note ? ' (' + t.note + ')' : ''} [${t.source}]`).join(', ') : ''}`;
+}
+
+async function callAI(userTxt, short = false) {
+  showTyping();
+  const sys = `Tu es un coach de trading psychologique expert. Tu aides les traders à gérer FOMO, revenge trading, overtrading, manque de discipline. Tu connais les biais cognitifs du trading. Tu vois les trades qui arrivent depuis MT5 en temps réel. Tu es bienveillant, direct, concis. ${short ? '2-3 phrases max.' : '4-5 phrases max.'} Réponds en français. Pas de markdown.`;
+  const msgs = [...hist.slice(-8), { role: 'user', content: getCtx() + '\n\n' + userTxt }];
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: sys, messages: msgs })
+    });
+    const d = await r.json(); rmTyping();
+    const rep = d.content?.[0]?.text || 'Connexion interrompue.';
+    coachMsg(rep); hist.push({ role: 'user', content: userTxt });
+  } catch (e) { rmTyping(); coachMsg('Connexion momentanément interrompue. Reste focus !'); }
+}
+
+async function autoCoach(tr) {
+  const isMT5 = tr.source === 'mt5' || tr.source === 'tradingview';
+  const cl = maxConsec();
+  if (trades.length === 1 || tr.plan === 'no' || tr.pnl < -100 || cl >= 2) {
+    const p = tr.plan === 'no'
+      ? `Trade ${isMT5 ? 'MT5' : 'manuel'} hors plan: ${tr.symbol} ${tr.direction} ${tr.pnl.toFixed(2)}€${tr.note ? ' (' + tr.note + ')' : ''}. Commente brièvement, bienveillant.`
+      : tr.pnl < -100
+        ? `Grosse perte MT5: ${tr.symbol} ${tr.pnl.toFixed(2)}€. Soutien + mise en garde revenge.`
+        : cl >= 2
+          ? `${cl} pertes consécutives détectées depuis MT5. Alerte douce.`
+          : `1er trade de session${isMT5 ? ' via MT5' : ''}: ${tr.symbol} ${tr.direction} ${tr.pnl.toFixed(2)}€. Encouragement bref.`;
+    await callAI(p, true);
+  }
+}
+
+async function bilan() {
+  coachMsg("Génération de ton bilan de discipline...");
+  await callAI("Génère un bilan complet de fin de session : score, points forts, axes d'amélioration, conseil clé pour demain. Pas de markdown.", false);
+}
+
+function sendMsg() {
+  const inp = document.getElementById('chat-in');
+  const txt = inp.value.trim(); if (!txt) return;
+  userMsg(txt); inp.value = ''; callAI(txt);
+}
+function sq(t) { userMsg(t); callAI(t); }
+function hk(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } }
+
+// Init
+connectWS();
+</script>
+</body>
+</html>
