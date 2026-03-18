@@ -58,6 +58,10 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .btn.pause-btn:hover{background:var(--amber);color:var(--bg)}
 .btn.pause-btn.on{background:var(--amber-dim);animation:blink 1.5s infinite}
 
+/* PAGES */
+.page{display:none;flex:1;overflow:hidden}
+.page.active{display:flex}
+
 /* BEHAVIOUR ALERTS */
 .bstrip{display:none;flex-direction:column;gap:4px;padding:8px 24px;border-bottom:1px solid var(--border);background:var(--bg2)}
 .bstrip.show{display:flex}
@@ -65,7 +69,6 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .balert.danger{background:var(--red-dim);border-color:rgba(255,77,106,0.25);color:var(--red)}
 .balert.warn{background:var(--amber-dim);border-color:rgba(255,181,71,0.25);color:var(--amber)}
 .balert.profit{background:var(--purple-dim);border-color:rgba(167,139,250,0.25);color:var(--purple)}
-.balert.good{background:var(--green-dim);border-color:rgba(0,229,160,0.2);color:var(--green)}
 .bcl{margin-left:auto;cursor:pointer;opacity:0.4;padding:0 4px}
 .bcl:hover{opacity:1}
 
@@ -84,14 +87,12 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .met-val.warn{color:var(--amber)}
 .met-sub{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:3px}
 
-/* MAIN */
-.main{display:grid;grid-template-columns:1fr 300px;overflow:hidden}
+/* SESSION PAGE */
+.session-page{display:grid;grid-template-columns:1fr 300px;overflow:hidden;width:100%}
 .left{display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border)}
 .sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
 .sec-title{font-family:var(--mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3)}
 .sec-title em{color:var(--green);font-style:normal;margin-left:6px}
-
-/* TRADE LIST */
 .trades-list{flex:1;overflow-y:auto;min-height:0}
 .trades-list::-webkit-scrollbar{width:2px}
 .trades-list::-webkit-scrollbar-thumb{background:var(--border2)}
@@ -113,8 +114,6 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .t-tag.mt5{color:var(--blue)}
 .t-tag.normal,.t-tag.manual{color:var(--text3)}
 .empty{padding:32px 16px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text3);line-height:2}
-
-/* ADD TRADE */
 .add-area{padding:10px 16px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0}
 .form-grid{display:grid;grid-template-columns:1fr 76px 96px 106px auto;gap:7px;align-items:center}
 .fi{font-family:var(--mono);font-size:12px;background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:7px 9px;outline:none;width:100%;transition:border-color 0.2s}
@@ -124,8 +123,6 @@ select.fi option{background:var(--bg3)}
 .add-btn{font-family:var(--mono);font-size:10px;padding:7px 14px;background:var(--green);color:var(--bg);border:none;cursor:pointer;letter-spacing:0.06em;text-transform:uppercase;font-weight:700;white-space:nowrap}
 .add-btn:hover{opacity:0.85}
 .note-row{margin-top:7px}
-
-/* RULES */
 .rules-area{padding:12px 16px;border-top:1px solid var(--border);flex-shrink:0}
 .rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
 .rule-card{background:var(--bg3);border:1px solid var(--border);padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:6px}
@@ -147,14 +144,12 @@ select.fi option{background:var(--bg3)}
 .locked{display:none;align-items:center;gap:8px;padding:9px 16px;background:var(--red-dim);border-top:1px solid rgba(255,77,106,0.3);font-family:var(--mono);font-size:11px;color:var(--red);flex-shrink:0}
 .locked.show{display:flex}
 
-/* RIGHT */
+/* RIGHT COACH */
 .right{display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
 .coach-hdr{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
 .coach-pulse{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite;flex-shrink:0}
 .coach-name{font-size:13px;font-weight:600;letter-spacing:0.08em}
 .coach-sub{font-family:var(--mono);font-size:9px;color:var(--green);letter-spacing:0.05em;margin-top:2px}
-
-/* BEHAVIOUR PANEL */
 .behav-panel{padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
 .behav-title{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
 .behav-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
@@ -167,8 +162,6 @@ select.fi option{background:var(--bg3)}
 .bcard-val.danger{color:var(--red)}
 .bcard-val.warn{color:var(--amber)}
 .bcard-val.ok{color:var(--green)}
-
-/* MESSAGES */
 .msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:9px;min-height:0}
 .msgs::-webkit-scrollbar{width:2px}
 .msgs::-webkit-scrollbar-thumb{background:var(--border2)}
@@ -199,6 +192,67 @@ select.fi option{background:var(--bg3)}
 .snd:hover{opacity:0.8}
 .snd svg{width:14px;height:14px;fill:var(--bg)}
 
+/* HISTORIQUE PAGE */
+.history-page{width:100%;overflow-y:auto;padding:24px}
+.history-page::-webkit-scrollbar{width:3px}
+.history-page::-webkit-scrollbar-thumb{background:var(--border2)}
+.month-nav{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+.month-title{font-size:18px;font-weight:700;letter-spacing:0.06em;flex:1}
+.month-btn{font-family:var(--mono);font-size:11px;padding:6px 14px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;transition:all 0.2s}
+.month-btn:hover{border-color:var(--green);color:var(--green)}
+
+/* MONTHLY STATS */
+.monthly-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.mstat{background:var(--bg3);border:1px solid var(--border);padding:16px;position:relative;overflow:hidden}
+.mstat-bar{position:absolute;top:0;left:0;right:0;height:2px}
+.mstat.pos .mstat-bar{background:var(--green)}
+.mstat.neg .mstat-bar{background:var(--red)}
+.mstat.info .mstat-bar{background:var(--blue)}
+.mstat.warn .mstat-bar{background:var(--amber)}
+.mstat-label{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.mstat-val{font-family:var(--mono);font-size:22px;font-weight:500}
+.mstat-val.pos{color:var(--green)}
+.mstat-val.neg{color:var(--red)}
+.mstat-val.warn{color:var(--amber)}
+.mstat-val.info{color:var(--blue)}
+.mstat-sub{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:4px}
+
+/* CALENDAR */
+.calendar-section{margin-bottom:24px}
+.cal-title{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:12px}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-day-hdr{font-family:var(--mono);font-size:9px;color:var(--text3);text-align:center;padding:4px 0;letter-spacing:0.06em}
+.cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid var(--border);font-family:var(--mono);font-size:10px;cursor:default;transition:all 0.2s;position:relative}
+.cal-day.empty{border-color:transparent;background:transparent}
+.cal-day.today{border-color:var(--green);color:var(--green)}
+.cal-day.profitable{background:rgba(0,229,160,0.12);border-color:rgba(0,229,160,0.3);color:var(--green)}
+.cal-day.losing{background:rgba(255,77,106,0.08);border-color:rgba(255,77,106,0.2);color:var(--red)}
+.cal-day.no-trade{background:var(--bg3);border-color:var(--border);color:var(--text3)}
+.cal-day .score-dot{width:4px;height:4px;border-radius:50%;margin-top:2px}
+.cal-day.profitable .score-dot{background:var(--green)}
+.cal-day.losing .score-dot{background:var(--red)}
+
+/* CHART */
+.chart-section{margin-bottom:24px}
+.chart-wrap{background:var(--bg3);border:1px solid var(--border);padding:16px;position:relative;height:200px}
+.chart-bars{display:flex;align-items:flex-end;gap:4px;height:100%;padding-top:20px}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%}
+.chart-bar{width:100%;border-radius:2px 2px 0 0;transition:height 0.5s,background 0.3s;min-height:2px}
+.chart-bar.pos{background:var(--green)}
+.chart-bar.neg{background:var(--red);border-radius:0 0 2px 2px}
+.chart-bar-label{font-family:var(--mono);font-size:8px;color:var(--text3)}
+.chart-zero{position:absolute;left:16px;right:16px;height:1px;background:var(--border2)}
+
+/* STREAK */
+.streak-section{display:flex;align-items:center;gap:16px;background:var(--bg3);border:1px solid var(--border);padding:16px;margin-bottom:24px}
+.streak-fire{font-size:28px}
+.streak-info{flex:1}
+.streak-val{font-family:var(--mono);font-size:24px;font-weight:500;color:var(--amber)}
+.streak-label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-top:2px}
+.streak-dots{display:flex;gap:4px;flex-wrap:wrap}
+.streak-dot{width:10px;height:10px;border-radius:50%;background:var(--border2)}
+.streak-dot.done{background:var(--amber)}
+
 /* PAUSE OVERLAY */
 .pause-overlay{display:none;position:fixed;inset:0;background:rgba(8,9,12,0.97);z-index:500;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px}
 .pause-overlay.show{display:flex}
@@ -220,7 +274,7 @@ select.fi option{background:var(--bg3)}
 .resume-btn.ready:hover{background:var(--green);color:var(--bg)}
 
 /* WELCOME */
-.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:20px;padding:32px;grid-column:1/-1}
+.welcome-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:20px;padding:32px;width:100%}
 .welcome-title{font-size:26px;font-weight:800;letter-spacing:0.06em;text-align:center}
 .welcome-title span{color:var(--green)}
 .welcome-sub{font-family:var(--mono);font-size:11px;color:var(--text2);text-align:center;line-height:2}
@@ -237,27 +291,30 @@ select.fi option{background:var(--bg3)}
 </head>
 <body>
 <div class="app" id="app">
+  <!-- HEADER -->
   <div class="hdr">
     <div class="brand">
       <div class="brand-mark"><svg viewBox="0 0 24 24"><path d="M3 3h18v2H3V3zm0 4h12v2H3V7zm0 4h18v2H3v-2zm0 4h12v2H3v-2zm0 4h18v2H3v-2z"/></svg></div>
       <div class="brand-name">Trade<span>Coach</span></div>
     </div>
     <div class="hdr-mid">
-      <button class="ntab active">Session</button>
-      <button class="ntab">Historique</button>
-      <button class="ntab">Regles</button>
+      <button class="ntab active" onclick="showPage('session',this)">Session</button>
+      <button class="ntab" onclick="showPage('history',this)">Historique</button>
+      <button class="ntab" onclick="showPage('rules',this)">Regles</button>
     </div>
     <div class="hdr-right">
       <div class="ws-status"><div class="ws-dot" id="ws-dot"></div><span class="ws-label" id="ws-label">Deconnecte</span></div>
       <div class="timer-wrap" id="timer">00:00:00</div>
-      <button class="btn pause-btn" id="pause-btn" style="display:none" onclick="triggerPause(10,'Pause volontaire activee.')">Pause</button>
+      <button class="btn pause-btn" id="pause-btn" style="display:none" onclick="triggerPause(10,'Pause volontaire.')">Pause</button>
       <button class="btn go" id="start-btn" onclick="startSession()">Demarrer</button>
       <button class="btn stop" id="end-btn" style="display:none" onclick="endSession()">Terminer</button>
     </div>
   </div>
 
+  <!-- ALERTS -->
   <div class="bstrip" id="bstrip"></div>
 
+  <!-- METRICS -->
   <div class="metrics" id="metrics" style="display:none">
     <div class="met" id="m-pnl"><div class="met-bar"></div><div class="met-label">P&L journalier</div><div class="met-val" id="pnl-val">+0.00 EUR</div><div class="met-sub" id="pnl-sub">0 trades</div></div>
     <div class="met" id="m-trades"><div class="met-bar"></div><div class="met-label">Trades</div><div class="met-val" id="trades-val">0</div><div class="met-sub" id="trades-sub">/ 5 max</div></div>
@@ -266,86 +323,150 @@ select.fi option{background:var(--bg3)}
     <div class="met" id="m-score"><div class="met-bar"></div><div class="met-label">Discipline</div><div class="met-val" id="score-val">-</div><div class="met-sub">score du jour</div></div>
   </div>
 
-  <div class="main" id="main">
-    <div id="welcome" class="welcome">
-      <div class="welcome-title">Ton coach <span>discipline</span> est pret.</div>
-      <div class="welcome-sub">MT5 connecte · Analyse comportementale · Pause Trading · Profit Protection</div>
-      <div class="welcome-feats">
-        <div class="feat"><div class="feat-icon">🔗</div><div class="feat-ttl">MT5 Auto</div><div class="feat-desc">Trades importes automatiquement</div></div>
-        <div class="feat"><div class="feat-icon">🧠</div><div class="feat-ttl">Comportement</div><div class="feat-desc">Detection FOMO et revenge</div></div>
-        <div class="feat"><div class="feat-icon">⏸</div><div class="feat-ttl">Pause Trading</div><div class="feat-desc">Check mental avant reprise</div></div>
-        <div class="feat"><div class="feat-icon">💰</div><div class="feat-ttl">Profit Guard</div><div class="feat-desc">Alerte securisation gains</div></div>
+  <!-- PAGES -->
+  <!-- SESSION PAGE -->
+  <div class="page active" id="page-session">
+    <div id="welcome-screen" style="width:100%">
+      <div class="welcome-wrap">
+        <div class="welcome-title">Ton coach <span>discipline</span> est pret.</div>
+        <div class="welcome-sub">MT5 connecte · Analyse comportementale · Pause Trading · Profit Protection</div>
+        <div class="welcome-feats">
+          <div class="feat"><div class="feat-icon">🔗</div><div class="feat-ttl">MT5 Auto</div><div class="feat-desc">Trades importes auto</div></div>
+          <div class="feat"><div class="feat-icon">🧠</div><div class="feat-ttl">Comportement</div><div class="feat-desc">Detection FOMO et revenge</div></div>
+          <div class="feat"><div class="feat-icon">⏸</div><div class="feat-ttl">Pause Trading</div><div class="feat-desc">Check mental avant reprise</div></div>
+          <div class="feat"><div class="feat-icon">💰</div><div class="feat-ttl">Profit Guard</div><div class="feat-desc">Alerte securisation gains</div></div>
+        </div>
+        <button class="welcome-btn" onclick="startSession()">Demarrer la session</button>
+        <div class="ws-info">Connexion MT5 : <span id="ws-info-status">en attente...</span></div>
       </div>
-      <button class="welcome-btn" onclick="startSession()">Demarrer la session</button>
-      <div class="ws-info">Connexion MT5 : <span id="ws-info-status">en attente...</span></div>
     </div>
-
-    <div class="left" id="left-panel" style="display:none">
-      <div class="sec-hdr">
-        <span class="sec-title">Journal<em id="trade-count-lbl"></em></span>
-        <span class="sec-title" id="plan-pct"></span>
-      </div>
-      <div class="trades-list" id="trade-list"><div class="empty">[ MT5 connecte · En attente de trades ]</div></div>
-      <div class="add-area">
-        <div class="form-grid">
-          <input class="fi" type="text" id="t-sym" placeholder="XAUUSD · EURUSD · BTC..."/>
-          <select class="fi" id="t-dir"><option value="long">LONG</option><option value="short">SHORT</option></select>
-          <input class="fi" type="number" id="t-pnl" placeholder="P&L EUR" step="0.01"/>
-          <select class="fi" id="t-plan"><option value="yes">Dans le plan</option><option value="no">Hors plan</option></select>
-          <button class="add-btn" onclick="addManualTrade()">+ Ajouter</button>
+    <div class="session-page" id="session-content" style="display:none">
+      <div class="left">
+        <div class="sec-hdr">
+          <span class="sec-title">Journal<em id="trade-count-lbl"></em></span>
+          <span class="sec-title" id="plan-pct"></span>
         </div>
-        <div class="note-row"><input class="fi" type="text" id="t-note" placeholder="Note : FOMO · Revenge · Overtrading..."/></div>
-      </div>
-      <div class="rules-area">
-        <div class="sec-title">Regles de protection</div>
-        <div class="rules-grid">
-          <div class="rule-card"><div><div class="rule-lbl">Perte max / jour</div><div class="rule-inp-row"><input type="number" class="rule-inp" id="r-maxloss" value="200" step="10" onchange="checkRules()"/><span class="rule-unit">EUR</span></div></div><label class="tog"><input type="checkbox" id="r-maxloss-on" checked onchange="checkRules()"><span class="tog-sl"></span></label></div>
-          <div class="rule-card"><div><div class="rule-lbl">Max trades / jour</div><div class="rule-inp-row"><input type="number" class="rule-inp" id="r-maxtrades" value="5" min="1" onchange="checkRules()"/><span class="rule-unit">trades</span></div></div><label class="tog"><input type="checkbox" id="r-maxtrades-on" checked onchange="checkRules()"><span class="tog-sl"></span></label></div>
-          <div class="rule-card"><div><div class="rule-lbl">Bloquer apres pertes</div><div class="rule-inp-row"><input type="number" class="rule-inp" id="r-consec" value="2" min="1" onchange="checkRules()"/><span class="rule-unit">consec.</span></div></div><label class="tog"><input type="checkbox" id="r-consec-on" checked onchange="checkRules()"><span class="tog-sl"></span></label></div>
-          <div class="rule-card"><div><div class="rule-lbl">Alerte profit a</div><div class="rule-inp-row"><input type="number" class="rule-inp" id="r-profit" value="50" min="10"/><span class="rule-unit">%</span></div></div><label class="tog"><input type="checkbox" id="r-profit-on" checked><span class="tog-sl"></span></label></div>
+        <div class="trades-list" id="trade-list"><div class="empty">[ MT5 connecte · En attente de trades ]</div></div>
+        <div class="add-area">
+          <div class="form-grid">
+            <input class="fi" type="text" id="t-sym" placeholder="XAUUSD · EURUSD · BTC..."/>
+            <select class="fi" id="t-dir"><option value="long">LONG</option><option value="short">SHORT</option></select>
+            <input class="fi" type="number" id="t-pnl" placeholder="P&L EUR" step="0.01"/>
+            <select class="fi" id="t-plan"><option value="yes">Dans le plan</option><option value="no">Hors plan</option></select>
+            <button class="add-btn" onclick="addManualTrade()">+ Ajouter</button>
+          </div>
+          <div class="note-row"><input class="fi" type="text" id="t-note" placeholder="Note : FOMO · Revenge · Overtrading..."/></div>
         </div>
-        <div class="score-row">
-          <span class="score-lbl">Discipline</span>
-          <div class="score-track"><div class="score-fill" id="score-fill" style="width:0%"></div></div>
-          <span class="score-num" id="score-num" style="color:var(--text3)">-</span>
+        <div class="rules-area">
+          <div class="sec-title">Regles de protection</div>
+          <div class="rules-grid">
+            <div class="rule-card"><div><div class="rule-lbl">Perte max / jour</div><div class="rule-inp-row"><input type="number" class="rule-inp" id="r-maxloss" value="200" step="10" onchange="checkRules()"/><span class="rule-unit">EUR</span></div></div><label class="tog"><input type="checkbox" id="r-maxloss-on" checked onchange="checkRules()"><span class="tog-sl"></span></label></div>
+            <div class="rule-card"><div><div class="rule-lbl">Max trades / jour</div><div class="rule-inp-row"><input type="number" class="rule-inp" id="r-maxtrades" value="5" min="1" onchange="checkRules()"/><span class="rule-unit">trades</span></div></div><label class="tog"><input type="checkbox" id="r-maxtrades-on" checked onchange="checkRules()"><span class="tog-sl"></span></label></div>
+            <div class="rule-card"><div><div class="rule-lbl">Bloquer apres pertes</div><div class="rule-inp-row"><input type="number" class="rule-inp" id="r-consec" value="2" min="1" onchange="checkRules()"/><span class="rule-unit">consec.</span></div></div><label class="tog"><input type="checkbox" id="r-consec-on" checked onchange="checkRules()"><span class="tog-sl"></span></label></div>
+            <div class="rule-card"><div><div class="rule-lbl">Alerte profit a</div><div class="rule-inp-row"><input type="number" class="rule-inp" id="r-profit" value="50" min="10"/><span class="rule-unit">%</span></div></div><label class="tog"><input type="checkbox" id="r-profit-on" checked><span class="tog-sl"></span></label></div>
+          </div>
+          <div class="score-row">
+            <span class="score-lbl">Discipline</span>
+            <div class="score-track"><div class="score-fill" id="score-fill" style="width:0%"></div></div>
+            <span class="score-num" id="score-num" style="color:var(--text3)">-</span>
+          </div>
+        </div>
+        <div class="locked" id="locked-bar">SESSION VERROUILLEE - Ferme MT5 et repose-toi.</div>
+      </div>
+      <div class="right">
+        <div class="coach-hdr">
+          <div class="coach-pulse"></div>
+          <div><div class="coach-name">COACH IA</div><div class="coach-sub">Analyse comportementale active</div></div>
+        </div>
+        <div class="behav-panel">
+          <div class="behav-title">Analyse comportementale</div>
+          <div class="behav-grid">
+            <div class="behav-card" id="bc-revenge"><div class="bcard-label">Revenge</div><div class="bcard-val" id="bv-revenge">-</div></div>
+            <div class="behav-card" id="bc-fomo"><div class="bcard-label">Overtrading</div><div class="bcard-val" id="bv-fomo">-</div></div>
+            <div class="behav-card" id="bc-over"><div class="bcard-label">Pertes consec.</div><div class="bcard-val" id="bv-over">-</div></div>
+            <div class="behav-card" id="bc-profit"><div class="bcard-label">Profit Guard</div><div class="bcard-val" id="bv-profit">-</div></div>
+          </div>
+        </div>
+        <div class="msgs" id="msgs"></div>
+        <div class="quick-row">
+          <button class="qbtn" onclick="sq('Comment est ma discipline ?')">Discipline</button>
+          <button class="qbtn" onclick="sq('J ai du FOMO')">FOMO</button>
+          <button class="qbtn" onclick="sq('Trade revenge')">Revenge</button>
+          <button class="qbtn" onclick="sq('Je continue ?')">Continuer ?</button>
+          <button class="qbtn" onclick="triggerPause(10,'Pause manuelle.')">Pause 10min</button>
+        </div>
+        <div class="chat-foot">
+          <textarea id="chat-in" placeholder="Parle a ton coach..." onkeydown="hk(event)"></textarea>
+          <button class="snd" onclick="sendMsg()"><svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg></button>
         </div>
       </div>
-      <div class="locked" id="locked-bar">SESSION VERROUILLEE - Ferme MT5 et repose-toi.</div>
     </div>
+  </div>
 
-    <div class="right" id="right-panel" style="display:none">
-      <div class="coach-hdr">
-        <div class="coach-pulse"></div>
-        <div><div class="coach-name">COACH IA</div><div class="coach-sub">Analyse comportementale active</div></div>
+  <!-- HISTORY PAGE -->
+  <div class="page" id="page-history">
+    <div class="history-page" id="history-content">
+      <div class="month-nav">
+        <button class="month-btn" onclick="changeMonth(-1)">Precedent</button>
+        <div class="month-title" id="month-title">Chargement...</div>
+        <button class="month-btn" onclick="changeMonth(1)">Suivant</button>
       </div>
-      <div class="behav-panel">
-        <div class="behav-title">Analyse comportementale en temps reel</div>
-        <div class="behav-grid">
-          <div class="behav-card" id="bc-revenge"><div class="bcard-label">Revenge</div><div class="bcard-val" id="bv-revenge">-</div></div>
-          <div class="behav-card" id="bc-fomo"><div class="bcard-label">Overtrading</div><div class="bcard-val" id="bv-fomo">-</div></div>
-          <div class="behav-card" id="bc-over"><div class="bcard-label">Pertes consec.</div><div class="bcard-val" id="bv-over">-</div></div>
-          <div class="behav-card" id="bc-profit"><div class="bcard-label">Profit Guard</div><div class="bcard-val" id="bv-profit">-</div></div>
+
+      <div class="monthly-stats">
+        <div class="mstat pos"><div class="mstat-bar"></div><div class="mstat-label">Score moyen</div><div class="mstat-val pos" id="h-score">-</div><div class="mstat-sub">discipline du mois</div></div>
+        <div class="mstat info"><div class="mstat-bar"></div><div class="mstat-label">Jours rentables</div><div class="mstat-val info" id="h-prof">-</div><div class="mstat-sub" id="h-prof-sub">sur 0 jours</div></div>
+        <div class="mstat warn"><div class="mstat-bar"></div><div class="mstat-label">Meilleur streak</div><div class="mstat-val warn" id="h-streak">-</div><div class="mstat-sub">jours disciplines</div></div>
+        <div class="mstat" id="h-pnl-card"><div class="mstat-bar"></div><div class="mstat-label">P&L total</div><div class="mstat-val" id="h-pnl">-</div><div class="mstat-sub">ce mois</div></div>
+      </div>
+
+      <div class="streak-section" id="streak-section">
+        <div class="streak-fire">🔥</div>
+        <div class="streak-info">
+          <div class="streak-val" id="streak-val">0</div>
+          <div class="streak-label">Jours disciplines consecutifs</div>
+        </div>
+        <div class="streak-dots" id="streak-dots"></div>
+      </div>
+
+      <div class="chart-section">
+        <div class="cal-title">Evolution du P&L</div>
+        <div class="chart-wrap">
+          <div class="chart-bars" id="chart-bars"></div>
+          <div class="chart-zero" id="chart-zero" style="bottom:50%"></div>
         </div>
       </div>
-      <div class="msgs" id="msgs"></div>
-      <div class="quick-row">
-        <button class="qbtn" onclick="sq('Comment est ma discipline ?')">Discipline</button>
-        <button class="qbtn" onclick="sq('J ai du FOMO')">FOMO</button>
-        <button class="qbtn" onclick="sq('Trade revenge')">Revenge</button>
-        <button class="qbtn" onclick="sq('Je continue ?')">Continuer ?</button>
-        <button class="qbtn" onclick="triggerPause(10,'Pause manuelle.')">Pause 10min</button>
+
+      <div class="calendar-section">
+        <div class="cal-title">Calendrier discipline</div>
+        <div class="calendar" id="calendar">
+          <div class="cal-day-hdr">Lun</div>
+          <div class="cal-day-hdr">Mar</div>
+          <div class="cal-day-hdr">Mer</div>
+          <div class="cal-day-hdr">Jeu</div>
+          <div class="cal-day-hdr">Ven</div>
+          <div class="cal-day-hdr">Sam</div>
+          <div class="cal-day-hdr">Dim</div>
+        </div>
       </div>
-      <div class="chat-foot">
-        <textarea id="chat-in" placeholder="Parle a ton coach..." onkeydown="hk(event)"></textarea>
-        <button class="snd" onclick="sendMsg()"><svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg></button>
+    </div>
+  </div>
+
+  <!-- RULES PAGE -->
+  <div class="page" id="page-rules">
+    <div style="padding:24px;width:100%;overflow-y:auto">
+      <div style="font-size:18px;font-weight:700;margin-bottom:20px;letter-spacing:0.06em">Parametres</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--text2);line-height:2">
+        Les regles de protection sont configurables dans l onglet Session.<br>
+        Prochainement : gestion des profils, export CSV, partage social.
       </div>
     </div>
   </div>
 </div>
 
+<!-- PAUSE OVERLAY -->
 <div class="pause-overlay" id="pause-overlay">
   <div class="pause-title">PAUSE TRADING</div>
-  <div class="pause-sub" id="pause-reason">Prends le temps de respirer et d evaluer ton etat mental avant de reprendre.</div>
+  <div class="pause-sub" id="pause-reason">Prends le temps de respirer.</div>
   <div class="pause-cd" id="pause-cd">10:00</div>
   <div class="pause-cd-lbl">temps restant</div>
   <div class="pause-check">
@@ -362,10 +483,23 @@ select.fi option{background:var(--bg3)}
 const BACKEND='https://radecoach-backend-production.up.railway.app';
 const SESSION_ID='ma-session';
 const WS_URL=BACKEND.replace('https','wss').replace('http','ws')+'?session='+SESSION_ID;
+const MONTHS=['Janvier','Fevrier','Mars','Avril','Mai','Juin','Juillet','Aout','Septembre','Octobre','Novembre','Decembre'];
+
 let sessionOn=false,trades=[],timerInt=null,t0=null,locked=false,paused=false;
 let hist=[],ws=null,wsRT=null,pauseTimer=null,pauseSeconds=0,depositAmount=0;
 let profitAlerted=false;
+let currentMonth=new Date().getMonth(),currentYear=new Date().getFullYear();
 
+// ── NAVIGATION ──────────────────────────────────────────────────────────────
+function showPage(page,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(page==='history')loadMonthlyData();
+}
+
+// ── WEBSOCKET ──────────────────────────────────────────────────────────────
 function connectWS(){
   if(ws&&ws.readyState===WebSocket.OPEN)return;
   setWS('connecting');
@@ -378,9 +512,9 @@ function connectWS(){
     if(msg.type==='TRADE_CLOSED'){
       const t=trades.find(x=>x.id===msg.trade.id||(msg.trade.ticket&&x.ticket===msg.trade.ticket));
       if(t){t.pnl=msg.trade.pnl;t.status='closed';}
-      renderTrades();updateMetrics();checkRules();
-      if(sessionOn)analyse(msg.trade,true);
+      renderTrades();updateMetrics();checkRules();if(sessionOn)analyse(msg.trade,true);
     }
+    if(msg.type==='STATUS'){if(msg.locked&&!locked){locked=true;document.getElementById('locked-bar').className='locked show';}}
   };
   ws.onclose=()=>{setWS('disconnected');if(!wsRT)wsRT=setInterval(connectWS,5000);};
   ws.onerror=()=>ws.close();
@@ -394,15 +528,14 @@ function setWS(s){
   const i=document.getElementById('ws-info-status');if(i){i.textContent=L[s];i.style.color=C[s];}
 }
 
+// ── SESSION ────────────────────────────────────────────────────────────────
 function startSession(){
-  const dep=prompt('Depot de depart pour aujourd hui (EUR) :\nEx: 200\n(Appuie sur OK sans rien ecrire pour passer)');
-  depositAmount=parseFloat(dep)||0;
-  profitAlerted=false;
+  const dep=prompt('Depot de depart pour aujourd hui (EUR) :\n(Appuie sur OK pour passer)');
+  depositAmount=parseFloat(dep)||0;profitAlerted=false;
   sessionOn=true;locked=false;t0=Date.now();
-  document.getElementById('welcome').style.display='none';
+  document.getElementById('welcome-screen').style.display='none';
+  document.getElementById('session-content').style.display='grid';
   document.getElementById('metrics').style.display='grid';
-  document.getElementById('left-panel').style.display='flex';
-  document.getElementById('right-panel').style.display='flex';
   document.getElementById('start-btn').style.display='none';
   document.getElementById('end-btn').style.display='inline-block';
   document.getElementById('pause-btn').style.display='inline-block';
@@ -411,7 +544,7 @@ function startSession(){
     document.getElementById('timer').textContent=String(Math.floor(e/3600)).padStart(2,'0')+':'+String(Math.floor((e%3600)/60)).padStart(2,'0')+':'+String(e%60).padStart(2,'0');
     document.getElementById('timer').className='timer-wrap active';
   },1000);
-  coachMsg('Session demarree'+(depositAmount?' avec '+depositAmount+'EUR':'')+'.\n\nJe surveille ton comportement : revenge trading, overtrading, et protection de tes gains.\n\nQuel est ton plan de trading aujourd hui ?');
+  coachMsg('Session demarree'+(depositAmount?' avec '+depositAmount+'EUR':'')+'.\n\nJe surveille ton comportement en temps reel. Quel est ton plan de trading aujourd hui ?');
   connectWS();
 }
 
@@ -422,9 +555,23 @@ function endSession(){
   document.getElementById('start-btn').textContent='Nouvelle session';
   document.getElementById('end-btn').style.display='none';
   document.getElementById('pause-btn').style.display='none';
+  saveSessionToBackend();
   generateBilan();
 }
 
+function saveSessionToBackend(){
+  const tp=trades.reduce((a,t)=>a+t.pnl,0);
+  const wins=trades.filter(t=>t.pnl>0).length;
+  const sc=calcScore();
+  if(ws&&ws.readyState===WebSocket.OPEN){
+    ws.send(JSON.stringify({
+      type:'SAVE_SESSION',
+      data:{trades_count:trades.length,wins,losses:trades.length-wins,pnl:tp,discipline_score:sc||0,revenge_count:trades.filter(t=>t.behaviour==='revenge').length}
+    }));
+  }
+}
+
+// ── TRADES ────────────────────────────────────────────────────────────────
 function addTUI(trade,isNew){
   if(trades.find(t=>t.id===trade.id))return;
   trades.push(trade);renderTrades(isNew?trade.id:null);
@@ -459,57 +606,30 @@ function renderTrades(newId){
   if(newId)setTimeout(()=>el.querySelectorAll('.trade-row.new').forEach(r=>r.classList.remove('new')),2000);
 }
 
+// ── ANALYSE COMPORTEMENTALE ───────────────────────────────────────────────
 function analyse(trade,isClosed){
   const cl=maxConsec();
   const tp=trades.reduce((a,t)=>a+t.pnl,0);
   const mt=parseInt(document.getElementById('r-maxtrades').value)||5;
-
-  // REVENGE — trade ouvert moins de 3 min apres une perte
   if(trades.length>=2){
     const prev=trades[trades.length-2];
     if(prev&&prev.pnl<0&&prev.status==='closed'){
       const diff=(new Date(trade.timestamp)-new Date(prev.timestamp))/60000;
-      if(diff<3){
-        trade.behaviour='revenge';
-        showAlert('danger','REVENGE TRADING detecte - '+Math.round(diff)+'min apres ta derniere perte. Ce trade est emotionnel.');
-        setCard('bc-revenge','bv-revenge','DETECTE','danger');
-      }
+      if(diff<3){trade.behaviour='revenge';showAlert('danger','REVENGE TRADING detecte - '+Math.round(diff)+'min apres ta derniere perte.');setCard('bc-revenge','bv-revenge','DETECTE','danger');}
     }
   }
-
-  // OVERTRADING
-  if(trades.length>mt){
-    showAlert('warn','OVERTRADING - '+trades.length+' trades aujourd hui. Ta limite est '+mt+'.');
-    setCard('bc-fomo','bv-fomo',trades.length+'/'+mt,'warn');
-  }else{
-    setCard('bc-fomo','bv-fomo',trades.length+'/'+mt,trades.length>=mt-1?'warn':'ok');
-  }
-
-  // PERTES CONSECUTIVES
+  if(trades.length>mt){showAlert('warn','OVERTRADING - '+trades.length+' trades. Ta limite est '+mt+'.');setCard('bc-fomo','bv-fomo',trades.length+'/'+mt,'warn');}
+  else setCard('bc-fomo','bv-fomo',trades.length+'/'+mt,trades.length>=mt-1?'warn':'ok');
   setCard('bc-over','bv-over',cl>0?cl+' pertes':'OK',cl>=2?'danger':cl===1?'warn':'ok');
-  if(cl>=2&&!paused){
-    showAlert('danger',cl+' PERTES CONSECUTIVES - Pause obligatoire pour eviter le revenge trading.');
-    triggerPause(10,cl+' pertes consecutives detectees. Pause pour proteger ton capital.');
-  }
-
-  // PROFIT GUARD
+  if(cl>=2&&!paused){showAlert('danger',cl+' PERTES CONSECUTIVES - Pause obligatoire.');triggerPause(10,cl+' pertes consecutives. Pause pour proteger ton capital.');}
   if(depositAmount>0&&isClosed&&!profitAlerted){
     const pct=Math.round((tp/depositAmount)*100);
     const threshold=parseInt(document.getElementById('r-profit').value)||50;
-    if(pct>=threshold&&document.getElementById('r-profit-on').checked){
-      profitAlerted=true;
-      showAlert('profit','PROFIT GUARD - Tu as gagne +'+pct+'% ('+tp.toFixed(2)+'EUR) sur ton depot de '+depositAmount+'EUR. Securise et arrete-toi !');
-      setCard('bc-profit','bv-profit','+'+pct+'%','ok');
-    }
+    if(pct>=threshold&&document.getElementById('r-profit-on').checked){profitAlerted=true;showAlert('profit','PROFIT GUARD - Tu as gagne +'+pct+'% soit '+tp.toFixed(2)+'EUR. Securise et arrete-toi !');setCard('bc-profit','bv-profit','+'+pct+'%','ok');}
   }
-  if(depositAmount>0){
-    const pct=Math.round((tp/depositAmount)*100);
-    setCard('bc-profit','bv-profit',(tp>=0?'+':'')+pct+'%',tp>0?'ok':tp<0?'danger':'ok');
-  }
-
-  // TRADING NOCTURNEE
+  if(depositAmount>0){const pct=Math.round((trades.reduce((a,t)=>a+t.pnl,0)/depositAmount)*100);setCard('bc-profit','bv-profit',(trades.reduce((a,t)=>a+t.pnl,0)>=0?'+':'')+pct+'%',trades.reduce((a,t)=>a+t.pnl,0)>0?'ok':'danger');}
   const h=new Date().getHours();
-  if(h>=22||h<5){showAlert('warn','TRADING NOCTURNE - Il est '+h+'h. Tes decisions sont moins bonnes la nuit.');}
+  if(h>=22||h<5)showAlert('warn','TRADING NOCTURNE - Il est '+h+'h. Tes decisions sont moins bonnes.');
 }
 
 function setCard(cid,vid,val,state){
@@ -527,12 +647,11 @@ function showAlert(type,msg){
   coachMsg(msg,type==='danger'?'danger-msg':type==='profit'?'profit-msg':'system');
   setTimeout(()=>{if(d.parentElement){d.remove();checkStrip();}},25000);
 }
-
 function checkStrip(){const s=document.getElementById('bstrip');if(!s.children.length)s.className='bstrip';}
 
+// ── PAUSE ────────────────────────────────────────────────────────────────
 function triggerPause(min,reason){
-  if(paused)return;
-  paused=true;pauseSeconds=min*60;
+  if(paused)return;paused=true;pauseSeconds=min*60;
   document.getElementById('pause-btn').className='btn pause-btn on';
   document.getElementById('pause-reason').textContent=reason||'Prends le temps de respirer.';
   document.getElementById('pause-overlay').className='pause-overlay show';
@@ -541,29 +660,14 @@ function triggerPause(min,reason){
   updateCD();
   pauseTimer=setInterval(()=>{pauseSeconds--;updateCD();if(pauseSeconds<=0){clearInterval(pauseTimer);checkResume();}},1000);
 }
-
 function updateCD(){const m=String(Math.floor(pauseSeconds/60)).padStart(2,'0');const s=String(pauseSeconds%60).padStart(2,'0');document.getElementById('pause-cd').textContent=m+':'+s;}
-
 function toggleCheck(el){el.classList.toggle('done');el.querySelector('.cbox').classList.toggle('checked');checkResume();}
+function checkResume(){const all=document.querySelectorAll('.ci').length;const done=document.querySelectorAll('.ci.done').length;document.getElementById('resume-btn').className=(pauseSeconds<=0&&done===all)?'resume-btn ready':'resume-btn';}
+function resumeTrading(){if(!document.getElementById('resume-btn').classList.contains('ready'))return;paused=false;document.getElementById('pause-overlay').className='pause-overlay';document.getElementById('pause-btn').className='btn pause-btn';clearInterval(pauseTimer);coachMsg('Pause terminee. Tu es pret a trader avec discipline.');}
 
-function checkResume(){
-  const all=document.querySelectorAll('.ci').length;
-  const done=document.querySelectorAll('.ci.done').length;
-  document.getElementById('resume-btn').className=(pauseSeconds<=0&&done===all)?'resume-btn ready':'resume-btn';
-}
-
-function resumeTrading(){
-  if(!document.getElementById('resume-btn').classList.contains('ready'))return;
-  paused=false;
-  document.getElementById('pause-overlay').className='pause-overlay';
-  document.getElementById('pause-btn').className='btn pause-btn';
-  clearInterval(pauseTimer);
-  coachMsg('Pause terminee. Tu es pret a trader avec discipline. Rappelle-toi de ton plan.');
-}
-
+// ── METRICS ────────────────────────────────────────────────────────────────
 function calcScore(){
-  if(!trades.length)return null;
-  let s=100;
+  if(!trades.length)return null;let s=100;
   s-=trades.filter(t=>t.plan==='no').length*15;
   const cl=maxConsec();if(cl>=3)s-=20;else if(cl>=2)s-=10;
   const mt=parseInt(document.getElementById('r-maxtrades').value)||5;
@@ -573,7 +677,6 @@ function calcScore(){
   s-=trades.filter(t=>t.behaviour==='revenge').length*10;
   return Math.max(0,Math.min(100,s));
 }
-
 function maxConsec(){let max=0,cur=0;for(const t of trades){if(t.pnl<0){cur++;max=Math.max(max,cur);}else cur=0;}return max;}
 
 function updateMetrics(){
@@ -618,10 +721,106 @@ function checkRules(){
   if(document.getElementById('r-maxloss-on').checked&&tp<=-ml&&!locked){
     locked=true;document.getElementById('locked-bar').className='locked show';
     coachMsg('Perte max de '+ml+'EUR atteinte. Session verrouillee.','system');
+    if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'LOCK',reason:'Perte max atteinte'}));
   }
   updateMetrics();
 }
 
+// ── HISTORIQUE MENSUEL ────────────────────────────────────────────────────
+async function loadMonthlyData(){
+  document.getElementById('month-title').textContent=MONTHS[currentMonth]+' '+currentYear;
+  try{
+    const res=await fetch(BACKEND+'/monthly/'+SESSION_ID+'/'+currentYear+'/'+(currentMonth+1));
+    const data=await res.json();
+    renderMonthlyStats(data);
+    renderCalendar(data.days);
+    renderChart(data.days);
+    renderStreak(data);
+  }catch(e){
+    document.getElementById('month-title').textContent=MONTHS[currentMonth]+' '+currentYear+' (pas de donnees)';
+  }
+}
+
+function changeMonth(dir){
+  currentMonth+=dir;
+  if(currentMonth>11){currentMonth=0;currentYear++;}
+  if(currentMonth<0){currentMonth=11;currentYear--;}
+  loadMonthlyData();
+}
+
+function renderMonthlyStats(data){
+  const scoreEl=document.getElementById('h-score');
+  scoreEl.textContent=data.avg_score?data.avg_score+'/100':'-';
+  scoreEl.className='mstat-val '+(data.avg_score>=70?'pos':data.avg_score>=40?'warn':'neg');
+  document.getElementById('h-prof').textContent=data.profitable_days||'-';
+  document.getElementById('h-prof-sub').textContent='sur '+data.total_days+' jours trades';
+  document.getElementById('h-streak').textContent=data.best_streak||'-';
+  const pnlEl=document.getElementById('h-pnl');
+  const pnl=data.total_pnl||0;
+  pnlEl.textContent=(pnl>=0?'+':'')+pnl.toFixed(2)+'EUR';
+  pnlEl.className='mstat-val '+(pnl>0?'pos':pnl<0?'neg':'');
+  document.getElementById('h-pnl-card').className='mstat '+(pnl>0?'pos':pnl<0?'neg':'');
+}
+
+function renderCalendar(days){
+  const cal=document.getElementById('calendar');
+  const headers=cal.querySelectorAll('.cal-day-hdr');
+  cal.innerHTML='';
+  headers.forEach(h=>cal.appendChild(h.cloneNode(true)));
+
+  const firstDay=new Date(currentYear,currentMonth,1).getDay();
+  const offset=(firstDay===0?6:firstDay-1);
+  const daysInMonth=new Date(currentYear,currentMonth+1,0).getDate();
+  const today=new Date();
+
+  for(let i=0;i<offset;i++){const d=document.createElement('div');d.className='cal-day empty';cal.appendChild(d);}
+
+  const dayMap={};
+  if(days){days.forEach(d=>{const date=d.date.split('T')[0];dayMap[date]=d;});}
+
+  for(let d=1;d<=daysInMonth;d++){
+    const dateStr=currentYear+'-'+String(currentMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const dayData=dayMap[dateStr];
+    const isToday=today.getDate()===d&&today.getMonth()===currentMonth&&today.getFullYear()===currentYear;
+    const div=document.createElement('div');
+    let cls='cal-day';
+    if(isToday)cls+=' today';
+    else if(dayData){cls+=dayData.pnl>0?' profitable':' losing';}
+    else if(new Date(dateStr)<=today)cls+=' no-trade';
+    div.className=cls;
+    div.innerHTML='<span>'+d+'</span>'+(dayData?'<div class="score-dot"></div>':'');
+    if(dayData)div.title='Score: '+dayData.discipline_score+'/100 | PnL: '+dayData.pnl+'EUR';
+    cal.appendChild(div);
+  }
+}
+
+function renderChart(days){
+  const wrap=document.getElementById('chart-bars');
+  wrap.innerHTML='';
+  if(!days||!days.length){wrap.innerHTML='<div style="width:100%;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text3);align-self:center">Aucune donnee pour ce mois</div>';return;}
+  const maxAbs=Math.max(...days.map(d=>Math.abs(d.pnl||0)),1);
+  days.forEach(d=>{
+    const pnl=d.pnl||0;
+    const pct=Math.abs(pnl)/maxAbs*80;
+    const date=new Date(d.date).getDate();
+    const div=document.createElement('div');
+    div.className='chart-bar-wrap';
+    div.innerHTML='<div class="chart-bar '+(pnl>=0?'pos':'neg')+'" style="height:'+pct+'%;'+(pnl<0?'margin-top:auto':'')+'"></div><div class="chart-bar-label">'+date+'</div>';
+    wrap.appendChild(div);
+  });
+}
+
+function renderStreak(data){
+  document.getElementById('streak-val').textContent=data.best_streak||0;
+  const dots=document.getElementById('streak-dots');dots.innerHTML='';
+  for(let i=0;i<Math.min(data.total_days||0,30);i++){
+    const d=document.createElement('div');
+    d.className='streak-dot'+(i<(data.best_streak||0)?' done':'');
+    dots.appendChild(d);
+  }
+}
+
+// ── COACH IA ──────────────────────────────────────────────────────────────
 const gt=()=>new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
 
 function coachMsg(txt,type){
@@ -645,32 +844,31 @@ function getCtx(){
   const rev=trades.filter(t=>t.behaviour==='revenge').length;
   const sc=calcScore();
   const el=t0?Math.floor((Date.now()-t0)/60000):0;
-  return 'Session ('+el+'min) - Depot:'+depositAmount+'EUR | Trades:'+trades.length+' | PnL:'+tp.toFixed(2)+'EUR | Wins:'+wins+'/'+trades.length+' | Revenge:'+rev+' | Pertes consec:'+maxConsec()+' | Score:'+sc+'/100';
+  return 'Session ('+el+'min) - Depot:'+depositAmount+'EUR | Trades:'+trades.length+' | PnL:'+tp.toFixed(2)+'EUR | Wins:'+wins+'/'+trades.length+' | Revenge:'+rev+' | Score:'+sc+'/100';
 }
 
 async function callAI(txt,short){
   showTyping();
-  const sys='Tu es un coach de trading psychologique expert. Tu analyses FOMO, revenge, overtrading en temps reel. Bienveillant, direct. '+(short?'2-3 phrases.':'4-5 phrases.')+' Francais. Pas de markdown.';
+  const sys='Tu es un coach de trading psychologique expert. Tu analyses FOMO, revenge, overtrading. Bienveillant, direct. '+(short?'2-3 phrases.':'4-5 phrases.')+' Francais. Pas de markdown.';
   const msgs=[...hist.slice(-8),{role:'user',content:getCtx()+'\n\n'+txt}];
   try{
     const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,system:sys,messages:msgs})});
     const d=await r.json();rmTyping();
-    const rep=d.content&&d.content[0]?d.content[0].text:'Reste focus sur ton plan et respecte tes regles.';
+    const rep=d.content&&d.content[0]?d.content[0].text:'Reste focus sur ton plan.';
     coachMsg(rep);hist.push({role:'user',content:txt});
   }catch(e){rmTyping();coachMsg('Reste focus sur ton plan et respecte tes regles.');}
 }
 
 async function generateBilan(){
-  const tp=trades.reduce((a,t)=>a+t.pnl,0);
-  const sc=calcScore();
-  const rev=trades.filter(t=>t.behaviour==='revenge').length;
-  coachMsg('--- BILAN DE SESSION ---\nScore discipline : '+sc+'/100\nPnL : '+(tp>=0?'+':'')+tp.toFixed(2)+'EUR'+(depositAmount?' ('+Math.round(tp/depositAmount*100)+'%)':'')+'\nTrades : '+trades.length+' | Revenge : '+rev+'\n'+(rev>0?'Des trades de revenge ont ete detectes.':'Aucun revenge trading.'),'system');
-  await callAI('Genere un bilan psychologique de fin de session. Conseils concrets pour demain.',false);
+  const tp=trades.reduce((a,t)=>a+t.pnl,0);const sc=calcScore();
+  coachMsg('--- BILAN ---\nScore: '+sc+'/100 | PnL: '+(tp>=0?'+':'')+tp.toFixed(2)+'EUR | Trades: '+trades.length,'system');
+  await callAI('Bilan psychologique de fin de session. Conseils concrets pour demain.',false);
 }
 
 function sendMsg(){const inp=document.getElementById('chat-in');const txt=inp.value.trim();if(!txt)return;userMsg(txt);inp.value='';callAI(txt);}
 function sq(t){userMsg(t);callAI(t);}
 function hk(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
+
 connectWS();
 </script>
 </body>
