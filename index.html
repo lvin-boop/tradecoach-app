@@ -370,6 +370,11 @@ select.fi option{background:var(--bg3)}
 .resume.ready{border-color:var(--green);color:var(--green);cursor:pointer;background:var(--green-dim)}
 .resume.ready:hover{background:var(--green);color:#fff}
 
+/* LANGUAGE BUTTONS */
+.lang-btn{font-family:var(--mono);font-size:11px;font-weight:600;padding:8px 16px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;border-radius:6px;transition:all 0.15s;letter-spacing:0.02em}
+.lang-btn:hover{border-color:var(--green);color:var(--green)}
+.lang-btn.active{background:var(--green-dim);border-color:rgba(16,185,129,0.3);color:var(--green)}
+
 /* CHALLENGE 30J */
 .ch-wrap{flex:1;overflow-y:auto;padding:22px;min-height:0}
 .ch-wrap::-webkit-scrollbar{width:4px}
@@ -784,14 +789,36 @@ select.fi option{background:var(--bg3)}
     <!-- SETTINGS -->
     <div class="pg" id="pg-settings">
       <div style="padding:28px;width:100%;overflow-y:auto">
-        <div style="font-size:20px;font-weight:700;margin-bottom:6px">Réglages</div>
-        <div style="font-size:13px;color:var(--text3);margin-bottom:20px">Configuration de DisciplineAI</div>
-        <div style="background:var(--bg3);border:1px solid var(--border);padding:18px;max-width:460px;border-radius:8px;margin-bottom:10px">
-          <div style="font-family:var(--mono);font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">ID de session MT5</div>
-          <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green)">ma-session</div>
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:6px">Utilise cet ID dans ton Expert Advisor MT5.</div>
+        <div style="font-size:20px;font-weight:700;margin-bottom:4px" data-i18n="settings_title">Réglages</div>
+        <div style="font-size:13px;color:var(--text3);margin-bottom:24px" data-i18n="settings_sub">Configuration de DisciplineAI</div>
+
+        <!-- LANGUE -->
+        <div style="background:var(--bg3);border:1px solid var(--border);padding:18px;max-width:460px;border-radius:8px;margin-bottom:12px">
+          <div style="font-family:var(--mono);font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:12px" data-i18n="lang_label">Langue / Language / Idioma</div>
+          <div style="display:flex;gap:8px">
+            <button class="lang-btn active" id="lang-fr" onclick="setLang('fr',this)">🇫🇷 Français</button>
+            <button class="lang-btn" id="lang-en" onclick="setLang('en',this)">🇬🇧 English</button>
+            <button class="lang-btn" id="lang-es" onclick="setLang('es',this)">🇪🇸 Español</button>
+          </div>
         </div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text3);line-height:2.2">Prochainement : Challenge 30 jours · Prop Firm Mode · Multilingue · Push notifications</div>
+
+        <!-- SESSION ID -->
+        <div style="background:var(--bg3);border:1px solid var(--border);padding:18px;max-width:460px;border-radius:8px;margin-bottom:12px">
+          <div style="font-family:var(--mono);font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:8px" data-i18n="session_id_label">ID de session MT5</div>
+          <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green)">ma-session</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:6px" data-i18n="session_id_hint">Utilise cet ID dans ton Expert Advisor MT5.</div>
+        </div>
+
+        <!-- THÈME -->
+        <div style="background:var(--bg3);border:1px solid var(--border);padding:18px;max-width:460px;border-radius:8px;margin-bottom:12px">
+          <div style="font-family:var(--mono);font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:12px" data-i18n="theme_label">Thème</div>
+          <div style="display:flex;gap:8px">
+            <button class="lang-btn active" id="theme-dark-btn" onclick="setThemeBtn('dark',this)">🌙 Dark</button>
+            <button class="lang-btn" id="theme-light-btn" onclick="setThemeBtn('light',this)">☀️ Light</button>
+          </div>
+        </div>
+
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text3);line-height:2.2" data-i18n="coming_soon">Prochainement : Prop Firm Mode · Push notifications · Export CSV</div>
       </div>
     </div>
 
@@ -1254,7 +1281,426 @@ function sendMsg(){const inp=document.getElementById('chat-in'),txt=inp.value.tr
 function sq(t){usr(t);ai(t);}
 function hk(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
 
-// ══ CHALLENGE 30 JOURS ══════════════════════════════════════════
+// ══ I18N — MULTILINGUE FR/EN/ES ════════════════════════════════
+const I18N = {
+  fr: {
+    // Navigation
+    tab_session: 'Session', tab_history: 'Historique', tab_challenge: '🔥 Challenge 30J', tab_settings: 'Réglages',
+    // Header
+    status_inactive: 'INACTIVE', status_open: 'OPEN', status_pause: 'PAUSE', status_closed: 'CLOSED',
+    btn_start: 'Démarrer', btn_end: 'Terminer', btn_pause: '⏸ Pause', btn_new: 'Nouvelle session',
+    ws_connected: 'MT5 Connecté', ws_connecting: 'Connexion...', ws_disconnected: 'Déconnecté',
+    // Welcome
+    welcome_badge: 'AI Trading Coach · Institutional Grade',
+    welcome_title: 'Protège ton capital.<br><span>Discipline ta stratégie.</span>',
+    welcome_sub: 'Détection comportementale · MT5 Live · Pause Shield · Profit Guard · Score mensuel',
+    welcome_btn: 'Démarrer la session',
+    welcome_ws: 'Connexion MT5 en attente...',
+    feat1_title: 'MT5 Live', feat1_desc: 'Import automatique de toutes tes positions',
+    feat2_title: 'Analyse IA', feat2_desc: 'Détection FOMO, revenge et overtrading',
+    feat3_title: 'Pause Shield', feat3_desc: 'Check mental avant reprise',
+    feat4_title: 'Score mensuel', feat4_desc: 'Progression et calendrier',
+    // Stats
+    stat_pnl: 'P&L Journalier', stat_wr: 'Win Rate', stat_trades: 'Trades',
+    stat_discipline: 'Discipline', stat_protections: 'Protections',
+    prot_active: '● Actives', prot_alert: '⚠ ',
+    prot_ok: 'Aucune alerte',
+    // Journal
+    journal_title: 'Journal',
+    col_symbol: 'Symbole', col_dir: 'Dir.', col_time: 'Heure',
+    col_pnl: 'P&L', col_note: 'Note', col_source: 'Source', col_plan: 'Plan',
+    empty_trades: '[ MT5 connecté · En attente de positions ]',
+    placeholder_sym: 'XAUUSD · EURUSD · BTC...', placeholder_pnl: 'P&L',
+    placeholder_note: 'Note : FOMO · Revenge · Overtrading...',
+    in_plan: 'Dans le plan', out_plan: 'Hors plan',
+    btn_add: '+ Ajouter',
+    // Rules
+    rules_title: 'Règles de protection',
+    rule_loss: 'Perte max', rule_trades: 'Max trades',
+    rule_consec: 'Bloquer après', rule_profit: 'Profit alert',
+    unit_eur: 'EUR', unit_trades: 'trades', unit_pertes: 'pertes', unit_pct: '%',
+    discipline_lbl: 'Discipline',
+    locked_msg: '⛔ Session verrouillée — Ferme MT5.',
+    // Behaviour
+    behav_title: 'Détection comportementale',
+    bc_revenge: 'Revenge', bc_over: 'Overtrading', bc_consec: 'Pertes consec.', bc_profit: 'Profit Guard',
+    // Coach
+    coach_name: 'Coach IA', coach_status: 'Surveillance active',
+    qbtn1: 'Discipline', qbtn2: 'FOMO', qbtn3: 'Revenge', qbtn4: 'Continuer ?', qbtn5: '⏸ 10min',
+    chat_placeholder: 'Parle à ton coach IA...',
+    // Alerts
+    revenge_alert: 'REVENGE TRADING détecté — ',
+    overtrading_alert: 'OVERTRADING — ',
+    consec_alert: ' PERTES CONSÉCUTIVES — Pause obligatoire.',
+    profit_alert: 'PROFIT GUARD — Sécurise tes gains !',
+    nocturnal_alert: 'TRADING NOCTURNE — Il est ',
+    nocturnal_alert2: 'h. Tes décisions sont moins bonnes.',
+    locked_alert: '⛔ Perte max atteinte. Session verrouillée.',
+    // Pause
+    pause_badge: 'Pause Trading', pause_title: 'Respire.',
+    pause_sub: 'Ce moment est conçu pour te protéger. Utilise-le.',
+    pause_lbl: 'temps restant',
+    check_title: 'Check mental avant de reprendre',
+    check1: 'Je ne suis pas en colère ou frustré',
+    check2: 'Mon prochain trade respecte mon plan',
+    check3: 'Je ne cherche pas à rattraper des pertes',
+    check4: "Je suis dans un bon état d'esprit",
+    resume_btn: 'Reprendre le trading',
+    // History
+    hist_score: 'Score moyen', hist_prof: 'Jours rentables', hist_streak: 'Streak', hist_pnl: 'P&L total',
+    hist_discipline: 'discipline', hist_jours: 'sur 0 jours', hist_jours_disc: 'jours disciplinés', hist_periode: 'période',
+    streak_lbl: 'Jours disciplinés consécutifs',
+    period_month: 'Ce mois', period_7d: '7 jours', period_30d: '30 jours', period_all: 'Tout',
+    cal_days: ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'],
+    // Challenge
+    ch_title: 'Challenge 30 Jours 🔥',
+    ch_sub: '30 jours de discipline consécutifs. Pas de revenge trading. Pas d\'overtrading. Juste ton plan.',
+    ch_start: 'Démarrer le challenge', ch_reset: 'Recommencer',
+    ch_validated: 'Jours validés ✅', ch_neutral: 'Jours neutres ⚪',
+    ch_jokers: 'Jokers ⚡', ch_failed: 'Jours ratés ❌',
+    ch_grid_title: 'Progression jour par jour',
+    ch_rules_title: 'Règles du challenge',
+    ch_badges_title: 'Badges de certification',
+    // Settings
+    settings_title: 'Réglages', settings_sub: 'Configuration de DisciplineAI',
+    lang_label: 'Langue / Language / Idioma',
+    session_id_label: 'ID de session MT5',
+    session_id_hint: 'Utilise cet ID dans ton Expert Advisor MT5.',
+    theme_label: 'Thème',
+    coming_soon: 'Prochainement : Prop Firm Mode · Push notifications · Export CSV',
+    // Coach messages
+    coach_welcome: 'Session démarrée. Je surveille ton comportement. Quel est ton plan de trading ?',
+    pause_ended: 'Pause terminée. Tu es prêt à reprendre avec discipline.',
+    session_locked: 'atteinte. Session verrouillée.',
+    bilan_prefix: 'Bilan — Score: ',
+  },
+  en: {
+    tab_session: 'Session', tab_history: 'History', tab_challenge: '🔥 30D Challenge', tab_settings: 'Settings',
+    status_inactive: 'INACTIVE', status_open: 'OPEN', status_pause: 'PAUSE', status_closed: 'CLOSED',
+    btn_start: 'Start', btn_end: 'End', btn_pause: '⏸ Pause', btn_new: 'New session',
+    ws_connected: 'MT5 Connected', ws_connecting: 'Connecting...', ws_disconnected: 'Disconnected',
+    welcome_badge: 'AI Trading Coach · Institutional Grade',
+    welcome_title: 'Protect your capital.<br><span>Discipline your strategy.</span>',
+    welcome_sub: 'Behavioural detection · MT5 Live · Pause Shield · Profit Guard · Monthly score',
+    welcome_btn: 'Start session',
+    welcome_ws: 'Waiting for MT5 connection...',
+    feat1_title: 'MT5 Live', feat1_desc: 'Automatic import of all your positions',
+    feat2_title: 'AI Analysis', feat2_desc: 'FOMO, revenge and overtrading detection',
+    feat3_title: 'Pause Shield', feat3_desc: 'Mental check before resuming',
+    feat4_title: 'Monthly score', feat4_desc: 'Progress and calendar',
+    stat_pnl: 'Daily P&L', stat_wr: 'Win Rate', stat_trades: 'Trades',
+    stat_discipline: 'Discipline', stat_protections: 'Protections',
+    prot_active: '● Active', prot_alert: '⚠ ', prot_ok: 'No alerts',
+    journal_title: 'Trade Journal',
+    col_symbol: 'Symbol', col_dir: 'Dir.', col_time: 'Time',
+    col_pnl: 'P&L', col_note: 'Note', col_source: 'Source', col_plan: 'Plan',
+    empty_trades: '[ MT5 connected · Waiting for positions ]',
+    placeholder_sym: 'XAUUSD · EURUSD · BTC...', placeholder_pnl: 'P&L',
+    placeholder_note: 'Note: FOMO · Revenge · Overtrading...',
+    in_plan: 'In plan', out_plan: 'Off plan', btn_add: '+ Add',
+    rules_title: 'Protection rules',
+    rule_loss: 'Max loss', rule_trades: 'Max trades',
+    rule_consec: 'Lock after', rule_profit: 'Profit alert',
+    unit_eur: 'EUR', unit_trades: 'trades', unit_pertes: 'losses', unit_pct: '%',
+    discipline_lbl: 'Discipline',
+    locked_msg: '⛔ Session locked — Close MT5.',
+    behav_title: 'Behavioural detection',
+    bc_revenge: 'Revenge', bc_over: 'Overtrading', bc_consec: 'Consec. losses', bc_profit: 'Profit Guard',
+    coach_name: 'AI Coach', coach_status: 'Active monitoring',
+    qbtn1: 'Discipline', qbtn2: 'FOMO', qbtn3: 'Revenge', qbtn4: 'Continue?', qbtn5: '⏸ 10min',
+    chat_placeholder: 'Talk to your AI coach...',
+    revenge_alert: 'REVENGE TRADING detected — ',
+    overtrading_alert: 'OVERTRADING — ',
+    consec_alert: ' CONSECUTIVE LOSSES — Mandatory pause.',
+    profit_alert: 'PROFIT GUARD — Secure your gains!',
+    nocturnal_alert: 'LATE NIGHT TRADING — It\'s ',
+    nocturnal_alert2: 'h. Your decisions are weaker now.',
+    locked_alert: '⛔ Max loss reached. Session locked.',
+    pause_badge: 'Trading Pause', pause_title: 'Breathe.',
+    pause_sub: 'This moment is designed to protect you. Use it.',
+    pause_lbl: 'time remaining',
+    check_title: 'Mental check before resuming',
+    check1: 'I am not angry or frustrated',
+    check2: 'My next trade follows my plan',
+    check3: 'I am not trying to recover losses',
+    check4: 'I am in a good mental state',
+    resume_btn: 'Resume trading',
+    hist_score: 'Avg score', hist_prof: 'Profitable days', hist_streak: 'Streak', hist_pnl: 'Total P&L',
+    hist_discipline: 'discipline', hist_jours: 'out of 0 days', hist_jours_disc: 'disciplined days', hist_periode: 'period',
+    streak_lbl: 'Consecutive disciplined days',
+    period_month: 'This month', period_7d: '7 days', period_30d: '30 days', period_all: 'All',
+    cal_days: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    ch_title: '30-Day Challenge 🔥',
+    ch_sub: '30 consecutive disciplined days. No revenge trading. No overtrading. Just your plan.',
+    ch_start: 'Start challenge', ch_reset: 'Restart',
+    ch_validated: 'Validated days ✅', ch_neutral: 'Neutral days ⚪',
+    ch_jokers: 'Jokers ⚡', ch_failed: 'Failed days ❌',
+    ch_grid_title: 'Day by day progress',
+    ch_rules_title: 'Challenge rules', ch_badges_title: 'Certification badges',
+    settings_title: 'Settings', settings_sub: 'DisciplineAI Configuration',
+    lang_label: 'Langue / Language / Idioma',
+    session_id_label: 'MT5 Session ID',
+    session_id_hint: 'Use this ID in your MT5 Expert Advisor.',
+    theme_label: 'Theme',
+    coming_soon: 'Coming soon: Prop Firm Mode · Push notifications · CSV Export',
+    coach_welcome: 'Session started. I am monitoring your behaviour. What is your trading plan?',
+    pause_ended: 'Break over. You are ready to resume with discipline.',
+    session_locked: 'reached. Session locked.',
+    bilan_prefix: 'Summary — Score: ',
+  },
+  es: {
+    tab_session: 'Sesión', tab_history: 'Historial', tab_challenge: '🔥 Desafío 30D', tab_settings: 'Ajustes',
+    status_inactive: 'INACTIVO', status_open: 'ABIERTO', status_pause: 'PAUSA', status_closed: 'CERRADO',
+    btn_start: 'Iniciar', btn_end: 'Terminar', btn_pause: '⏸ Pausa', btn_new: 'Nueva sesión',
+    ws_connected: 'MT5 Conectado', ws_connecting: 'Conectando...', ws_disconnected: 'Desconectado',
+    welcome_badge: 'Coach IA de Trading · Grado Institucional',
+    welcome_title: 'Protege tu capital.<br><span>Disciplina tu estrategia.</span>',
+    welcome_sub: 'Detección de comportamiento · MT5 Live · Pause Shield · Profit Guard · Puntuación mensual',
+    welcome_btn: 'Iniciar sesión',
+    welcome_ws: 'Esperando conexión MT5...',
+    feat1_title: 'MT5 Live', feat1_desc: 'Importación automática de todas tus posiciones',
+    feat2_title: 'Análisis IA', feat2_desc: 'Detección de FOMO, revenge y overtrading',
+    feat3_title: 'Pause Shield', feat3_desc: 'Control mental antes de reanudar',
+    feat4_title: 'Puntuación mensual', feat4_desc: 'Progreso y calendario',
+    stat_pnl: 'P&L Diario', stat_wr: 'Tasa de aciertos', stat_trades: 'Operaciones',
+    stat_discipline: 'Disciplina', stat_protections: 'Protecciones',
+    prot_active: '● Activas', prot_alert: '⚠ ', prot_ok: 'Sin alertas',
+    journal_title: 'Diario de operaciones',
+    col_symbol: 'Símbolo', col_dir: 'Dir.', col_time: 'Hora',
+    col_pnl: 'P&L', col_note: 'Nota', col_source: 'Fuente', col_plan: 'Plan',
+    empty_trades: '[ MT5 conectado · Esperando posiciones ]',
+    placeholder_sym: 'XAUUSD · EURUSD · BTC...', placeholder_pnl: 'P&L',
+    placeholder_note: 'Nota: FOMO · Revenge · Overtrading...',
+    in_plan: 'En el plan', out_plan: 'Fuera del plan', btn_add: '+ Añadir',
+    rules_title: 'Reglas de protección',
+    rule_loss: 'Pérdida máx.', rule_trades: 'Máx. operaciones',
+    rule_consec: 'Bloquear tras', rule_profit: 'Alerta beneficio',
+    unit_eur: 'EUR', unit_trades: 'ops.', unit_pertes: 'pérdidas', unit_pct: '%',
+    discipline_lbl: 'Disciplina',
+    locked_msg: '⛔ Sesión bloqueada — Cierra MT5.',
+    behav_title: 'Detección de comportamiento',
+    bc_revenge: 'Revenge', bc_over: 'Overtrading', bc_consec: 'Pérdidas consec.', bc_profit: 'Profit Guard',
+    coach_name: 'Coach IA', coach_status: 'Supervisión activa',
+    qbtn1: 'Disciplina', qbtn2: 'FOMO', qbtn3: 'Revenge', qbtn4: '¿Continuar?', qbtn5: '⏸ 10min',
+    chat_placeholder: 'Habla con tu coach IA...',
+    revenge_alert: 'REVENGE TRADING detectado — ',
+    overtrading_alert: 'OVERTRADING — ',
+    consec_alert: ' PÉRDIDAS CONSECUTIVAS — Pausa obligatoria.',
+    profit_alert: '¡PROFIT GUARD — Asegura tus ganancias!',
+    nocturnal_alert: 'TRADING NOCTURNO — Son las ',
+    nocturnal_alert2: 'h. Tus decisiones son peores ahora.',
+    locked_alert: '⛔ Pérdida máxima alcanzada. Sesión bloqueada.',
+    pause_badge: 'Pausa Trading', pause_title: 'Respira.',
+    pause_sub: 'Este momento está diseñado para protegerte. Aprovéchalo.',
+    pause_lbl: 'tiempo restante',
+    check_title: 'Control mental antes de reanudar',
+    check1: 'No estoy enfadado ni frustrado',
+    check2: 'Mi próxima operación sigue mi plan',
+    check3: 'No intento recuperar pérdidas',
+    check4: 'Estoy en buen estado mental',
+    resume_btn: 'Reanudar el trading',
+    hist_score: 'Puntuación media', hist_prof: 'Días rentables', hist_streak: 'Racha', hist_pnl: 'P&L total',
+    hist_discipline: 'disciplina', hist_jours: 'de 0 días', hist_jours_disc: 'días disciplinados', hist_periode: 'período',
+    streak_lbl: 'Días disciplinados consecutivos',
+    period_month: 'Este mes', period_7d: '7 días', period_30d: '30 días', period_all: 'Todo',
+    cal_days: ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'],
+    ch_title: 'Desafío 30 Días 🔥',
+    ch_sub: '30 días consecutivos de disciplina. Sin revenge trading. Sin overtrading. Solo tu plan.',
+    ch_start: 'Iniciar desafío', ch_reset: 'Reiniciar',
+    ch_validated: 'Días validados ✅', ch_neutral: 'Días neutros ⚪',
+    ch_jokers: 'Comodines ⚡', ch_failed: 'Días fallidos ❌',
+    ch_grid_title: 'Progreso día a día',
+    ch_rules_title: 'Reglas del desafío', ch_badges_title: 'Insignias de certificación',
+    settings_title: 'Ajustes', settings_sub: 'Configuración de DisciplineAI',
+    lang_label: 'Langue / Language / Idioma',
+    session_id_label: 'ID de sesión MT5',
+    session_id_hint: 'Usa este ID en tu Expert Advisor de MT5.',
+    theme_label: 'Tema',
+    coming_soon: 'Próximamente: Modo Prop Firm · Notificaciones · Exportar CSV',
+    coach_welcome: 'Sesión iniciada. Estoy monitoreando tu comportamiento. ¿Cuál es tu plan de trading?',
+    pause_ended: 'Pausa terminada. Estás listo para reanudar con disciplina.',
+    session_locked: 'alcanzada. Sesión bloqueada.',
+    bilan_prefix: 'Resumen — Puntuación: ',
+  }
+};
+
+let currentLang = localStorage.getItem('dai-lang') || 'fr';
+
+function t(key){ return I18N[currentLang][key] || I18N['fr'][key] || key; }
+
+function setLang(lang, btn){
+  currentLang = lang;
+  localStorage.setItem('dai-lang', lang);
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('lang-'+lang).classList.add('active');
+  applyLang();
+}
+
+function setThemeBtn(theme, btn){
+  document.querySelectorAll('[id^="theme-"]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  dark = theme === 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('theme-btn').textContent = dark ? '🌙' : '☀️';
+}
+
+function applyLang(){
+  // Tabs
+  document.querySelectorAll('.tab')[0].textContent = t('tab_session');
+  document.querySelectorAll('.tab')[1].textContent = t('tab_history');
+  document.querySelectorAll('.tab')[2].textContent = t('tab_challenge');
+  document.querySelectorAll('.tab')[3].textContent = t('tab_settings');
+
+  // Header buttons
+  const goBtn = document.getElementById('go-btn');
+  if(goBtn) goBtn.textContent = on ? t('btn_new') : t('btn_start');
+  const endBtn = document.getElementById('end-btn');
+  if(endBtn) endBtn.textContent = t('btn_end');
+  const brkBtn = document.getElementById('brk-btn');
+  if(brkBtn) brkBtn.textContent = t('btn_pause');
+
+  // Welcome
+  const wb = document.querySelector('.w-badge');
+  if(wb) wb.textContent = t('welcome_badge');
+  const wt = document.querySelector('.w-title');
+  if(wt) wt.innerHTML = t('welcome_title');
+  const ws2 = document.querySelector('.w-sub');
+  if(ws2) ws2.textContent = t('welcome_sub');
+  const wbtn = document.querySelector('.w-btn');
+  if(wbtn) wbtn.textContent = t('welcome_btn');
+  const wtxt = document.getElementById('w-txt');
+  if(wtxt) wtxt.textContent = t('welcome_ws');
+
+  // Feature cards
+  const cards = document.querySelectorAll('.w-card');
+  if(cards.length >= 4){
+    cards[0].querySelector('.w-card-ttl').textContent = t('feat1_title');
+    cards[0].querySelector('.w-card-desc').textContent = t('feat1_desc');
+    cards[1].querySelector('.w-card-ttl').textContent = t('feat2_title');
+    cards[1].querySelector('.w-card-desc').textContent = t('feat2_desc');
+    cards[2].querySelector('.w-card-ttl').textContent = t('feat3_title');
+    cards[2].querySelector('.w-card-desc').textContent = t('feat3_desc');
+    cards[3].querySelector('.w-card-ttl').textContent = t('feat4_title');
+    cards[3].querySelector('.w-card-desc').textContent = t('feat4_desc');
+  }
+
+  // Stats labels
+  const slbls = document.querySelectorAll('.stat-lbl');
+  const statKeys = ['stat_pnl','stat_wr','stat_trades','stat_discipline','stat_protections'];
+  slbls.forEach((el,i) => { if(statKeys[i]) el.textContent = t(statKeys[i]); });
+
+  // Journal
+  const jt = document.getElementById('j-cnt');
+  if(jt && !jt.textContent) document.querySelector('.j-title').firstChild.textContent = t('journal_title');
+  const ths = document.querySelectorAll('.th');
+  const colKeys = ['col_symbol','col_dir','col_time','col_pnl','col_note','col_source','col_plan'];
+  ths.forEach((el,i) => { if(colKeys[i]) el.textContent = t(colKeys[i]); });
+  const sym = document.getElementById('t-sym');
+  if(sym) sym.placeholder = t('placeholder_sym');
+  const pnlInp = document.getElementById('t-pnl');
+  if(pnlInp) pnlInp.placeholder = t('placeholder_pnl');
+  const noteInp = document.getElementById('t-note');
+  if(noteInp) noteInp.placeholder = t('placeholder_note');
+  const tplan = document.getElementById('t-plan');
+  if(tplan){ tplan.options[0].text = t('in_plan'); tplan.options[1].text = t('out_plan'); }
+  const addBtn = document.querySelector('.add-btn');
+  if(addBtn) addBtn.textContent = t('btn_add');
+
+  // Rules
+  const rtitle = document.querySelector('.rcard-title');
+  if(rtitle) rtitle.textContent = t('rules_title');
+  const rlbls = document.querySelectorAll('.rule-lbl');
+  const ruleKeys = ['rule_loss','rule_trades','rule_consec','rule_profit'];
+  rlbls.forEach((el,i) => { if(ruleKeys[i]) el.textContent = t(ruleKeys[i]); });
+  const runits = document.querySelectorAll('.rule-u');
+  if(runits.length >= 4){
+    runits[0].textContent = t('unit_eur');
+    runits[1].textContent = t('unit_trades');
+    runits[2].textContent = t('unit_pertes');
+    runits[3].textContent = t('unit_pct');
+  }
+  const scLbl = document.querySelector('.score-lbl');
+  if(scLbl) scLbl.textContent = t('discipline_lbl');
+  const lkd = document.getElementById('locked');
+  if(lkd) lkd.textContent = t('locked_msg');
+
+  // Behaviour
+  const btitle = document.querySelector('.bcard-title');
+  if(btitle) btitle.textContent = t('behav_title');
+  const bcKeys = ['bc_revenge','bc_over','bc_consec','bc_profit'];
+  const bcLbls = document.querySelectorAll('.bc-lbl');
+  bcLbls.forEach((el,i) => { if(bcKeys[i]) el.textContent = t(bcKeys[i]); });
+
+  // Coach
+  const cname = document.querySelector('.ai-name');
+  if(cname) cname.textContent = t('coach_name');
+  const csub = document.querySelector('.ai-sub');
+  if(csub) csub.innerHTML = '<div class="ai-sub-dot"></div>'+t('coach_status');
+  const qbtns = document.querySelectorAll('.qbtn');
+  const qkeys = ['qbtn1','qbtn2','qbtn3','qbtn4','qbtn5'];
+  qbtns.forEach((el,i) => { if(qkeys[i]) el.textContent = t(qkeys[i]); });
+  const chatIn = document.getElementById('chat-in');
+  if(chatIn) chatIn.placeholder = t('chat_placeholder');
+
+  // Pause overlay
+  const pbadge = document.querySelector('.p-badge');
+  if(pbadge) pbadge.textContent = t('pause_badge');
+  const ptitle = document.querySelector('.p-title');
+  if(ptitle) ptitle.textContent = t('pause_title');
+  const plbl = document.querySelector('.p-lbl');
+  if(plbl) plbl.textContent = t('pause_lbl');
+  const chtitle = document.querySelector('.p-check-lbl');
+  if(chtitle) chtitle.textContent = t('check_title');
+  const clbls = document.querySelectorAll('.clbl');
+  const checkKeys = ['check1','check2','check3','check4'];
+  clbls.forEach((el,i) => { if(checkKeys[i]) el.textContent = t(checkKeys[i]); });
+  const resbtn = document.getElementById('resume-btn');
+  if(resbtn) resbtn.textContent = t('resume_btn');
+
+  // History periods
+  const ppills = document.querySelectorAll('.ppill');
+  if(ppills.length >= 4){
+    ppills[0].textContent = t('period_month');
+    ppills[1].textContent = t('period_7d');
+    ppills[2].textContent = t('period_30d');
+    ppills[3].textContent = t('period_all');
+  }
+  const streakLbl = document.querySelector('.streak-lbl');
+  if(streakLbl) streakLbl.textContent = t('streak_lbl');
+  // Calendar headers
+  const cdhs = document.querySelectorAll('.cdh');
+  const days = t('cal_days');
+  cdhs.forEach((el,i) => { if(days[i]) el.textContent = days[i]; });
+
+  // Challenge
+  const chtitleEl = document.querySelector('.ch-title');
+  if(chtitleEl) chtitleEl.textContent = t('ch_title');
+  const chsub = document.querySelector('.ch-sub');
+  if(chsub) chsub.textContent = t('ch_sub');
+  const chstart = document.getElementById('ch-start-btn');
+  if(chstart) chstart.textContent = t('ch_start');
+  const chreset = document.getElementById('ch-reset-btn');
+  if(chreset) chreset.textContent = t('ch_reset');
+  const chstatLbls = document.querySelectorAll('.ch-stat-lbl');
+  const chstatKeys = ['ch_validated','ch_neutral','ch_jokers','ch_failed'];
+  chstatLbls.forEach((el,i) => { if(chstatKeys[i]) el.textContent = t(chstatKeys[i]); });
+  const chgridtitle = document.querySelector('.ch-grid-title');
+  if(chgridtitle) chgridtitle.textContent = t('ch_grid_title');
+  const chrulestitle = document.querySelector('.ch-rules-title');
+  if(chrulestitle) chrulestitle.textContent = t('ch_rules_title');
+  const chbadgestitle = document.querySelector('.ch-badges-title');
+  if(chbadgestitle) chbadgestitle.textContent = t('ch_badges_title');
+
+  // Settings
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if(I18N[currentLang][key]) el.textContent = I18N[currentLang][key];
+  });
+}
+
+// Init langue au chargement
+applyLang();
+document.getElementById('lang-'+currentLang).classList.add('active');
 let challenge = JSON.parse(localStorage.getItem('dai-challenge')||'null') || {
   active: false,
   startDate: null,
