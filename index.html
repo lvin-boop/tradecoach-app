@@ -539,10 +539,10 @@ select.fi option{background:var(--bg3)}
           <div class="rcard">
             <div class="rcard-title">Règles de protection</div>
             <div class="rules-grid">
-              <div class="rule"><div><div class="rule-lbl">Perte max</div><div class="rule-row"><input type="number" class="rule-inp" id="r-loss" value="200" step="10" onchange="checkRules()"/><span class="rule-u">EUR</span></div></div><label class="tog"><input type="checkbox" id="r-loss-on" checked onchange="checkRules()"><span class="tog-sl"></span></label></div>
-              <div class="rule"><div><div class="rule-lbl">Max trades</div><div class="rule-row"><input type="number" class="rule-inp" id="r-trades" value="5" min="1" onchange="checkRules()"/><span class="rule-u">trades</span></div></div><label class="tog"><input type="checkbox" id="r-trades-on" checked onchange="checkRules()"><span class="tog-sl"></span></label></div>
-              <div class="rule"><div><div class="rule-lbl">Bloquer après</div><div class="rule-row"><input type="number" class="rule-inp" id="r-consec" value="2" min="1" onchange="checkRules()"/><span class="rule-u">pertes</span></div></div><label class="tog"><input type="checkbox" id="r-consec-on" checked onchange="checkRules()"><span class="tog-sl"></span></label></div>
-              <div class="rule"><div><div class="rule-lbl">Profit alert</div><div class="rule-row"><input type="number" class="rule-inp" id="r-profit" value="50" min="10"/><span class="rule-u">%</span></div></div><label class="tog"><input type="checkbox" id="r-profit-on" checked><span class="tog-sl"></span></label></div>
+              <div class="rule"><div><div class="rule-lbl" id="rl-loss">Perte max</div><div class="rule-row"><input type="number" class="rule-inp" id="r-loss" value="200" step="10" onchange="checkRules()"/><span class="rule-u" id="ru-loss">EUR</span></div></div><label class="tog"><input type="checkbox" id="r-loss-on" checked onchange="checkRules()"><span class="tog-sl"></span></label></div>
+              <div class="rule"><div><div class="rule-lbl" id="rl-trades">Max trades</div><div class="rule-row"><input type="number" class="rule-inp" id="r-trades" value="5" min="1" onchange="checkRules()"/><span class="rule-u" id="ru-trades">trades</span></div></div><label class="tog"><input type="checkbox" id="r-trades-on" checked onchange="checkRules()"><span class="tog-sl"></span></label></div>
+              <div class="rule"><div><div class="rule-lbl" id="rl-consec">Bloquer après</div><div class="rule-row"><input type="number" class="rule-inp" id="r-consec" value="2" min="1" onchange="checkRules()"/><span class="rule-u" id="ru-consec">pertes</span></div></div><label class="tog"><input type="checkbox" id="r-consec-on" checked onchange="checkRules()"><span class="tog-sl"></span></label></div>
+              <div class="rule"><div><div class="rule-lbl" id="rl-profit">Profit alert</div><div class="rule-row"><input type="number" class="rule-inp" id="r-profit" value="50" min="10"/><span class="rule-u" id="ru-profit">%</span></div></div><label class="tog"><input type="checkbox" id="r-profit-on" checked><span class="tog-sl"></span></label></div>
             </div>
             <div class="score-row">
               <span class="score-lbl">Discipline</span>
@@ -1606,19 +1606,17 @@ function applyLang(){
   const addBtn = document.querySelector('.add-btn');
   if(addBtn) addBtn.textContent = t('btn_add');
 
-  // Rules
+  // Rules — ciblage par ID
   const rtitle = document.querySelector('.rcard-title');
   if(rtitle) rtitle.textContent = t('rules_title');
-  const rlbls = document.querySelectorAll('.rule-lbl');
-  const ruleKeys = ['rule_loss','rule_trades','rule_consec','rule_profit'];
-  rlbls.forEach((el,i) => { if(ruleKeys[i]) el.textContent = t(ruleKeys[i]); });
-  const runits = document.querySelectorAll('.rule-u');
-  if(runits.length >= 4){
-    runits[0].textContent = t('unit_eur');
-    runits[1].textContent = t('unit_trades');
-    runits[2].textContent = t('unit_pertes');
-    runits[3].textContent = t('unit_pct');
-  }
+  const rloss = document.getElementById('rl-loss'); if(rloss) rloss.textContent = t('rule_loss');
+  const rltrades = document.getElementById('rl-trades'); if(rltrades) rltrades.textContent = t('rule_trades');
+  const rlconsec = document.getElementById('rl-consec'); if(rlconsec) rlconsec.textContent = t('rule_consec');
+  const rlprofit = document.getElementById('rl-profit'); if(rlprofit) rlprofit.textContent = t('rule_profit');
+  const ruloss = document.getElementById('ru-loss'); if(ruloss) ruloss.textContent = t('unit_eur');
+  const rutrades = document.getElementById('ru-trades'); if(rutrades) rutrades.textContent = t('unit_trades');
+  const ruconsec = document.getElementById('ru-consec'); if(ruconsec) ruconsec.textContent = t('unit_pertes');
+  const ruprofit = document.getElementById('ru-profit'); if(ruprofit) ruprofit.textContent = t('unit_pct');
   const scLbl = document.querySelector('.score-lbl');
   if(scLbl) scLbl.textContent = t('discipline_lbl');
   const lkd = document.getElementById('locked');
