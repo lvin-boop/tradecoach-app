@@ -262,8 +262,52 @@ select.fi option{background:var(--bg3)}
 .hist{flex:1;overflow-y:auto;padding:22px;min-height:0}
 .hist::-webkit-scrollbar{width:4px}
 .hist::-webkit-scrollbar-thumb{background:var(--border2)}
-.mnav{display:flex;align-items:center;gap:12px;margin-bottom:18px}
-.mnav-title{font-size:20px;font-weight:700;letter-spacing:-0.5px;flex:1}
+
+/* Period bar */
+.period-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px}
+.period-pills{display:flex;gap:4px}
+.ppill{font-family:var(--mono);font-size:10px;padding:5px 12px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;border-radius:20px;transition:all 0.15s;font-weight:500;letter-spacing:0.04em}
+.ppill:hover{color:var(--text2);border-color:var(--border2)}
+.ppill.active{background:var(--green-dim);border-color:rgba(16,185,129,0.3);color:var(--green)}
+.mnav-inline{display:flex;align-items:center;gap:8px}
+.mnav-title{font-size:14px;font-weight:700;letter-spacing:-0.3px;white-space:nowrap}
+
+/* Top row */
+.hist-top{display:grid;grid-template-columns:1fr 200px;gap:10px;margin-bottom:10px}
+
+/* Performance curve */
+.perf-card{background:var(--bg3);border:1px solid var(--border);padding:14px;border-radius:8px;display:flex;flex-direction:column;gap:10px}
+.perf-hdr{display:flex;justify-content:space-between;align-items:flex-start}
+.perf-val{font-size:22px;font-weight:700;color:var(--green);letter-spacing:-0.5px;margin-top:4px}
+.perf-val.neg{color:var(--red)}
+.perf-pct{font-family:var(--mono);font-size:11px;color:var(--green);margin-top:2px}
+.perf-pct.neg{color:var(--red)}
+.dd-val{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--red);margin-top:4px}
+
+/* Donut */
+.donut-card{background:var(--bg3);border:1px solid var(--border);padding:14px;border-radius:8px;display:flex;flex-direction:column;align-items:center}
+.donut-wrap{position:relative;display:flex;align-items:center;justify-content:center;margin:4px 0}
+.donut-center{position:absolute;text-align:center}
+.donut-pct{font-size:20px;font-weight:700;color:var(--text);letter-spacing:-0.5px}
+.donut-lbl{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.06em}
+.donut-legend{display:flex;gap:14px;margin-top:8px}
+.dl-item{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--text2)}
+.dl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* Drawdown bar */
+.dd-card{background:var(--bg3);border:1px solid var(--border);padding:14px;border-radius:8px;margin-bottom:10px}
+.dd-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
+.dd-cur{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-0.3px}
+.dd-sep{color:var(--text3);margin:0 4px}
+.dd-max-lbl{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.dd-track{height:8px;background:var(--bg5);border-radius:4px;overflow:visible;position:relative;margin-bottom:6px}
+.dd-fill{height:100%;border-radius:4px;transition:width 0.6s,background 0.4s;background:var(--green)}
+.dd-fill.warn{background:var(--amber)}
+.dd-fill.danger{background:var(--red)}
+.dd-zones{position:absolute;inset:0;pointer-events:none}
+.dd-zone-line{position:absolute;top:-2px;bottom:-2px;width:1px;background:var(--border2)}
+.dd-zone-lbl{position:absolute;top:-16px;font-family:var(--mono);font-size:8px;color:var(--text3);transform:translateX(-50%)}
+.dd-sublbl{font-family:var(--mono);font-size:9px;color:var(--text3)}
 .mbtn{font-family:var(--mono);font-size:10px;padding:6px 13px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all 0.15s;border-radius:5px;font-weight:500}
 .mbtn:hover{border-color:var(--green);color:var(--green)}
 .hstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
@@ -468,29 +512,102 @@ select.fi option{background:var(--bg3)}
     <!-- HISTORY -->
     <div class="pg" id="pg-history">
       <div class="hist">
-        <div class="mnav">
-          <button class="mbtn" onclick="changeMonth(-1)">← Précédent</button>
-          <div class="mnav-title" id="mnav-title">Chargement...</div>
-          <button class="mbtn" onclick="changeMonth(1)">Suivant →</button>
+
+        <!-- PÉRIODE SELECTOR -->
+        <div class="period-bar">
+          <div class="period-pills">
+            <button class="ppill active" onclick="setPeriod('month',this)">Ce mois</button>
+            <button class="ppill" onclick="setPeriod('7d',this)">7 jours</button>
+            <button class="ppill" onclick="setPeriod('30d',this)">30 jours</button>
+            <button class="ppill" onclick="setPeriod('all',this)">Tout</button>
+          </div>
+          <div class="mnav-inline">
+            <button class="mbtn" onclick="changeMonth(-1)">←</button>
+            <div class="mnav-title" id="mnav-title">Chargement...</div>
+            <button class="mbtn" onclick="changeMonth(1)">→</button>
+          </div>
         </div>
+
+        <!-- TOP ROW: Courbe + Donut -->
+        <div class="hist-top">
+
+          <!-- COURBE DE PERFORMANCE -->
+          <div class="perf-card">
+            <div class="perf-hdr">
+              <div>
+                <div class="hstat-lbl">Évolution du capital</div>
+                <div class="perf-val" id="perf-total">+0.00€</div>
+                <div class="perf-pct" id="perf-pct">+0.00%</div>
+              </div>
+              <div style="text-align:right">
+                <div class="hstat-lbl">Max drawdown</div>
+                <div class="dd-val" id="dd-val">0.00€</div>
+              </div>
+            </div>
+            <canvas id="perf-canvas" height="100" style="width:100%;display:block"></canvas>
+          </div>
+
+          <!-- DONUT WIN/LOSS -->
+          <div class="donut-card">
+            <div class="hstat-lbl" style="margin-bottom:12px">Win / Loss</div>
+            <div class="donut-wrap">
+              <canvas id="donut-canvas" width="120" height="120"></canvas>
+              <div class="donut-center">
+                <div class="donut-pct" id="donut-pct">—</div>
+                <div class="donut-lbl">win rate</div>
+              </div>
+            </div>
+            <div class="donut-legend">
+              <div class="dl-item"><span class="dl-dot" style="background:var(--green)"></span><span id="dl-wins">0W</span></div>
+              <div class="dl-item"><span class="dl-dot" style="background:var(--red)"></span><span id="dl-losses">0L</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DRAWDOWN BAR -->
+        <div class="dd-card">
+          <div class="dd-hdr">
+            <div class="hstat-lbl">Drawdown journalier</div>
+            <div class="dd-hdr">
+              <span class="dd-cur" id="dd-cur">0.00€</span>
+              <span class="dd-sep">/</span>
+              <span class="dd-max-lbl">Max: <span id="dd-limit">200€</span></span>
+            </div>
+          </div>
+          <div class="dd-track">
+            <div class="dd-fill" id="dd-fill" style="width:0%"></div>
+            <div class="dd-zones">
+              <div class="dd-zone-lbl" style="left:50%">50%</div>
+              <div class="dd-zone-lbl" style="left:75%">75%</div>
+              <div class="dd-zone-line" style="left:50%"></div>
+              <div class="dd-zone-line" style="left:75%"></div>
+            </div>
+          </div>
+          <div class="dd-sublbl" id="dd-sublbl">En dessous de la limite</div>
+        </div>
+
+        <!-- STATS ROW -->
         <div class="hstats">
-          <div class="hstat up"><div class="hstat-lbl">Score moyen</div><div class="hstat-val up" id="h-score">—</div><div class="hstat-sub">discipline du mois</div></div>
+          <div class="hstat up"><div class="hstat-lbl">Score moyen</div><div class="hstat-val up" id="h-score">—</div><div class="hstat-sub">discipline</div></div>
           <div class="hstat info"><div class="hstat-lbl">Jours rentables</div><div class="hstat-val info" id="h-prof">—</div><div class="hstat-sub" id="h-prof-s">sur 0 jours</div></div>
-          <div class="hstat warn"><div class="hstat-lbl">Meilleur streak</div><div class="hstat-val warn" id="h-str">—</div><div class="hstat-sub">jours disciplinés</div></div>
-          <div class="hstat" id="h-pnl-c"><div class="hstat-lbl">P&L total</div><div class="hstat-val" id="h-pnl">—</div><div class="hstat-sub">ce mois</div></div>
+          <div class="hstat warn"><div class="hstat-lbl">Streak</div><div class="hstat-val warn" id="h-str">—</div><div class="hstat-sub">jours disciplinés</div></div>
+          <div class="hstat" id="h-pnl-c"><div class="hstat-lbl">P&L total</div><div class="hstat-val" id="h-pnl">—</div><div class="hstat-sub">période</div></div>
         </div>
+
+        <!-- STREAK -->
         <div class="streak-card">
           <div style="font-size:28px">🔥</div>
           <div><div class="streak-num" id="str-v">0</div><div class="streak-lbl">Jours disciplinés consécutifs</div></div>
           <div class="sdots" id="sdots"></div>
         </div>
-        <div class="sec-lbl">Évolution P&L journalier</div>
-        <div class="chart-box" id="chart"></div>
+
+        <!-- CALENDRIER -->
         <div class="sec-lbl">Calendrier discipline</div>
         <div class="cal" id="cal">
           <div class="cdh">Lun</div><div class="cdh">Mar</div><div class="cdh">Mer</div>
           <div class="cdh">Jeu</div><div class="cdh">Ven</div><div class="cdh">Sam</div><div class="cdh">Dim</div>
         </div>
+
       </div>
     </div>
 
@@ -770,41 +887,173 @@ function checkRules(){
   upd();
 }
 
+let currentPeriod='month';
+function setPeriod(p,btn){
+  currentPeriod=p;
+  document.querySelectorAll('.ppill').forEach(x=>x.classList.remove('active'));
+  btn.classList.add('active');
+  loadHistory();
+}
+function changeMonth(d){curM+=d;if(curM>11){curM=0;curY++;}if(curM<0){curM=11;curY--;}loadHistory();}
+
 async function loadHistory(){
   document.getElementById('mnav-title').textContent=MONTHS[curM]+' '+curY;
   try{
     const r=await fetch(BACKEND+'/monthly/'+SID+'/'+curY+'/'+(curM+1)),data=await r.json();
-    const sv=document.getElementById('h-score');sv.textContent=data.avg_score?data.avg_score+'/100':'—';sv.className='hstat-val '+(data.avg_score>=70?'up':data.avg_score>=40?'warn':'dn');
-    document.getElementById('h-prof').textContent=data.profitable_days||'—';
-    document.getElementById('h-prof-s').textContent='sur '+data.total_days+' jours';
+    const days=data.days||[];
+
+    // Filter by period
+    let filtered=days;
+    const now=new Date();
+    if(currentPeriod==='7d'){const cutoff=new Date(now-7*86400000);filtered=days.filter(d=>new Date(d.date)>=cutoff);}
+    else if(currentPeriod==='30d'){const cutoff=new Date(now-30*86400000);filtered=days.filter(d=>new Date(d.date)>=cutoff);}
+
+    // Compute stats
+    const totalPnl=filtered.reduce((a,d)=>a+(d.pnl||0),0);
+    const wins=filtered.filter(d=>d.pnl>0).length;
+    const losses=filtered.filter(d=>d.pnl<0).length;
+    const wr=filtered.length?Math.round(wins/filtered.length*100):null;
+    const avgScore=filtered.length?Math.round(filtered.reduce((a,d)=>a+(d.discipline_score||0),0)/filtered.length):null;
+    const profDays=wins;
+
+    // Max drawdown
+    let peak=0,maxDD=0,running=0;
+    filtered.forEach(d=>{running+=d.pnl||0;if(running>peak)peak=running;const dd=peak-running;if(dd>maxDD)maxDD=dd;});
+
+    // Capital curve (cumulative)
+    let cum=0;const curve=filtered.map(d=>{cum+=(d.pnl||0);return{date:new Date(d.date).getDate(),val:cum};});
+
+    // Stats cards
+    const sv=document.getElementById('h-score');sv.textContent=avgScore!==null?avgScore+'/100':'—';sv.className='hstat-val '+(avgScore>=70?'up':avgScore>=40?'warn':'dn');
+    document.getElementById('h-prof').textContent=profDays||'—';
+    document.getElementById('h-prof-s').textContent='sur '+filtered.length+' jours';
     document.getElementById('h-str').textContent=data.best_streak||'—';
-    const pnl=data.total_pnl||0,pv=document.getElementById('h-pnl');
-    pv.textContent=(pnl>=0?'+':'')+pnl.toFixed(2);pv.className='hstat-val '+(pnl>0?'up':pnl<0?'dn':'');
-    document.getElementById('h-pnl-c').className='hstat '+(pnl>0?'up':pnl<0?'dn':'');
+    const pv=document.getElementById('h-pnl');pv.textContent=(totalPnl>=0?'+':'')+totalPnl.toFixed(2);pv.className='hstat-val '+(totalPnl>0?'up':totalPnl<0?'dn':'');
+    document.getElementById('h-pnl-c').className='hstat '+(totalPnl>0?'up':totalPnl<0?'dn':'');
+
+    // Perf card
+    const perfV=document.getElementById('perf-total');perfV.textContent=(totalPnl>=0?'+':'')+totalPnl.toFixed(2)+'€';perfV.className='perf-val'+(totalPnl<0?' neg':'');
+    const pctV=document.getElementById('perf-pct');
+    const dep=deposit||1000;const pct=Math.round((totalPnl/dep)*100*10)/10;
+    pctV.textContent=(pct>=0?'+':'')+pct+'%';pctV.className='perf-pct'+(pct<0?' neg':'');
+    document.getElementById('dd-val').textContent='-'+maxDD.toFixed(2)+'€';
+
+    // Draw performance curve
+    drawCurve(curve);
+
+    // Draw donut
+    drawDonut(wins,losses,wr);
+
+    // Drawdown bar
+    const ddLimit=parseFloat(document.getElementById('r-loss')?.value)||200;
+    const todayDD=Math.max(0,-totalPnl);
+    const ddPct=Math.min(100,Math.round((todayDD/ddLimit)*100));
+    document.getElementById('dd-cur').textContent=todayDD.toFixed(2)+'€';
+    document.getElementById('dd-limit').textContent=ddLimit+'€';
+    const fill=document.getElementById('dd-fill');
+    fill.style.width=ddPct+'%';
+    fill.className='dd-fill'+(ddPct>=75?' danger':ddPct>=50?' warn':'');
+    document.getElementById('dd-sublbl').textContent=ddPct>=75?'⚠ Proche de la limite journalière':ddPct>=50?'Attention — Mi-limite atteinte':'En dessous de la limite';
+
+    // Streak
     document.getElementById('str-v').textContent=data.best_streak||0;
     const dots=document.getElementById('sdots');dots.innerHTML='';
     for(let i=0;i<Math.min(data.total_days||0,28);i++){const d=document.createElement('div');d.className='sdot'+(i<(data.best_streak||0)?' on':'');dots.appendChild(d);}
-    const chart=document.getElementById('chart');chart.innerHTML='';
-    if(data.days&&data.days.length){
-      const mx=Math.max(...data.days.map(d=>Math.abs(d.pnl||0)),1);
-      data.days.forEach(d=>{const pl=d.pnl||0,pct=Math.abs(pl)/mx*85,dt=new Date(d.date).getDate();const w=document.createElement('div');w.className='cw';w.innerHTML='<div class="cb '+(pl>=0?'up':'dn')+'" style="height:'+pct+'%;'+(pl<0?'margin-top:auto':'')+'"></div><div class="cb-lbl">'+dt+'</div>';chart.appendChild(w);});
-    }else chart.innerHTML='<div style="width:100%;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text3);align-self:center">Aucune donnée pour ce mois</div>';
-    const cal=document.getElementById('cal'),hdrs=Array.from(cal.querySelectorAll('.cdh'));cal.innerHTML='';hdrs.forEach(h=>cal.appendChild(h.cloneNode(true)));
-    const first=new Date(curY,curM,1).getDay(),off=first===0?6:first-1,dim=new Date(curY,curM+1,0).getDate(),today=new Date();
-    for(let i=0;i<off;i++){const d=document.createElement('div');d.className='cd empty';cal.appendChild(d);}
-    const map={};if(data.days)data.days.forEach(d=>{map[d.date.split('T')[0]]=d;});
-    for(let d=1;d<=dim;d++){
-      const ds=curY+'-'+String(curM+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'),dd=map[ds];
-      const isT=today.getDate()===d&&today.getMonth()===curM&&today.getFullYear()===curY;
-      const div=document.createElement('div');
-      div.className='cd'+(isT?' today':dd?dd.pnl>0?' win':' loss':new Date(ds)<=today?' flat':'');
-      div.innerHTML='<span>'+d+'</span>'+(dd?'<div class="cd-dot"></div>':'');
-      if(dd)div.title='Score: '+dd.discipline_score+'/100 | PnL: '+dd.pnl+'€';
-      cal.appendChild(div);
-    }
+
+    // Calendar
+    renderCal(days);
+
   }catch(e){document.getElementById('mnav-title').textContent=MONTHS[curM]+' '+curY;}
 }
-function changeMonth(d){curM+=d;if(curM>11){curM=0;curY++;}if(curM<0){curM=11;curY--;}loadHistory();}
+
+function drawCurve(curve){
+  const canvas=document.getElementById('perf-canvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.offsetWidth||600,H=100;
+  canvas.width=W;canvas.height=H;
+  ctx.clearRect(0,0,W,H);
+  if(!curve.length){ctx.fillStyle='rgba(255,255,255,0.1)';ctx.font='11px monospace';ctx.fillText('Aucune donnée',W/2-40,H/2);return;}
+  const vals=curve.map(c=>c.val);
+  const min=Math.min(...vals,0),max=Math.max(...vals,0);
+  const range=max-min||1;
+  const toY=v=>H-8-((v-min)/range)*(H-16);
+  const toX=(i)=>8+(i/(curve.length-1||1))*(W-16);
+  // Zero line
+  const zy=toY(0);
+  ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.moveTo(0,zy);ctx.lineTo(W,zy);ctx.stroke();ctx.setLineDash([]);
+  // Gradient fill
+  const isPos=vals[vals.length-1]>=0;
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,isPos?'rgba(16,185,129,0.25)':'rgba(239,68,68,0.25)');
+  grad.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.beginPath();
+  curve.forEach((c,i)=>{const x=toX(i),y=toY(c.val);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.lineTo(toX(curve.length-1),zy);ctx.lineTo(toX(0),zy);ctx.closePath();
+  ctx.fillStyle=grad;ctx.fill();
+  // Line
+  ctx.strokeStyle=isPos?'#10B981':'#EF4444';ctx.lineWidth=2;ctx.lineJoin='round';
+  ctx.beginPath();
+  curve.forEach((c,i)=>{const x=toX(i),y=toY(c.val);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+  ctx.stroke();
+  // Last dot
+  const lx=toX(curve.length-1),ly=toY(vals[vals.length-1]);
+  ctx.beginPath();ctx.arc(lx,ly,4,0,Math.PI*2);
+  ctx.fillStyle=isPos?'#10B981':'#EF4444';ctx.fill();
+}
+
+function drawDonut(wins,losses,wr){
+  const canvas=document.getElementById('donut-canvas');if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const W=120,H=120,cx=60,cy=60,r=46,thick=12;
+  canvas.width=W;canvas.height=H;
+  ctx.clearRect(0,0,W,H);
+  const total=wins+losses;
+  if(!total){
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=thick;ctx.stroke();
+    document.getElementById('donut-pct').textContent='—';
+    document.getElementById('dl-wins').textContent='0W';
+    document.getElementById('dl-losses').textContent='0L';
+    return;
+  }
+  const winAng=(wins/total)*Math.PI*2;
+  const start=-Math.PI/2;
+  // Background
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=thick;ctx.stroke();
+  // Losses
+  if(losses>0){
+    ctx.beginPath();ctx.arc(cx,cy,r,start,start+Math.PI*2);
+    ctx.strokeStyle='#EF4444';ctx.lineWidth=thick;ctx.lineCap='butt';ctx.stroke();
+  }
+  // Wins
+  if(wins>0){
+    ctx.beginPath();ctx.arc(cx,cy,r,start,start+winAng);
+    ctx.strokeStyle='#10B981';ctx.lineWidth=thick;ctx.lineCap='butt';ctx.stroke();
+  }
+  document.getElementById('donut-pct').textContent=wr+'%';
+  document.getElementById('dl-wins').textContent=wins+'W';
+  document.getElementById('dl-losses').textContent=losses+'L';
+}
+
+function renderCal(days){
+  const cal=document.getElementById('cal');
+  const hdrs=Array.from(cal.querySelectorAll('.cdh'));cal.innerHTML='';hdrs.forEach(h=>cal.appendChild(h.cloneNode(true)));
+  const first=new Date(curY,curM,1).getDay(),off=first===0?6:first-1,dim=new Date(curY,curM+1,0).getDate(),today=new Date();
+  for(let i=0;i<off;i++){const d=document.createElement('div');d.className='cd empty';cal.appendChild(d);}
+  const map={};if(days)days.forEach(d=>{map[d.date.split('T')[0]]=d;});
+  for(let d=1;d<=dim;d++){
+    const ds=curY+'-'+String(curM+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'),dd=map[ds];
+    const isT=today.getDate()===d&&today.getMonth()===curM&&today.getFullYear()===curY;
+    const div=document.createElement('div');
+    div.className='cd'+(isT?' today':dd?dd.pnl>0?' win':' loss':new Date(ds)<=today?' flat':'');
+    div.innerHTML='<span>'+d+'</span>'+(dd?'<div class="cd-dot"></div>':'');
+    if(dd)div.title='Score: '+dd.discipline_score+'/100 | PnL: '+dd.pnl+'€';
+    cal.appendChild(div);
+  }
+}
 
 const gt=()=>new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
 function bot(txt,type){
