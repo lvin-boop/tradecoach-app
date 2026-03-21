@@ -369,6 +369,76 @@ select.fi option{background:var(--bg3)}
 .resume{font-family:var(--mono);font-size:10px;font-weight:700;padding:11px 34px;background:transparent;border:1px solid var(--border2);color:var(--text3);cursor:not-allowed;letter-spacing:0.08em;text-transform:uppercase;transition:all 0.2s;border-radius:6px}
 .resume.ready{border-color:var(--green);color:var(--green);cursor:pointer;background:var(--green-dim)}
 .resume.ready:hover{background:var(--green);color:#fff}
+
+/* CHALLENGE 30J */
+.ch-wrap{flex:1;overflow-y:auto;padding:22px;min-height:0}
+.ch-wrap::-webkit-scrollbar{width:4px}
+.ch-wrap::-webkit-scrollbar-thumb{background:var(--border2)}
+.ch-hero{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden}
+.ch-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--green),var(--amber));border-radius:10px 10px 0 0}
+.ch-hero-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+.ch-title{font-size:20px;font-weight:700;letter-spacing:-0.3px;margin-bottom:4px}
+.ch-sub{font-size:12px;color:var(--text3);line-height:1.6;max-width:400px}
+.ch-badge-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
+.ch-badge{font-size:40px;line-height:1}
+.ch-badge-lbl{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase}
+.ch-progress-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.ch-days-lbl{font-family:var(--mono);font-size:11px;color:var(--text2);flex-shrink:0}
+.ch-track{flex:1;height:6px;background:var(--bg5);border-radius:3px;overflow:hidden}
+.ch-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--green),var(--amber));transition:width 0.6s}
+.ch-pct{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--green);min-width:36px;text-align:right}
+.ch-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.ch-stat{background:var(--bg4);border:1px solid var(--border);padding:12px;border-radius:7px;text-align:center}
+.ch-stat-val{font-size:22px;font-weight:700;margin-bottom:3px}
+.ch-stat-val.green{color:var(--green)}
+.ch-stat-val.amber{color:var(--amber)}
+.ch-stat-val.red{color:var(--red)}
+.ch-stat-val.blue{color:var(--blue)}
+.ch-stat-lbl{font-size:9px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3)}
+.ch-actions{display:flex;gap:8px}
+.ch-btn{font-family:var(--mono);font-size:10px;font-weight:700;padding:8px 18px;border-radius:6px;border:none;cursor:pointer;letter-spacing:0.06em;text-transform:uppercase;transition:all 0.15s}
+.ch-btn.start{background:var(--green);color:#fff}
+.ch-btn.start:hover{opacity:0.88}
+.ch-btn.reset{background:transparent;border:1px solid var(--border2);color:var(--text3)}
+.ch-btn.reset:hover{border-color:var(--red);color:var(--red)}
+
+/* GRID 30 JOURS */
+.ch-grid-wrap{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px}
+.ch-grid-title{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);margin-bottom:12px}
+.ch-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
+.ch-day{aspect-ratio:1;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid var(--border);font-family:var(--mono);font-size:9px;font-weight:700;cursor:default;transition:all 0.2s;position:relative}
+.ch-day.future{background:var(--bg4);color:var(--text3);border-color:var(--border)}
+.ch-day.validated{background:var(--green-dim);border-color:rgba(16,185,129,0.3);color:var(--green)}
+.ch-day.neutral{background:var(--bg4);border-color:var(--border2);color:var(--text2)}
+.ch-day.failed{background:var(--red-dim);border-color:rgba(239,68,68,0.2);color:var(--red)}
+.ch-day.joker{background:var(--amber-dim);border-color:rgba(245,158,11,0.3);color:var(--amber)}
+.ch-day.today{border-color:var(--green);box-shadow:0 0 8px rgba(16,185,129,0.2)}
+.ch-day-num{font-size:11px;font-weight:700;line-height:1}
+.ch-day-ico{font-size:10px;line-height:1;margin-top:1px}
+
+/* RÈGLES */
+.ch-rules{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px}
+.ch-rules-title{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);margin-bottom:10px}
+.ch-rule-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.ch-rule-item:last-child{border-bottom:none}
+.ch-rule-ico{font-size:16px;flex-shrink:0}
+.ch-rule-text{font-size:12px;color:var(--text2);flex:1}
+.ch-rule-badge{font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;font-weight:600;flex-shrink:0}
+.ch-rule-badge.req{background:var(--green-dim);color:var(--green);border:1px solid rgba(16,185,129,0.2)}
+.ch-rule-badge.opt{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(59,130,246,0.2)}
+.ch-rule-badge.joker{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,0.2)}
+
+/* BADGES */
+.ch-badges{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px}
+.ch-badges-title{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);margin-bottom:12px}
+.badges-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.badge-card{background:var(--bg4);border:1px solid var(--border);padding:12px;border-radius:8px;text-align:center;transition:all 0.2s}
+.badge-card.unlocked{border-color:var(--amber);background:var(--amber-dim)}
+.badge-ico{font-size:28px;margin-bottom:6px}
+.badge-name{font-size:10px;font-weight:700;color:var(--text2);margin-bottom:3px}
+.badge-cond{font-family:var(--mono);font-size:9px;color:var(--text3)}
+.badge-card.unlocked .badge-name{color:var(--amber)}
+.badge-locked{font-size:16px;opacity:0.2}
 </style>
 </head>
 <body>
@@ -405,6 +475,7 @@ select.fi option{background:var(--bg3)}
   <div class="tabnav">
     <button class="tab active" onclick="showTab('session',this)">Session</button>
     <button class="tab" onclick="showTab('history',this)">Historique</button>
+    <button class="tab" onclick="showTab('challenge',this)">🔥 Challenge 30J</button>
     <button class="tab" onclick="showTab('settings',this)">Réglages</button>
   </div>
 
@@ -606,6 +677,105 @@ select.fi option{background:var(--bg3)}
         <div class="cal" id="cal">
           <div class="cdh">Lun</div><div class="cdh">Mar</div><div class="cdh">Mer</div>
           <div class="cdh">Jeu</div><div class="cdh">Ven</div><div class="cdh">Sam</div><div class="cdh">Dim</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- CHALLENGE 30J -->
+    <div class="pg" id="pg-challenge">
+      <div class="ch-wrap">
+
+        <!-- HERO -->
+        <div class="ch-hero">
+          <div class="ch-hero-top">
+            <div>
+              <div class="ch-title">Challenge 30 Jours 🔥</div>
+              <div class="ch-sub">30 jours de discipline consécutifs. Pas de revenge trading. Pas d'overtrading. Juste ton plan.</div>
+            </div>
+            <div class="ch-badge-wrap">
+              <div class="ch-badge" id="ch-main-badge">🎯</div>
+              <div class="ch-badge-lbl" id="ch-main-lbl">En attente</div>
+            </div>
+          </div>
+          <div class="ch-progress-row">
+            <span class="ch-days-lbl" id="ch-days-lbl">Jour 0 / 30</span>
+            <div class="ch-track"><div class="ch-fill" id="ch-fill" style="width:0%"></div></div>
+            <span class="ch-pct" id="ch-pct">0%</span>
+          </div>
+          <div class="ch-stats-row">
+            <div class="ch-stat"><div class="ch-stat-val green" id="ch-validated">0</div><div class="ch-stat-lbl">Jours validés ✅</div></div>
+            <div class="ch-stat"><div class="ch-stat-val amber" id="ch-neutral">0</div><div class="ch-stat-lbl">Jours neutres ⚪</div></div>
+            <div class="ch-stat"><div class="ch-stat-val amber" id="ch-jokers">1</div><div class="ch-stat-lbl">Jokers ⚡</div></div>
+            <div class="ch-stat"><div class="ch-stat-val red" id="ch-failed">0</div><div class="ch-stat-lbl">Jours ratés ❌</div></div>
+          </div>
+          <div class="ch-actions">
+            <button class="ch-btn start" id="ch-start-btn" onclick="startChallenge()">Démarrer le challenge</button>
+            <button class="ch-btn reset" id="ch-reset-btn" style="display:none" onclick="resetChallenge()">Recommencer</button>
+          </div>
+        </div>
+
+        <!-- GRILLE 30 JOURS -->
+        <div class="ch-grid-wrap">
+          <div class="ch-grid-title">Progression jour par jour</div>
+          <div class="ch-grid" id="ch-grid"></div>
+        </div>
+
+        <!-- RÈGLES -->
+        <div class="ch-rules">
+          <div class="ch-rules-title">Règles du challenge</div>
+          <div class="ch-rule-item">
+            <div class="ch-rule-ico">✅</div>
+            <div class="ch-rule-text">Score de discipline ≥ 70/100 — jour validé</div>
+            <div class="ch-rule-badge req">Requis</div>
+          </div>
+          <div class="ch-rule-item">
+            <div class="ch-rule-ico">⚪</div>
+            <div class="ch-rule-text">Pas de trade aujourd'hui — jour neutre, pas pénalisé</div>
+            <div class="ch-rule-badge opt">Neutre</div>
+          </div>
+          <div class="ch-rule-item">
+            <div class="ch-rule-ico">⚡</div>
+            <div class="ch-rule-text">1 joker par semaine — rattrapage si les 3 jours suivants font 80/100+</div>
+            <div class="ch-rule-badge joker">1x / semaine</div>
+          </div>
+          <div class="ch-rule-item">
+            <div class="ch-rule-ico">❌</div>
+            <div class="ch-rule-text">2 jours ratés consécutifs — pas de rattrapage possible</div>
+            <div class="ch-rule-badge req">Limite</div>
+          </div>
+          <div class="ch-rule-item">
+            <div class="ch-rule-ico">🏆</div>
+            <div class="ch-rule-text">30 jours validés ou neutres — badge "Trader Discipliné" débloqué</div>
+            <div class="ch-rule-badge req">Objectif</div>
+          </div>
+        </div>
+
+        <!-- BADGES -->
+        <div class="ch-badges">
+          <div class="ch-badges-title">Badges de certification</div>
+          <div class="badges-grid">
+            <div class="badge-card" id="badge-30" style="opacity:0.4">
+              <div class="badge-ico">🥉</div>
+              <div class="badge-name">Trader Discipliné</div>
+              <div class="badge-cond">30 jours validés</div>
+            </div>
+            <div class="badge-card" id="badge-90" style="opacity:0.4">
+              <div class="badge-ico">🥈</div>
+              <div class="badge-name">Trader Certifié</div>
+              <div class="badge-cond">3 mois disciplinés</div>
+            </div>
+            <div class="badge-card" id="badge-180" style="opacity:0.4">
+              <div class="badge-ico">🥇</div>
+              <div class="badge-name">Elite Trader</div>
+              <div class="badge-cond">6 mois disciplinés</div>
+            </div>
+            <div class="badge-card" id="badge-365" style="opacity:0.4">
+              <div class="badge-ico">💎</div>
+              <div class="badge-name">Master Discipline</div>
+              <div class="badge-cond">12 mois disciplinés</div>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -1083,6 +1253,184 @@ async function bilan(){
 function sendMsg(){const inp=document.getElementById('chat-in'),txt=inp.value.trim();if(!txt)return;usr(txt);inp.value='';ai(txt);}
 function sq(t){usr(t);ai(t);}
 function hk(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
+
+// ══ CHALLENGE 30 JOURS ══════════════════════════════════════════
+let challenge = JSON.parse(localStorage.getItem('dai-challenge')||'null') || {
+  active: false,
+  startDate: null,
+  days: [], // {date, status: 'validated'|'neutral'|'failed'|'joker'|'future', score}
+  jokersUsed: 0,
+  jokerWeek: null, // ISO week when joker was used
+  totalValidated: 0,
+  totalNeutral: 0,
+  totalFailed: 0
+};
+
+function saveChallenge(){localStorage.setItem('dai-challenge',JSON.stringify(challenge));}
+
+function startChallenge(){
+  if(challenge.active)return;
+  challenge = {
+    active: true,
+    startDate: new Date().toISOString().split('T')[0],
+    days: [],
+    jokersUsed: 0,
+    jokerWeek: null,
+    totalValidated: 0,
+    totalNeutral: 0,
+    totalFailed: 0
+  };
+  // Init 30 jours
+  for(let i=0;i<30;i++){
+    const d = new Date();
+    d.setDate(d.getDate()+i);
+    challenge.days.push({
+      date: d.toISOString().split('T')[0],
+      status: i===0?'today':'future',
+      score: null
+    });
+  }
+  saveChallenge();
+  renderChallenge();
+}
+
+function resetChallenge(){
+  if(!confirm('Recommencer le challenge ? Ta progression sera perdue.'))return;
+  challenge.active=false;
+  challenge.days=[];
+  saveChallenge();
+  renderChallenge();
+}
+
+function getISOWeek(dateStr){
+  const d=new Date(dateStr);
+  const thu=new Date(d);thu.setDate(d.getDate()-(d.getDay()+6)%7+3);
+  return thu.getFullYear()*100+Math.ceil((((thu-new Date(thu.getFullYear(),0,4))/86400000)+1)/7);
+}
+
+function validateDay(dateStr, score, hadTrades){
+  if(!challenge.active)return;
+  const day=challenge.days.find(d=>d.date===dateStr);
+  if(!day||day.status==='future')return;
+  day.score=score;
+  if(!hadTrades){
+    day.status='neutral';
+    challenge.totalNeutral++;
+  } else if(score>=70){
+    day.status='validated';
+    challenge.totalValidated++;
+  } else {
+    // Check joker availability
+    const week=getISOWeek(dateStr);
+    const prevDay=challenge.days[challenge.days.indexOf(day)-1];
+    const twoDaysFailed = prevDay&&prevDay.status==='failed';
+    if(!twoDaysFailed && challenge.jokerWeek!==week){
+      day.status='joker';
+      challenge.jokerWeek=week;
+      challenge.jokersUsed++;
+    } else {
+      day.status='failed';
+      challenge.totalFailed++;
+    }
+  }
+  // Check joker recovery — if last 3 days after a joker all ≥80
+  const jIdx=challenge.days.findIndex(d=>d.status==='joker');
+  if(jIdx>=0){
+    const after=challenge.days.slice(jIdx+1,jIdx+4);
+    if(after.length===3&&after.every(d=>d.score>=80)){
+      challenge.days[jIdx].status='validated';
+      challenge.totalValidated++;
+    }
+  }
+  // Advance today marker
+  const todayStr=new Date().toISOString().split('T')[0];
+  challenge.days.forEach(d=>{
+    if(d.date>todayStr)d.status='future';
+    else if(d.status==='future')d.status='neutral';
+  });
+  saveChallenge();
+  renderChallenge();
+  checkBadges();
+}
+
+function renderChallenge(){
+  const grid=document.getElementById('ch-grid');if(!grid)return;
+  const todayStr=new Date().toISOString().split('T')[0];
+  const validated=challenge.days.filter(d=>d.status==='validated').length;
+  const neutral=challenge.days.filter(d=>d.status==='neutral').length;
+  const failed=challenge.days.filter(d=>d.status==='failed').length;
+  const jokers=challenge.days.filter(d=>d.status==='joker').length;
+  const done=validated+neutral+jokers;
+  const pct=Math.round(done/30*100);
+  const jokersLeft=challenge.active?(challenge.jokerWeek===getISOWeek(todayStr)?0:1):1;
+
+  // Update stats
+  document.getElementById('ch-validated').textContent=validated;
+  document.getElementById('ch-neutral').textContent=neutral;
+  document.getElementById('ch-jokers').textContent=jokersLeft;
+  document.getElementById('ch-failed').textContent=failed;
+  document.getElementById('ch-days-lbl').textContent='Jour '+done+' / 30';
+  document.getElementById('ch-fill').style.width=pct+'%';
+  document.getElementById('ch-pct').textContent=pct+'%';
+
+  // Badge principal
+  const badge=document.getElementById('ch-main-badge');
+  const lbl=document.getElementById('ch-main-lbl');
+  if(!challenge.active){badge.textContent='🎯';lbl.textContent='Pas démarré';}
+  else if(pct===100){badge.textContent='🏆';lbl.textContent='Complété !';}
+  else if(pct>=50){badge.textContent='🔥';lbl.textContent='En feu !';}
+  else{badge.textContent='💪';lbl.textContent='En cours...';}
+
+  // Boutons
+  document.getElementById('ch-start-btn').style.display=challenge.active?'none':'inline-block';
+  document.getElementById('ch-reset-btn').style.display=challenge.active?'inline-block':'none';
+
+  // Grille
+  if(!challenge.active){
+    grid.innerHTML='';
+    for(let i=1;i<=30;i++){
+      const d=document.createElement('div');
+      d.className='ch-day future';
+      d.innerHTML='<div class="ch-day-num">'+i+'</div><div class="ch-day-ico">○</div>';
+      grid.appendChild(d);
+    }
+    return;
+  }
+
+  grid.innerHTML='';
+  challenge.days.forEach((day,i)=>{
+    const d=document.createElement('div');
+    const isToday=day.date===todayStr;
+    const icons={validated:'✅',neutral:'⚪',failed:'❌',joker:'⚡',future:'○',today:'▶'};
+    const status=isToday&&day.status==='future'?'today':day.status;
+    d.className='ch-day '+status+(isToday?' today':'');
+    d.innerHTML='<div class="ch-day-num">'+(i+1)+'</div><div class="ch-day-ico">'+(icons[status]||'○')+'</div>';
+    if(day.score)d.title='Score: '+day.score+'/100';
+    grid.appendChild(d);
+  });
+}
+
+function checkBadges(){
+  const validated=challenge.days.filter(d=>d.status==='validated').length;
+  if(validated>=30){
+    const b=document.getElementById('badge-30');
+    if(b){b.style.opacity='1';b.classList.add('unlocked');}
+  }
+}
+
+// Auto-validate today's session when ended
+const _origEndSession=endSession;
+function endSession(){
+  _origEndSession();
+  if(challenge.active){
+    const todayStr=new Date().toISOString().split('T')[0];
+    const sc=calcScore();
+    validateDay(todayStr,sc||0,trades.length>0);
+  }
+}
+
+// Init challenge on load
+renderChallenge();
 connectWS();
 </script>
 </body>
