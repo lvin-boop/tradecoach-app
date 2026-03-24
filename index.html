@@ -480,6 +480,28 @@ select.fi option{background:var(--bg3)}
 .ch-day-num{font-size:11px;font-weight:700;line-height:1}
 .ch-day-ico{font-size:10px;line-height:1;margin-top:1px}
 
+/* LÉGENDE CHALLENGE */
+.ch-legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.ch-leg-item{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.03em}
+.ch-leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;border:1px solid}
+.ch-leg-dot.validated{background:var(--green-dim);border-color:rgba(16,185,129,0.3)}
+.ch-leg-dot.failed{background:var(--red-dim);border-color:rgba(239,68,68,0.2)}
+.ch-leg-dot.joker{background:var(--amber-dim);border-color:rgba(245,158,11,0.3)}
+.ch-leg-dot.neutral{background:var(--bg4);border-color:var(--border2)}
+.ch-leg-dot.future{background:var(--bg4);border-color:var(--border);opacity:0.4}
+
+/* PANNEAU DÉTAIL JOUR */
+.ch-detail{background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:16px;margin-bottom:16px;animation:fadeUp 0.2s ease}
+.ch-detail-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.ch-detail-date{font-size:13px;font-weight:700;color:var(--text)}
+.ch-detail-close{background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px;transition:all 0.15s}
+.ch-detail-close:hover{background:var(--bg4);color:var(--text)}
+.ch-detail-score{font-family:var(--mono);font-size:28px;font-weight:700;color:var(--green);margin-bottom:12px}
+.ch-detail-rules{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.ch-detail-rule{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--text2)}
+.ch-detail-rule .r-ico{font-size:12px;flex-shrink:0}
+.ch-detail-summary{font-family:var(--mono);font-size:11px;color:var(--text3);line-height:1.8;padding:10px;background:var(--bg4);border-radius:6px;border-left:2px solid var(--green)}
+
 /* RÈGLES */
 .ch-rules{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px}
 .ch-rules-title{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);margin-bottom:10px}
@@ -803,6 +825,28 @@ select.fi option{background:var(--bg3)}
         <div class="ch-grid-wrap">
           <div class="ch-grid-title">Progression jour par jour</div>
           <div class="ch-grid" id="ch-grid"></div>
+
+          <!-- LÉGENDE -->
+          <div class="ch-legend">
+            <div class="ch-leg-item"><span class="ch-leg-dot validated"></span>Jour validé — discipline ok</div>
+            <div class="ch-leg-item"><span class="ch-leg-dot failed"></span>Jour non validé — règles brisées</div>
+            <div class="ch-leg-item"><span class="ch-leg-dot joker"></span>Joker activé — rattrapage en cours</div>
+            <div class="ch-leg-item"><span class="ch-leg-dot neutral"></span>Pas de session ce jour</div>
+            <div class="ch-leg-item"><span class="ch-leg-dot future"></span>Jour à venir</div>
+          </div>
+        </div>
+
+        <!-- PANNEAU DÉTAIL JOUR (au clic) -->
+        <div class="ch-detail" id="ch-detail" style="display:none">
+          <div class="ch-detail-hdr">
+            <div class="ch-detail-date" id="ch-detail-date">—</div>
+            <button class="ch-detail-close" onclick="closeDayDetail()">✕</button>
+          </div>
+          <div class="ch-detail-body">
+            <div class="ch-detail-score" id="ch-detail-score">—</div>
+            <div class="ch-detail-rules" id="ch-detail-rules"></div>
+            <div class="ch-detail-summary" id="ch-detail-summary"></div>
+          </div>
         </div>
 
         <!-- RÈGLES -->
@@ -2125,7 +2169,11 @@ function renderChallenge(){
     const status=isToday&&day.status==='future'?'today':day.status;
     d.className='ch-day '+status+(isToday?' today':'');
     d.innerHTML='<div class="ch-day-num">'+(i+1)+'</div><div class="ch-day-ico">'+(icons[status]||'○')+'</div>';
-    if(day.score)d.title='Score: '+day.score+'/100';
+    // Clic sur un jour non futur pour voir le détail
+    if(status!=='future'){
+      d.style.cursor='pointer';
+      d.onclick=()=>showDayDetail(day,i+1);
+    }
     grid.appendChild(d);
   });
 }
@@ -2136,6 +2184,60 @@ function checkBadges(){
     const b=document.getElementById('badge-30');
     if(b){b.style.opacity='1';b.classList.add('unlocked');}
   }
+}
+
+function showDayDetail(day, num){
+  const detail=document.getElementById('ch-detail');
+  if(!detail)return;
+  // Date lisible
+  const dateObj=new Date(day.date);
+  const opts={weekday:'long',day:'numeric',month:'long'};
+  const dateStr=dateObj.toLocaleDateString('fr-FR',opts);
+  document.getElementById('ch-detail-date').textContent='Jour '+num+' — '+dateStr.charAt(0).toUpperCase()+dateStr.slice(1);
+  // Score
+  const scoreEl=document.getElementById('ch-detail-score');
+  if(day.score){
+    scoreEl.textContent=day.score+'/100';
+    scoreEl.style.color=day.score>=70?'var(--green)':day.score>=40?'var(--amber)':'var(--red)';
+  } else {
+    scoreEl.textContent='Pas de session';
+    scoreEl.style.color='var(--text3)';
+  }
+  // Règles
+  const statusLabels={validated:'✅ Jour validé — discipline respectée',neutral:'⚪ Pas de session ce jour',failed:'❌ Jour non validé — règles importantes brisées',joker:'⚡ Joker activé — rattrapage en cours',today:'▶ Aujourd\'hui',future:'○ Jour à venir'};
+  const rulesEl=document.getElementById('ch-detail-rules');
+  rulesEl.innerHTML='';
+  const rules=[
+    {lbl:'Pertes max respectées',ok:day.score===null||(day.score&&day.score>75)},
+    {lbl:'Overtrading évité',ok:day.score===null||(day.score&&day.score>60)},
+    {lbl:'Score ≥ 70/100',ok:day.score&&day.score>=70},
+  ];
+  if(day.status!=='neutral'&&day.status!=='future'){
+    rules.forEach(r=>{
+      const div=document.createElement('div');
+      div.className='ch-detail-rule';
+      div.innerHTML='<span class="r-ico">'+(r.ok?'✅':'❌')+'</span>'+r.lbl;
+      rulesEl.appendChild(div);
+    });
+  }
+  // Résumé
+  const summaryEl=document.getElementById('ch-detail-summary');
+  const summaries={
+    validated:'Bonne journée. Discipline respectée — continue sur cette lancée.',
+    neutral:'Pas de session ce jour. Jour neutre — aucun impact sur ton challenge.',
+    failed:'Journée difficile. Analyse ce qui s\'est passé et reviens plus fort demain.',
+    joker:'Joker utilisé. Valide les 3 prochains jours à 80/100 pour rattraper.',
+    today:'Session en cours. Reste discipliné jusqu\'à la fin de ta session.',
+    future:'Ce jour n\'est pas encore arrivé.'
+  };
+  summaryEl.textContent=summaries[day.status]||'—';
+  detail.style.display='block';
+  detail.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function closeDayDetail(){
+  const d=document.getElementById('ch-detail');
+  if(d)d.style.display='none';
 }
 
 // Auto-validate today's session when ended
