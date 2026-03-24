@@ -227,15 +227,23 @@ select.fi option{background:var(--bg3)}
 .bcard::after{content:'';position:absolute;left:0;right:0;height:28px;background:linear-gradient(180deg,transparent,rgba(16,185,129,0.03),transparent);animation:scan 5s linear infinite;pointer-events:none}
 .bcard-title{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);margin-bottom:8px}
 .bgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
-.bc{padding:7px 9px;border:1px solid var(--border);border-radius:5px;background:var(--bg4);transition:all 0.2s}
+.bc{padding:7px 9px;border:1px solid var(--border);border-radius:5px;background:var(--bg4);transition:all 0.2s;position:relative;cursor:help}
 .bc.ok{border-color:rgba(16,185,129,0.2);background:var(--green-dim)}
 .bc.warn{border-color:rgba(245,158,11,0.2);background:var(--amber-dim)}
 .bc.err{border-color:rgba(239,68,68,0.2);background:var(--red-dim)}
-.bc-lbl{font-size:8px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);margin-bottom:2px}
+.bc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+.bc-lbl{font-size:8px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2)}
+.bc-dot{width:7px;height:7px;border-radius:50%;background:var(--border2);flex-shrink:0;transition:background 0.2s}
+.bc.ok .bc-dot{background:var(--green);box-shadow:0 0 5px var(--green)}
+.bc.warn .bc-dot{background:var(--amber);box-shadow:0 0 5px var(--amber);animation:pulse 1.5s infinite}
+.bc.err .bc-dot{background:var(--red);box-shadow:0 0 5px var(--red);animation:pulse 0.8s infinite}
 .bc-val{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text);transition:color 0.2s}
 .bc-val.ok{color:var(--green)}
 .bc-val.warn{color:var(--amber)}
 .bc-val.err{color:var(--red)}
+/* TOOLTIP */
+.bc-tip{display:none;position:absolute;bottom:calc(100% + 6px);left:0;right:0;background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:7px 9px;font-size:10px;color:var(--text2);line-height:1.5;z-index:200;pointer-events:none;font-family:var(--mono)}
+.bc:hover .bc-tip{display:block}
 .coach{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0}
 .coach-hdr{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg2)}
 .ai-orb{width:30px;height:30px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(16,185,129,0.3);background:var(--green-dim)}
@@ -370,9 +378,15 @@ select.fi option{background:var(--bg3)}
 /* PAUSE OVERLAY */
 .pause-ov{display:none;position:fixed;inset:0;background:rgba(9,9,11,0.96);z-index:500;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px}
 .pause-ov.on{display:flex}
-.p-badge{font-family:var(--mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--amber);border:1px solid rgba(245,158,11,0.2);padding:3px 12px;border-radius:20px;background:var(--amber-dim)}
-.p-title{font-size:32px;font-weight:700;color:var(--amber);letter-spacing:-0.5px}
-.p-sub{font-size:13px;color:var(--text3);text-align:center;max-width:420px;line-height:1.8}
+.p-badge{font-family:var(--mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--amber);border:1px solid rgba(245,158,11,0.2);padding:4px 14px;border-radius:20px;background:var(--amber-dim)}
+.p-title{font-size:36px;font-weight:700;color:var(--amber);letter-spacing:-0.5px}
+.p-sub{font-size:13px;color:var(--text3);text-align:center;max-width:420px;line-height:1.9}
+/* STATS PENDANT LA PAUSE */
+.p-stats{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);padding:8px 20px;border-radius:8px;font-family:var(--mono)}
+.p-stat{display:flex;flex-direction:column;align-items:center;gap:2px}
+.p-stat-lbl{font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3)}
+.p-stat-val{font-size:14px;font-weight:700;color:var(--text)}
+.p-stat-sep{color:var(--border2);font-size:16px}
 .p-cd{font-family:var(--mono);font-size:64px;font-weight:300;color:var(--amber);letter-spacing:0.05em;line-height:1}
 .p-lbl{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase}
 .p-check{background:var(--bg3);border:1px solid var(--border);padding:16px 20px;max-width:400px;width:100%;border-radius:10px}
@@ -603,10 +617,26 @@ select.fi option{background:var(--bg3)}
           <div class="bcard">
             <div class="bcard-title">Détection comportementale</div>
             <div class="bgrid">
-              <div class="bc" id="bc-rev"><div class="bc-lbl">Revenge</div><div class="bc-val" id="bv-rev">—</div></div>
-              <div class="bc" id="bc-ov"><div class="bc-lbl">Overtrading</div><div class="bc-val" id="bv-ov">—</div></div>
-              <div class="bc" id="bc-con"><div class="bc-lbl">Pertes consec.</div><div class="bc-val" id="bv-con">—</div></div>
-              <div class="bc" id="bc-pro"><div class="bc-lbl">Profit Guard</div><div class="bc-val" id="bv-pro">—</div></div>
+              <div class="bc" id="bc-rev">
+                <div class="bc-tip">Tu trades pour récupérer une perte récente — décision émotionnelle.</div>
+                <div class="bc-hdr"><div class="bc-lbl">Revenge</div><div class="bc-dot"></div></div>
+                <div class="bc-val" id="bv-rev">—</div>
+              </div>
+              <div class="bc" id="bc-ov">
+                <div class="bc-tip">Tu dépasses ton nombre de trades — signe de perte de contrôle.</div>
+                <div class="bc-hdr"><div class="bc-lbl">Overtrading</div><div class="bc-dot"></div></div>
+                <div class="bc-val" id="bv-ov">—</div>
+              </div>
+              <div class="bc" id="bc-con">
+                <div class="bc-tip">Pertes consécutives détectées — risque élevé de revenge trading.</div>
+                <div class="bc-hdr"><div class="bc-lbl">Pertes consec.</div><div class="bc-dot"></div></div>
+                <div class="bc-val" id="bv-con">—</div>
+              </div>
+              <div class="bc" id="bc-pro">
+                <div class="bc-tip">Tu approches de ton objectif de profit — sécurise tes gains maintenant.</div>
+                <div class="bc-hdr"><div class="bc-lbl">Profit Guard</div><div class="bc-dot"></div></div>
+                <div class="bc-val" id="bv-pro">—</div>
+              </div>
             </div>
           </div>
           <div class="coach">
@@ -868,6 +898,42 @@ select.fi option{background:var(--bg3)}
         </div>
 
         <div style="font-family:var(--mono);font-size:10px;color:var(--text3);line-height:2.2" data-i18n="coming_soon">Prochainement : Prop Firm Mode · Push notifications · Export CSV</div>
+
+        <!-- PROFILS PRESETS -->
+        <div style="margin-top:20px">
+          <div style="font-size:20px;font-weight:700;margin-bottom:4px">Profils de protection</div>
+          <div style="font-size:13px;color:var(--text3);margin-bottom:16px">Choisis un profil qui correspond à ta situation — il configure automatiquement tes règles.</div>
+          <div style="display:flex;flex-direction:column;gap:10px;max-width:460px">
+
+            <!-- PROFIL 1 -->
+            <div style="background:var(--bg3);border:1px solid var(--border);padding:16px;border-radius:8px;cursor:pointer;transition:all 0.2s" onclick="applyPreset('impulsif')" onmouseenter="this.style.borderColor='var(--red)'" onmouseleave="this.style.borderColor='var(--border)'">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+                <div style="font-size:13px;font-weight:700">🔴 Trader Impulsif</div>
+                <div style="font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;background:rgba(239,68,68,0.1);color:var(--red);border:1px solid rgba(239,68,68,0.2)">Appliquer</div>
+              </div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text3);line-height:1.8">Tu trades trop vite après une perte. Ce profil te force à ralentir.<br>Perte max : 100€ · Max 3 trades · Pause après 2 pertes</div>
+            </div>
+
+            <!-- PROFIL 2 -->
+            <div style="background:var(--bg3);border:1px solid var(--border);padding:16px;border-radius:8px;cursor:pointer;transition:all 0.2s" onclick="applyPreset('apres-gain')" onmouseenter="this.style.borderColor='var(--amber)'" onmouseleave="this.style.borderColor='var(--border)'">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+                <div style="font-size:13px;font-weight:700">🟡 Après Objectif Atteint</div>
+                <div style="font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;background:rgba(245,158,11,0.1);color:var(--amber);border:1px solid rgba(245,158,11,0.2)">Appliquer</div>
+              </div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text3);line-height:1.8">Tu as tendance à tout redonner après un bon trade. Ce profil verrouille ton gain.<br>Profit alert : 30% · Max 2 trades après gain · Protection stricte</div>
+            </div>
+
+            <!-- PROFIL 3 -->
+            <div style="background:var(--bg3);border:1px solid var(--border);padding:16px;border-radius:8px;cursor:pointer;transition:all 0.2s" onclick="applyPreset('prop')" onmouseenter="this.style.borderColor='var(--blue)'" onmouseleave="this.style.borderColor='var(--border)'">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+                <div style="font-size:13px;font-weight:700">🔵 Mode Prop Trader</div>
+                <div style="font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;background:rgba(59,130,246,0.1);color:var(--blue);border:1px solid rgba(59,130,246,0.2)">Appliquer</div>
+              </div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--text3);line-height:1.8">Tu passes un challenge prop firm. Zéro marge d'erreur.<br>Perte max : 200€ · Max 4 trades · Règles FTMO/Topstep · Blocage auto</div>
+            </div>
+
+          </div>
+        </div>
       </div>
     </div>
 
@@ -876,17 +942,28 @@ select.fi option{background:var(--bg3)}
 
 <!-- PAUSE -->
 <div class="pause-ov" id="pause-ov">
-  <div class="p-badge">Pause Trading</div>
-  <div class="p-title">Respire.</div>
-  <div class="p-sub" id="p-reason">Ce moment est conçu pour te protéger. Utilise-le.</div>
+  <div class="p-badge">⏸ Mode Protection Activé</div>
+  <div class="p-title">Pause.</div>
+  <div class="p-sub" id="p-reason">Ton objectif n'est pas de récupérer tes pertes.<br>C'est de ne pas tilter.</div>
+
+  <!-- STATS DU JOUR PENDANT LA PAUSE -->
+  <div class="p-stats" id="p-stats">
+    <div class="p-stat"><span class="p-stat-lbl">Trades</span><span class="p-stat-val" id="ps-trades">0</span></div>
+    <div class="p-stat-sep">·</div>
+    <div class="p-stat"><span class="p-stat-lbl">P&L</span><span class="p-stat-val" id="ps-pnl">0€</span></div>
+    <div class="p-stat-sep">·</div>
+    <div class="p-stat"><span class="p-stat-lbl">Score</span><span class="p-stat-val" id="ps-score">—</span></div>
+  </div>
+
   <div class="p-cd" id="p-cd">10:00</div>
   <div class="p-lbl">temps restant</div>
+
   <div class="p-check">
-    <div class="p-check-lbl">Check mental avant de reprendre</div>
-    <div class="ci" onclick="tglCheck(this)"><div class="cbox"></div><div class="clbl">Je ne suis pas en colère ou frustré</div></div>
-    <div class="ci" onclick="tglCheck(this)"><div class="cbox"></div><div class="clbl">Mon prochain trade respecte mon plan</div></div>
-    <div class="ci" onclick="tglCheck(this)"><div class="cbox"></div><div class="clbl">Je ne cherche pas à rattraper des pertes</div></div>
-    <div class="ci" onclick="tglCheck(this)"><div class="cbox"></div><div class="clbl">Je suis dans un bon état d'esprit</div></div>
+    <div class="p-check-lbl">Confirme avant de reprendre</div>
+    <div class="ci" onclick="tglCheck(this)"><div class="cbox"></div><div class="clbl">Je ne suis plus en colère ni frustré</div></div>
+    <div class="ci" onclick="tglCheck(this)"><div class="cbox"></div><div class="clbl">Je ne cherche pas à me refaire — je respecte mon plan</div></div>
+    <div class="ci" onclick="tglCheck(this)"><div class="cbox"></div><div class="clbl">Je vois un setup clair que je peux décrire précisément</div></div>
+    <div class="ci" onclick="tglCheck(this)"><div class="cbox"></div><div class="clbl">J'accepte pleinement le risque de mon prochain trade</div></div>
   </div>
   <button class="resume" id="resume-btn" onclick="resumeTrading()">Reprendre le trading</button>
 </div>
@@ -894,11 +971,11 @@ select.fi option{background:var(--bg3)}
 <!-- RESPONSABILISATION -->
 <div class="resp-ov" id="resp-ov">
   <div class="resp-badge">⚠️ Signal de risque actif</div>
-  <div class="resp-title">Tu chooses de continuer malgré un signal de risque.</div>
-  <div class="resp-sub">Cette décision sera enregistrée dans ton journal avec le résultat de ton prochain trade.</div>
+  <div class="resp-title">Tu choisis de continuer malgré un signal de risque.</div>
+  <div class="resp-sub" id="resp-context">Cette décision sera enregistrée dans ton journal avec le résultat de ton prochain trade.</div>
   <div class="resp-box">
     <div class="resp-lbl">Pourquoi veux-tu continuer ? <span style="color:var(--red)">*</span></div>
-    <textarea class="resp-textarea" id="resp-text" placeholder="Décris ta raison précisément — setup, contexte, niveau de prix..." oninput="chkResp()"></textarea>
+    <textarea class="resp-textarea" id="resp-text" placeholder="Décris précisément : ton setup, le contexte de marché, ton niveau d'entrée, et ce que tu ressens en ce moment. (20 caractères minimum)" oninput="chkResp()"></textarea>
     <div class="resp-count" id="resp-count">0 / 20 caractères minimum</div>
     <div class="resp-lbl" style="margin-top:4px">Capture d'écran du setup <span style="color:var(--text3)">(optionnel)</span></div>
     <label class="resp-upload" onclick="document.getElementById('resp-file').click()">
@@ -1097,7 +1174,17 @@ function triggerPause(min,reason){
   document.getElementById('sess-led').className='sess-led pause';
   document.getElementById('sess-lbl').textContent='PAUSE';
   document.getElementById('sess-lbl').className='sess-lbl pause';
-  document.getElementById('p-reason').textContent=reason;
+  document.getElementById('p-reason').innerHTML=reason||'Ton objectif n\'est pas de récupérer tes pertes.<br>C\'est de ne pas tilter.';
+  // Stats du jour pendant la pause
+  const tp=trades.reduce((a,t)=>a+t.pnl,0);
+  const sc=calcScore();
+  document.getElementById('ps-trades').textContent=trades.length+' trade'+(trades.length>1?'s':'');
+  const pnlEl=document.getElementById('ps-pnl');
+  pnlEl.textContent=(tp>=0?'+':'')+tp.toFixed(2)+'€';
+  pnlEl.style.color=tp>=0?'var(--green)':'var(--red)';
+  const scEl=document.getElementById('ps-score');
+  scEl.textContent=sc!==null?sc+'/100':'—';
+  scEl.style.color=sc>=70?'var(--green)':sc>=40?'var(--amber)':'var(--red)';
   document.getElementById('pause-ov').className='pause-ov on';
   document.querySelectorAll('.ci').forEach(c=>{c.classList.remove('done');c.querySelector('.cbox').classList.remove('checked');});
   document.getElementById('resume-btn').className='resume';
@@ -1108,7 +1195,19 @@ function tglCheck(el){el.classList.toggle('done');el.querySelector('.cbox').clas
 function chkResume(){const a=document.querySelectorAll('.ci').length,d=document.querySelectorAll('.ci.done').length;document.getElementById('resume-btn').className=(pSec<=0&&d===a)?'resume ready':'resume';}
 function resumeTrading(){
   if(!document.getElementById('resume-btn').classList.contains('ready'))return;
-  // Affiche responsabilisation au lieu de reprendre directement
+  // Phrase dynamique avec les vraies stats
+  const cl=maxC();
+  const tp=trades.reduce((a,t)=>a+t.pnl,0);
+  let ctx='Cette décision sera enregistrée dans ton journal avec le résultat de ton prochain trade.';
+  if(cl>=2||trades.length>=3){
+    const parts=[];
+    if(cl>=2)parts.push(cl+' perte'+(cl>1?'s':'')+' consécutive'+(cl>1?'s':''));
+    if(trades.length>0)parts.push(trades.length+' trade'+(trades.length>1?'s':'')+' aujourd\'hui');
+    if(tp<0)parts.push('P&L : '+tp.toFixed(2)+'€');
+    ctx='Tu as déjà '+parts.join(', ')+'. Cette décision sera enregistrée dans ton journal.';
+  }
+  document.getElementById('resp-context').textContent=ctx;
+  // Affiche responsabilisation
   document.getElementById('pause-ov').className='pause-ov';
   document.getElementById('resp-ov').className='resp-ov on';
   document.getElementById('resp-text').value='';
@@ -1437,7 +1536,28 @@ function toggleCoach(){
   if(arrow) arrow.setAttribute('points', isOpen ? '15 18 9 12 15 6' : '9 18 15 12 9 6');
 }
 
-// ══ I18N — MULTILINGUE FR/EN/ES ════════════════════════════════
+// ══ PROFILS PRESETS ═══════════════════════════════════
+function applyPreset(type){
+  const presets={
+    'impulsif':{loss:100,lossOn:true,trades:3,tradesOn:true,consec:2,consecOn:true,profit:50,profitOn:false},
+    'apres-gain':{loss:200,lossOn:true,trades:4,tradesOn:true,consec:2,consecOn:true,profit:30,profitOn:true},
+    'prop':{loss:200,lossOn:true,trades:4,tradesOn:true,consec:2,consecOn:true,profit:50,profitOn:false}
+  };
+  const names={'impulsif':'🔴 Trader Impulsif','apres-gain':'🟡 Après Objectif Atteint','prop':'🔵 Mode Prop Trader'};
+  const p=presets[type];if(!p)return;
+  document.getElementById('r-loss').value=p.loss;
+  document.getElementById('r-loss-on').checked=p.lossOn;
+  document.getElementById('r-trades').value=p.trades;
+  document.getElementById('r-trades-on').checked=p.tradesOn;
+  document.getElementById('r-consec').value=p.consec;
+  document.getElementById('r-consec-on').checked=p.consecOn;
+  document.getElementById('r-profit').value=p.profit;
+  document.getElementById('r-profit-on').checked=p.profitOn;
+  checkRules();
+  bot('Profil '+names[type]+' appliqué. Tes règles ont été mises à jour automatiquement.','sys');
+  // Revenir à l'onglet session
+  showTab('session',document.querySelectorAll('.tab')[0]);
+}
 const I18N = {
   fr: {
     // Navigation
