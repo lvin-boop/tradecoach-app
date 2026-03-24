@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>DisciplineAI</title>
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#10B981">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DisciplineAI">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<!-- SEO -->
+<meta name="description" content="Le coach IA qui détecte ton revenge trading et protège ton capital. Connecté à MT5.">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -1125,6 +1135,12 @@ function endSession(){
   document.getElementById('go-btn').textContent='Nouvelle session';
   document.getElementById('end-btn').style.display='none';
   document.getElementById('brk-btn').style.display='none';
+  // Valider le jour du challenge si actif
+  if(challenge.active){
+    const todayStr=new Date().toISOString().split('T')[0];
+    const sc=calcScore();
+    validateDay(todayStr,sc||0,trades.length>0);
+  }
   saveSession();bilan();
 }
 
@@ -2241,19 +2257,18 @@ function closeDayDetail(){
 }
 
 // Auto-validate today's session when ended
-const _origEndSession=endSession;
-function endSession(){
-  _origEndSession();
-  if(challenge.active){
-    const todayStr=new Date().toISOString().split('T')[0];
-    const sc=calcScore();
-    validateDay(todayStr,sc||0,trades.length>0);
-  }
-}
-
 // Init challenge on load
 renderChallenge();
 connectWS();
+
+// ══ PWA — Service Worker ═══════════════════════════════
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('/sw.js')
+      .then(()=>console.log('[PWA] Service Worker enregistré'))
+      .catch(e=>console.log('[PWA] Erreur SW:', e));
+  });
+}
 </script>
 </body>
 </html>
