@@ -543,7 +543,7 @@ select.fi option{background:var(--bg3)}
   <!-- HEADER -->
   <div class="hdr">
     <div class="brand">
-      <div class="brand-orb"><div class="brand-dot"></div></div>
+      <img src="logo-cercle.png" alt="DisciplineAI" style="height:36px;width:36px;object-fit:contain;flex-shrink:0">
       <div class="brand-name">Discipline<span>AI</span><span class="brand-pill">BETA</span></div>
     </div>
     <div class="hdr-mid">
@@ -935,6 +935,13 @@ select.fi option{background:var(--bg3)}
           </div>
         </div>
 
+        <!-- NOTIFICATIONS -->
+        <div style="background:var(--bg3);border:1px solid var(--border);padding:18px;max-width:460px;border-radius:8px;margin-bottom:12px">
+          <div style="font-family:var(--mono);font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:12px">Notifications push</div>
+          <button id="notif-btn" onclick="initNotifications()" style="font-family:var(--mono);font-size:11px;font-weight:600;padding:8px 16px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;border-radius:6px;transition:all 0.2s">🔕 Activer les notifications</button>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:8px;line-height:1.8">Reçois des alertes même quand l'app est fermée — revenge trading, perte max, pause obligatoire.</div>
+        </div>
+
         <!-- SESSION ID -->
         <div style="background:var(--bg3);border:1px solid var(--border);padding:18px;max-width:460px;border-radius:8px;margin-bottom:12px">
           <div style="font-family:var(--mono);font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:8px" data-i18n="session_id_label">ID de session MT5</div>
@@ -1119,6 +1126,7 @@ function startSession(){
     document.getElementById('timer').className='timer on';
   },1000);
   renderMkts();setInterval(renderMkts,30000);
+  initNotifications(); // Demande permission notifications au démarrage
   bot('Session démarrée'+(deposit?' avec '+deposit+'€':'')+'. Je surveille ton comportement. Quel est ton plan de trading ?');
   connectWS();
 }
@@ -1197,20 +1205,24 @@ function analyse(trade,isClosed){
     const prev=trades[trades.length-2];
     if(prev&&prev.pnl<0&&prev.status==='closed'){
       const diff=(new Date(trade.timestamp)-new Date(prev.timestamp))/60000;
-      if(diff<3){trade.behaviour='revenge';al('err','REVENGE détecté — '+Math.round(diff)+'min après ta dernière perte.');bc('bc-rev','bv-rev','DÉTECTÉ','err');}
+      if(diff<3){trade.behaviour='revenge';al('err','REVENGE détecté — '+Math.round(diff)+'min après ta dernière perte.');bc('bc-rev','bv-rev','DÉTECTÉ','err');notifyRevenge(trade.symbol);}
     }
   }
-  if(trades.length>mt){al('warn','OVERTRADING — '+trades.length+'/'+mt+' trades.');bc('bc-ov','bv-ov',trades.length+'/'+mt,'warn');}
+  if(trades.length>mt){al('warn','OVERTRADING — '+trades.length+'/'+mt+' trades.');bc('bc-ov','bv-ov',trades.length+'/'+mt,'warn');notifyOvertrading(trades.length,mt);}
   else bc('bc-ov','bv-ov',trades.length+'/'+mt,trades.length>=mt-1?'warn':'ok');
   bc('bc-con','bv-con',cl>0?cl+' pertes':'OK',cl>=2?'err':cl===1?'warn':'ok');
-  if(cl>=2&&!paused){al('err',cl+' PERTES CONSÉCUTIVES — Pause obligatoire.');triggerPause(10,cl+' pertes consécutives détectées.');}
+  if(cl>=2&&!paused){al('err',cl+' PERTES CONSÉCUTIVES — Pause obligatoire.');triggerPause(10,cl+' pertes consécutives détectées.');notifyPause(cl+' pertes consécutives');}
   if(deposit>0&&isClosed&&!profAl){
     const pct=Math.round((tp/deposit)*100);
     if(pct>=(parseInt(document.getElementById('r-profit').value)||50)&&document.getElementById('r-profit-on').checked){
       profAl=true;al('ok','PROFIT GUARD — +'+pct+'% soit '+tp.toFixed(2)+'€. Sécurise !');bc('bc-pro','bv-pro','+'+pct+'%','ok');
+      notify('💰 Profit Guard', '+'+pct+'% atteint — '+tp.toFixed(2)+'€. Sécurise tes gains maintenant !', 'profit');
     }
   }
   if(deposit>0){const pct=Math.round((tp/deposit)*100);bc('bc-pro','bv-pro',(tp>=0?'+':'')+pct+'%',tp>0?'ok':'err');}
+  // Alerte perte max
+  const ml=parseFloat(document.getElementById('r-loss').value)||200;
+  if(document.getElementById('r-loss-on').checked&&tp<=-ml){notifyMaxLoss(tp.toFixed(2));}
   const h=new Date().getHours();if(h>=22||h<5)al('warn','TRADING NOCTURNE — Il est '+h+'h.');
 }
 
@@ -1579,6 +1591,7 @@ async function ai(txt,short){
 async function bilan(){
   const tp=trades.reduce((a,t)=>a+t.pnl,0),sc=calcScore();
   bot('Bilan — Score: '+sc+'/100 | PnL: '+(tp>=0?'+':'')+tp.toFixed(2)+'€ | '+trades.length+' trades','sys');
+  if(sc!==null) notifyScore(sc); // Notification bilan
   await ai('Bilan psychologique. Points forts, axes d\'amélioration, conseil clé pour demain.',false);
 }
 function sendMsg(){const inp=document.getElementById('chat-in'),txt=inp.value.trim();if(!txt)return;usr(txt);inp.value='';ai(txt);}
@@ -1703,12 +1716,51 @@ const I18N = {
     session_id_label: 'ID de session MT5',
     session_id_hint: 'Utilise cet ID dans ton Expert Advisor MT5.',
     theme_label: 'Thème',
-    coming_soon: 'Prochainement : Prop Firm Mode · Push notifications · Export CSV',
+    coming_soon: 'Prochainement : Prop Firm Mode · Export CSV',
     // Coach messages
     coach_welcome: 'Session démarrée. Je surveille ton comportement. Quel est ton plan de trading ?',
     pause_ended: 'Pause terminée. Tu es prêt à reprendre avec discipline.',
     session_locked: 'atteinte. Session verrouillée.',
     bilan_prefix: 'Bilan — Score: ',
+    // Pause Shield
+    pause_mode: '⏸ Mode Protection Activé',
+    pause_title: 'Pause.',
+    pause_sub: 'Ton objectif n\'est pas de récupérer tes pertes.<br>C\'est de ne pas tilter.',
+    pause_check_lbl: 'Confirme avant de reprendre',
+    check1: 'Je ne suis plus en colère ni frustré',
+    check2: 'Je ne cherche pas à me refaire — je respecte mon plan',
+    check3: 'Je vois un setup clair que je peux décrire précisément',
+    check4: 'J\'accepte pleinement le risque de mon prochain trade',
+    // Responsabilisation
+    resp_badge: '⚠️ Signal de risque actif',
+    resp_title: 'Tu choisis de continuer malgré un signal de risque.',
+    resp_why: 'Pourquoi veux-tu continuer ?',
+    resp_placeholder: 'Décris précisément : ton setup, le contexte de marché, ton niveau d\'entrée, et ce que tu ressens en ce moment. (20 caractères minimum)',
+    resp_file_lbl: 'Capture d\'écran du setup',
+    resp_file_opt: '(optionnel)',
+    resp_btn: 'Je prends la responsabilité de continuer',
+    resp_back: '← Retourner à la pause',
+    // Profils
+    preset_title: 'Profils de protection',
+    preset_sub: 'Choisis un profil qui correspond à ta situation.',
+    preset_apply: 'Appliquer',
+    preset1_name: '🔴 Trader Impulsif',
+    preset1_desc: 'Tu trades trop vite après une perte. Ce profil te force à ralentir.',
+    preset2_name: '🟡 Après Objectif Atteint',
+    preset2_desc: 'Tu as tendance à tout redonner après un bon trade. Ce profil verrouille ton gain.',
+    preset3_name: '🔵 Mode Prop Trader',
+    preset3_desc: 'Tu passes un challenge prop firm. Zéro marge d\'erreur.',
+    // Challenge légende
+    ch_leg_validated: 'Jour validé — discipline ok',
+    ch_leg_failed: 'Jour non validé — règles brisées',
+    ch_leg_joker: 'Joker activé — rattrapage en cours',
+    ch_leg_neutral: 'Pas de session ce jour',
+    ch_leg_future: 'Jour à venir',
+    // Notifications
+    notif_lbl: 'Notifications push',
+    notif_on: '🔔 Notifications activées',
+    notif_off: '🔕 Activer les notifications',
+    notif_desc: 'Reçois des alertes même quand l\'app est fermée.',
   },
   en: {
     tab_session: 'Session', tab_history: 'History', tab_challenge: '🔥 30D Challenge', tab_settings: 'Settings',
@@ -1778,11 +1830,45 @@ const I18N = {
     session_id_label: 'MT5 Session ID',
     session_id_hint: 'Use this ID in your MT5 Expert Advisor.',
     theme_label: 'Theme',
-    coming_soon: 'Coming soon: Prop Firm Mode · Push notifications · CSV Export',
+    coming_soon: 'Coming soon: Prop Firm Mode · CSV Export',
     coach_welcome: 'Session started. I am monitoring your behaviour. What is your trading plan?',
     pause_ended: 'Break over. You are ready to resume with discipline.',
     session_locked: 'reached. Session locked.',
     bilan_prefix: 'Summary — Score: ',
+    pause_mode: '⏸ Protection Mode Activated',
+    pause_title: 'Pause.',
+    pause_sub: 'Your goal is not to recover your losses.<br>It\'s to not tilt.',
+    pause_check_lbl: 'Confirm before resuming',
+    check1: 'I am no longer angry or frustrated',
+    check2: 'I am not trying to recover losses — I follow my plan',
+    check3: 'I see a clear setup I can describe precisely',
+    check4: 'I fully accept the risk of my next trade',
+    resp_badge: '⚠️ Active risk signal',
+    resp_title: 'You choose to continue despite a risk signal.',
+    resp_why: 'Why do you want to continue?',
+    resp_placeholder: 'Describe precisely: your setup, market context, entry level, and what you feel right now. (20 characters minimum)',
+    resp_file_lbl: 'Setup screenshot',
+    resp_file_opt: '(optional)',
+    resp_btn: 'I take responsibility for continuing',
+    resp_back: '← Return to pause',
+    preset_title: 'Protection profiles',
+    preset_sub: 'Choose a profile that matches your situation.',
+    preset_apply: 'Apply',
+    preset1_name: '🔴 Impulsive Trader',
+    preset1_desc: 'You trade too fast after a loss. This profile forces you to slow down.',
+    preset2_name: '🟡 After Target Reached',
+    preset2_desc: 'You tend to give back profits after a big win. This profile locks your gain.',
+    preset3_name: '🔵 Prop Trader Mode',
+    preset3_desc: 'You are on a prop firm challenge. Zero margin for error.',
+    ch_leg_validated: 'Validated day — discipline ok',
+    ch_leg_failed: 'Failed day — important rules broken',
+    ch_leg_joker: 'Joker active — recovery in progress',
+    ch_leg_neutral: 'No session this day',
+    ch_leg_future: 'Upcoming day',
+    notif_lbl: 'Push notifications',
+    notif_on: '🔔 Notifications enabled',
+    notif_off: '🔕 Enable notifications',
+    notif_desc: 'Get alerts even when the app is closed.',
   },
   es: {
     tab_session: 'Sesión', tab_history: 'Historial', tab_challenge: '🔥 Desafío 30D', tab_settings: 'Ajustes',
@@ -1852,11 +1938,45 @@ const I18N = {
     session_id_label: 'ID de sesión MT5',
     session_id_hint: 'Usa este ID en tu Expert Advisor de MT5.',
     theme_label: 'Tema',
-    coming_soon: 'Próximamente: Modo Prop Firm · Notificaciones · Exportar CSV',
+    coming_soon: 'Próximamente: Modo Prop Firm · Exportar CSV',
     coach_welcome: 'Sesión iniciada. Estoy monitoreando tu comportamiento. ¿Cuál es tu plan de trading?',
     pause_ended: 'Pausa terminada. Estás listo para reanudar con disciplina.',
     session_locked: 'alcanzada. Sesión bloqueada.',
     bilan_prefix: 'Resumen — Puntuación: ',
+    pause_mode: '⏸ Modo Protección Activado',
+    pause_title: 'Pausa.',
+    pause_sub: 'Tu objetivo no es recuperar tus pérdidas.<br>Es no perder el control.',
+    pause_check_lbl: 'Confirma antes de reanudar',
+    check1: 'Ya no estoy enfadado ni frustrado',
+    check2: 'No intento recuperar pérdidas — respeto mi plan',
+    check3: 'Veo un setup claro que puedo describir con precisión',
+    check4: 'Acepto completamente el riesgo de mi próxima operación',
+    resp_badge: '⚠️ Señal de riesgo activa',
+    resp_title: 'Eliges continuar a pesar de una señal de riesgo.',
+    resp_why: '¿Por qué quieres continuar?',
+    resp_placeholder: 'Describe con precisión: tu setup, contexto de mercado, nivel de entrada y lo que sientes ahora mismo. (20 caracteres mínimo)',
+    resp_file_lbl: 'Captura de pantalla del setup',
+    resp_file_opt: '(opcional)',
+    resp_btn: 'Asumo la responsabilidad de continuar',
+    resp_back: '← Volver a la pausa',
+    preset_title: 'Perfiles de protección',
+    preset_sub: 'Elige un perfil que se adapte a tu situación.',
+    preset_apply: 'Aplicar',
+    preset1_name: '🔴 Trader Impulsivo',
+    preset1_desc: 'Operas demasiado rápido tras una pérdida. Este perfil te obliga a ralentizar.',
+    preset2_name: '🟡 Tras Objetivo Alcanzado',
+    preset2_desc: 'Tiendes a devolver ganancias tras un buen trade. Este perfil bloquea tu beneficio.',
+    preset3_name: '🔵 Modo Prop Trader',
+    preset3_desc: 'Estás en un desafío prop firm. Cero margen de error.',
+    ch_leg_validated: 'Día validado — disciplina ok',
+    ch_leg_failed: 'Día no validado — reglas rotas',
+    ch_leg_joker: 'Comodín activo — recuperación en curso',
+    ch_leg_neutral: 'Sin sesión este día',
+    ch_leg_future: 'Día futuro',
+    notif_lbl: 'Notificaciones push',
+    notif_on: '🔔 Notificaciones activadas',
+    notif_off: '🔕 Activar notificaciones',
+    notif_desc: 'Recibe alertas aunque la app esté cerrada.',
   }
 };
 
@@ -1978,18 +2098,43 @@ function applyLang(){
 
   // Pause overlay
   const pbadge = document.querySelector('.p-badge');
-  if(pbadge) pbadge.textContent = t('pause_badge');
+  if(pbadge) pbadge.textContent = t('pause_mode')||t('pause_badge');
   const ptitle = document.querySelector('.p-title');
   if(ptitle) ptitle.textContent = t('pause_title');
+  const psub = document.querySelector('.p-sub');
+  if(psub) psub.innerHTML = t('pause_sub');
   const plbl = document.querySelector('.p-lbl');
   if(plbl) plbl.textContent = t('pause_lbl');
   const chtitle = document.querySelector('.p-check-lbl');
-  if(chtitle) chtitle.textContent = t('check_title');
+  if(chtitle) chtitle.textContent = t('pause_check_lbl')||t('check_title');
   const clbls = document.querySelectorAll('.clbl');
   const checkKeys = ['check1','check2','check3','check4'];
   clbls.forEach((el,i) => { if(checkKeys[i]) el.textContent = t(checkKeys[i]); });
   const resbtn = document.getElementById('resume-btn');
   if(resbtn) resbtn.textContent = t('resume_btn');
+
+  // Responsabilisation
+  const respBadge = document.querySelector('.resp-badge');
+  if(respBadge) respBadge.textContent = t('resp_badge');
+  const respTitle = document.querySelector('.resp-title');
+  if(respTitle) respTitle.textContent = t('resp_title');
+  const respBtn = document.getElementById('resp-btn');
+  if(respBtn && !respBtn.classList.contains('ready')) respBtn.textContent = t('resp_btn');
+  const respBack = document.querySelector('.resp-back');
+  if(respBack) respBack.textContent = t('resp_back');
+  const respTa = document.getElementById('resp-text');
+  if(respTa) respTa.placeholder = t('resp_placeholder');
+
+  // Légende challenge
+  const legItems = document.querySelectorAll('.ch-leg-item');
+  const legKeys = ['ch_leg_validated','ch_leg_failed','ch_leg_joker','ch_leg_neutral','ch_leg_future'];
+  legItems.forEach((el,i) => {
+    if(legKeys[i]) el.childNodes[legKeys[i]?1:0] && (el.lastChild.textContent = t(legKeys[i]));
+  });
+
+  // Notifications bouton
+  const notifBtn = document.getElementById('notif-btn');
+  if(notifBtn) notifBtn.textContent = notifGranted ? t('notif_on') : t('notif_off');
 
   // History periods
   const ppills = document.querySelectorAll('.ppill');
@@ -2269,6 +2414,59 @@ if('serviceWorker' in navigator){
       .catch(e=>console.log('[PWA] Erreur SW:', e));
   });
 }
+
+// ══ NOTIFICATIONS PUSH ══════════════════════════════════
+let notifGranted = false;
+
+async function initNotifications(){
+  if(!('Notification' in window))return;
+  if(Notification.permission === 'granted'){
+    notifGranted = true; updateNotifBtn(); return;
+  }
+  if(Notification.permission !== 'denied'){
+    const perm = await Notification.requestPermission();
+    notifGranted = perm === 'granted';
+    updateNotifBtn();
+  }
+}
+
+function updateNotifBtn(){
+  const btn = document.getElementById('notif-btn');
+  if(!btn) return;
+  if(notifGranted){
+    btn.textContent = '🔔 Notifications activées';
+    btn.style.color = 'var(--green)';
+    btn.style.borderColor = 'rgba(16,185,129,0.3)';
+  } else {
+    btn.textContent = '🔕 Activer les notifications';
+    btn.style.color = 'var(--text3)';
+    btn.style.borderColor = 'var(--border2)';
+  }
+}
+
+function notify(title, body, tag){
+  if(!notifGranted) return;
+  if(document.visibilityState === 'visible') return; // App ouverte = pas besoin
+  try {
+    new Notification(title, {
+      body, icon: '/icon-192.png', badge: '/icon-192.png',
+      tag: tag || 'disciplineai', renotify: true, vibrate: [200,100,200]
+    });
+  } catch(e) {
+    // Fallback service worker
+    if(navigator.serviceWorker.controller){
+      navigator.serviceWorker.controller.postMessage({type:'NOTIFY', title, body, tag});
+    }
+  }
+}
+
+// Notifications sur les événements clés
+function notifyRevenge(symbol){ notify('⚠️ Revenge Trading détecté', symbol+' — Tu trades pour récupérer une perte. Fais une pause.', 'revenge'); }
+function notifyOvertrading(n, max){ notify('📈 Overtrading', n+' trades aujourd\'hui — ta limite est '+max+'. Ralentis.', 'overtrading'); }
+function notifyMaxLoss(pnl){ notify('🔒 Perte max atteinte', 'P&L : '+pnl+'€ — Session verrouillée. Ferme MT5.', 'maxloss'); }
+function notifyPause(reason){ notify('⏸ Pause obligatoire', reason+' — Check mental requis avant de reprendre.', 'pause'); }
+function notifyChallenge(day){ notify('🔥 Challenge 30J', 'Jour '+day+' validé ! Continue sur cette lancée.', 'challenge'); }
+function notifyScore(score){ notify('📊 Bilan de session', 'Score discipline : '+score+'/100. Bien joué !', 'score'); }
 </script>
 </body>
 </html>
