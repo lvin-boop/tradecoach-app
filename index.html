@@ -1,2472 +1,850 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="dark">
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>DisciplineAI</title>
-<!-- PWA -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#10B981">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="DisciplineAI">
-<link rel="apple-touch-icon" href="icon-192.png">
-<meta name="mobile-web-app-capable" content="yes">
-<!-- SEO -->
-<meta name="description" content="Le coach IA qui détecte ton revenge trading et protège ton capital. Connecté à MT5.">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TradeCoach — AI Discipline Coach</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --font:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
-  --green:#10B981;--green-dim:rgba(16,185,129,0.08);--green-glow:rgba(16,185,129,0.2);
-  --red:#EF4444;--red-dim:rgba(239,68,68,0.08);
-  --amber:#F59E0B;--amber-dim:rgba(245,158,11,0.08);
-  --blue:#3B82F6;--blue-dim:rgba(59,130,246,0.08);
-  --purple:#8B5CF6;--purple-dim:rgba(139,92,246,0.08);
+  --bg:#0B0B0F;
+  --bg2:#0F0F14;
+  --bg3:#141419;
+  --bg4:#1A1A22;
+  --glass:rgba(255,255,255,0.03);
+  --glass-hover:rgba(255,255,255,0.055);
+  --glass-border:rgba(255,255,255,0.07);
+  --glass-border-hover:rgba(255,255,255,0.14);
+  --text:#F0F0F5;
+  --text2:#8A8A9A;
+  --text3:#444455;
+  --green:#00FF88;
+  --green-dim:rgba(0,255,136,0.08);
+  --green-glow:rgba(0,255,136,0.2);
+  --red:#FF4D6A;
+  --red-dim:rgba(255,77,106,0.08);
+  --amber:#FFB547;
+  --amber-dim:rgba(255,181,71,0.08);
+  --accent1:#7B5CF0;
+  --accent2:#4D7EFF;
+  --accent-grad:linear-gradient(135deg,#7B5CF0,#4D7EFF);
+  --font:'Geist',sans-serif;
+  --mono:'DM Mono',monospace;
+  --radius:12px;
+  --radius-sm:8px;
+  --blur:blur(20px);
 }
-[data-theme="dark"]{
-  --bg:#09090B;--bg2:#111113;--bg3:#18181B;--bg4:#1F1F23;--bg5:#27272B;
-  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
-  --text:#FAFAFA;--text2:#D4D4D8;--text3:#A1A1AA;
-  --shadow:rgba(0,0,0,0.5);
+
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);overflow:hidden}
+
+/* NOISE TEXTURE */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9998;opacity:0.6;
 }
-[data-theme="light"]{
-  --bg:#F8F8FA;--bg2:#EFEFF3;--bg3:#FFFFFF;--bg4:#F4F4F8;--bg5:#EAEAF0;
-  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
-  --text:#09090B;--text2:#27272A;--text3:#52525B;
-  --shadow:rgba(0,0,0,0.08);
+
+/* AMBIENT GLOW */
+body::after{
+  content:'';position:fixed;
+  width:600px;height:600px;
+  background:radial-gradient(circle,rgba(123,92,240,0.06) 0%,transparent 70%);
+  top:-200px;left:50%;transform:translateX(-50%);
+  pointer-events:none;z-index:0;
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);overflow:hidden;-webkit-font-smoothing:antialiased}
+
+.app{display:grid;grid-template-rows:auto auto auto 1fr;height:100vh;position:relative;z-index:1}
+
+/* ══════════════════════════════════════
+   CAPITAL BAR — glass premium
+══════════════════════════════════════ */
+.capital-bar{
+  display:flex;justify-content:center;align-items:center;
+  padding:14px 24px;
+  border-bottom:1px solid var(--glass-border);
+  background:rgba(11,11,15,0.8);
+  backdrop-filter:var(--blur);
+  animation:fadeDown 0.6s ease;
+}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.capital-card{
+  display:flex;align-items:center;gap:0;
+  background:var(--glass);
+  border:1px solid var(--glass-border);
+  border-radius:100px;
+  padding:0;
+  overflow:hidden;
+  backdrop-filter:var(--blur);
+  box-shadow:0 0 0 1px rgba(255,255,255,0.04) inset;
+}
+.cap-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 24px;
+  border-right:1px solid var(--glass-border);
+  transition:background 0.2s;
+}
+.cap-item:last-child{border-right:none}
+.cap-item:hover{background:var(--glass-hover)}
+.cap-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.cap-dot.capital{background:var(--text3)}
+.cap-dot.pnl{background:var(--green);box-shadow:0 0 6px var(--green-glow)}
+.cap-dot.equity{background:var(--accent1);box-shadow:0 0 6px rgba(123,92,240,0.4)}
+.cap-label{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3)}
+.cap-val{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text);transition:color 0.3s;min-width:80px}
+.cap-val.pos{color:var(--green)}
+.cap-val.neg{color:var(--red)}
+
+/* ══════════════════════════════════════
+   HEADER
+══════════════════════════════════════ */
+.hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;height:52px;
+  border-bottom:1px solid var(--glass-border);
+  background:rgba(11,11,15,0.9);
+  backdrop-filter:var(--blur);
+  animation:fadeDown 0.5s ease;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-logo{
+  width:28px;height:28px;
+  background:var(--accent-grad);
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 16px rgba(123,92,240,0.3);
+}
+.brand-logo svg{width:14px;height:14px;fill:white}
+.brand-name{font-size:14px;font-weight:600;letter-spacing:0.02em;color:var(--text)}
+.brand-name span{
+  background:var(--accent-grad);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.brand-badge{
+  font-family:var(--mono);font-size:9px;letter-spacing:0.1em;
+  padding:2px 8px;border-radius:100px;
+  background:rgba(123,92,240,0.12);
+  border:1px solid rgba(123,92,240,0.25);
+  color:var(--accent1);text-transform:uppercase;
+}
+.hdr-mid{display:flex;align-items:center;gap:1px}
+.ntab{
+  font-family:var(--mono);font-size:10px;padding:6px 16px;
+  border:none;cursor:pointer;letter-spacing:0.08em;
+  color:var(--text3);background:transparent;text-transform:uppercase;
+  transition:all 0.2s;border-radius:6px;
+}
+.ntab:hover{color:var(--text2);background:var(--glass)}
+.ntab.active{color:var(--text);background:var(--glass);border:1px solid var(--glass-border)}
+.hdr-right{display:flex;align-items:center;gap:12px}
+.ws-pill{
+  display:flex;align-items:center;gap:6px;
+  font-family:var(--mono);font-size:10px;letter-spacing:0.06em;
+  padding:5px 12px;border-radius:100px;
+  background:var(--glass);border:1px solid var(--glass-border);
+}
+.ws-dot{width:5px;height:5px;border-radius:50%;background:var(--text3);transition:all 0.3s}
+.ws-dot.connected{background:var(--green);box-shadow:0 0 6px var(--green-glow);animation:pulse 2s infinite}
+.ws-dot.connecting{background:var(--amber);animation:pulse 1s infinite}
+.ws-label{color:var(--text3);transition:color 0.3s}
+.ws-label.connected{color:var(--green)}
+.timer-wrap{font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.1em;min-width:72px;text-align:center}
+.timer-wrap.active{color:var(--text)}
+.btn{
+  font-family:var(--mono);font-size:10px;padding:8px 18px;
+  border:1px solid var(--glass-border);cursor:pointer;
+  letter-spacing:0.08em;text-transform:uppercase;
+  transition:all 0.25s;background:var(--glass);
+  color:var(--text2);border-radius:var(--radius-sm);
+}
+.btn:hover{border-color:var(--glass-border-hover);color:var(--text);background:var(--glass-hover)}
+.btn.go{
+  background:var(--accent-grad);color:white;border:none;
+  box-shadow:0 0 20px rgba(123,92,240,0.25);
+}
+.btn.go:hover{box-shadow:0 0 30px rgba(123,92,240,0.4);transform:translateY(-1px)}
+.btn.stop{border-color:rgba(255,77,106,0.3);color:var(--red);background:var(--red-dim)}
+.btn.stop:hover{background:var(--red);color:white;border-color:var(--red)}
+
+/* ══════════════════════════════════════
+   ALERT
+══════════════════════════════════════ */
+.alert{display:none;align-items:center;gap:10px;padding:8px 24px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;border-bottom:1px solid}
+.alert.show{display:flex}
+.alert.danger{background:var(--red-dim);border-color:rgba(255,77,106,0.2);color:var(--red)}
+.alert.warn{background:var(--amber-dim);border-color:rgba(255,181,71,0.2);color:var(--amber)}
+
+/* ══════════════════════════════════════
+   METRICS
+══════════════════════════════════════ */
+.metrics{
+  display:grid;grid-template-columns:repeat(5,1fr);
+  border-bottom:1px solid var(--glass-border);
+  animation:fadeUp 0.5s ease 0.1s both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.met{
+  padding:16px 20px;border-right:1px solid var(--glass-border);
+  position:relative;overflow:hidden;transition:background 0.25s;
+}
+.met:last-child{border-right:none}
+.met:hover{background:var(--glass)}
+.met-accent{position:absolute;top:0;left:0;right:0;height:1px;background:var(--glass-border);transition:background 0.3s}
+.met.pos .met-accent{background:linear-gradient(90deg,transparent,var(--green),transparent);opacity:0.6}
+.met.neg .met-accent{background:linear-gradient(90deg,transparent,var(--red),transparent);opacity:0.6}
+.met.warn .met-accent{background:linear-gradient(90deg,transparent,var(--amber),transparent);opacity:0.6}
+.met.info .met-accent{background:var(--accent-grad);opacity:0.6}
+.met-label{font-family:var(--mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.met-val{font-family:var(--mono);font-size:18px;font-weight:500;color:var(--text);transition:color 0.3s}
+.met-val.pos{color:var(--green)}
+.met-val.neg{color:var(--red)}
+.met-val.warn{color:var(--amber)}
+.met-sub{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:5px}
+
+/* ══════════════════════════════════════
+   MAIN LAYOUT
+══════════════════════════════════════ */
+.main{display:grid;grid-template-columns:1fr 320px;overflow:hidden}
+.left{display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--glass-border)}
+
+/* TRADE LOG */
+.sec-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 20px;border-bottom:1px solid var(--glass-border);flex-shrink:0;
+}
+.sec-title{font-family:var(--mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3)}
+.sec-title em{color:var(--green);font-style:normal;margin-left:8px}
+.trades-list{flex:1;overflow-y:auto;min-height:0}
+.trades-list::-webkit-scrollbar{width:2px}
+.trades-list::-webkit-scrollbar-thumb{background:var(--glass-border)}
+
+.trade-col-hdr{
+  display:grid;grid-template-columns:90px 68px 54px 80px 80px 1fr 60px;
+  gap:6px;padding:6px 20px;
+  border-bottom:1px solid var(--glass-border);
+  background:var(--glass);
+}
+.trade-col-hdr span{font-family:var(--mono);font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3)}
+
+.trade-row{
+  display:grid;grid-template-columns:90px 68px 54px 80px 80px 1fr 60px;
+  gap:6px;align-items:center;padding:11px 20px;
+  border-bottom:1px solid var(--glass-border);
+  transition:background 0.2s;
+  animation:fadeIn 0.35s ease;
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes scan{0%{top:-40px}100%{top:110%}}
-@keyframes dot{0%,80%,100%{opacity:0.2;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}
-
-/* SHELL */
-.shell{display:flex;flex-direction:column;height:100vh;overflow:hidden}
-
-/* HEADER */
-.hdr{height:56px;flex-shrink:0;display:grid;grid-template-columns:220px 1fr 240px;align-items:center;padding:0 18px;gap:12px;background:var(--bg2);border-bottom:1px solid var(--border);position:relative;z-index:100}
-.hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--green) 40%,var(--blue) 60%,transparent);opacity:0.2}
-.brand{display:flex;align-items:center;gap:10px}
-.brand-orb{width:30px;height:30px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.brand-orb::before{content:'';position:absolute;inset:0;border-radius:50%;border:1.5px solid rgba(16,185,129,0.5)}
-.brand-orb::after{content:'';position:absolute;inset:5px;border-radius:50%;border:1px solid rgba(16,185,129,0.2);animation:spin 6s linear infinite}
-.brand-dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;position:relative;z-index:1}
-.brand-name{font-size:14px;font-weight:700;letter-spacing:-0.2px}
-.brand-name span{color:var(--green)}
-.brand-pill{font-family:var(--mono);font-size:9px;color:var(--text3);padding:2px 7px;border:1px solid var(--border2);margin-left:4px;letter-spacing:0.06em}
-.hdr-mid{display:flex;align-items:center;justify-content:center;gap:14px}
-.sess-box{display:flex;align-items:center;gap:7px;padding:5px 12px;border:1px solid var(--border2);background:var(--bg3);border-radius:6px}
-.sess-led{width:6px;height:6px;border-radius:50%;background:var(--text3);flex-shrink:0}
-.sess-led.live{background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
-.sess-led.pause{background:var(--amber);animation:pulse 1s infinite}
-.sess-lbl{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.1em;color:var(--text3)}
-.sess-lbl.live{color:var(--green)}
-.sess-lbl.pause{color:var(--amber)}
-.timer{font-family:var(--mono);font-size:16px;font-weight:300;color:var(--text3);letter-spacing:0.1em;min-width:78px;text-align:center}
-.timer.on{color:var(--text)}
-.hbtns{display:flex;gap:5px}
-.hbtn{font-family:var(--mono);font-size:10px;font-weight:600;padding:6px 13px;border-radius:5px;border:1px solid var(--border2);cursor:pointer;letter-spacing:0.05em;text-transform:uppercase;transition:all 0.15s;background:transparent;color:var(--text2)}
-.hbtn:hover{background:var(--bg4);color:var(--text)}
-.hbtn.go{background:var(--green);border-color:var(--green);color:#fff}
-.hbtn.go:hover{opacity:0.88}
-.hbtn.end{border-color:var(--red);color:var(--red)}
-.hbtn.end:hover{background:var(--red);color:#fff}
-.hbtn.brk{border-color:var(--amber);color:var(--amber)}
-.hbtn.brk:hover{background:var(--amber);color:#09090B}
-.hdr-right{display:flex;align-items:center;justify-content:flex-end;gap:6px}
-.ibtn{width:32px;height:32px;border-radius:5px;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.15s;color:var(--text3)}
-.ibtn:hover{background:var(--bg3);color:var(--text2)}
-.ws-chip{display:flex;align-items:center;gap:5px;padding:4px 9px;border:1px solid var(--border);background:var(--bg3);border-radius:5px;font-family:var(--mono);font-size:9px}
-.ws-led{width:5px;height:5px;border-radius:50%;background:var(--text3)}
-.ws-led.on{background:var(--green);box-shadow:0 0 4px var(--green)}
-.ws-led.blink{background:var(--amber);animation:pulse 0.8s infinite}
-
-/* TABNAV */
-.tabnav{display:flex;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
-.tab{font-family:var(--mono);font-size:10px;font-weight:500;padding:8px 20px;border:none;background:transparent;color:var(--text3);cursor:pointer;letter-spacing:0.08em;text-transform:uppercase;border-bottom:2px solid transparent;transition:all 0.15s}
-.tab:hover{color:var(--text2)}
-.tab.active{color:var(--green);border-bottom-color:var(--green)}
-
-/* PAGES CONTAINER */
-.pages{flex:1;overflow:hidden;min-height:0}
-.pg{display:none;width:100%;height:100%;overflow:hidden}
-.pg.on{display:flex;flex-direction:column}
-
-/* ── SESSION PAGE ── */
-.welcome{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:32px;position:relative;overflow:hidden}
-.welcome::before{content:'';position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(16,185,129,0.05) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
-.w-badge{font-family:var(--mono);font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--green);border:1px solid rgba(16,185,129,0.2);padding:4px 14px;border-radius:20px;background:var(--green-dim)}
-.w-title{font-size:38px;font-weight:700;letter-spacing:-1px;text-align:center;line-height:1.1;max-width:520px;position:relative;z-index:1}
-.w-title span{color:var(--green)}
-.w-sub{font-size:13px;color:var(--text3);text-align:center;line-height:1.9;max-width:440px}
-.w-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%;max-width:640px}
-.w-card{background:var(--bg3);border:1px solid var(--border);padding:15px 12px;text-align:center;border-radius:8px;transition:all 0.2s}
-.w-card:hover{border-color:var(--border2);transform:translateY(-2px)}
-.w-card-ico{font-size:20px;margin-bottom:8px}
-.w-card-ttl{font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text2);margin-bottom:4px}
-.w-card-desc{font-size:11px;color:var(--text3);line-height:1.5}
-.w-btn{font-size:13px;font-weight:600;padding:12px 42px;background:var(--green);color:#fff;border:none;cursor:pointer;border-radius:6px;transition:all 0.2s}
-.w-btn:hover{opacity:0.88;transform:translateY(-1px);box-shadow:0 8px 20px rgba(16,185,129,0.25)}
-.w-ws{font-family:var(--mono);font-size:10px;color:var(--text3);display:flex;align-items:center;gap:6px}
-.w-ws-dot{width:5px;height:5px;border-radius:50%;background:var(--text3)}
-.w-ws-dot.on{background:var(--green);animation:pulse 2s infinite}
-
-/* SESSION ACTIVE — KEY FIX: flex:1 + display:grid */
-.sa{display:none;flex:1;min-height:0;overflow:hidden}
-.sa.on{display:grid;grid-template-columns:1fr 320px}
-
-/* COACH TOGGLE BUTTON — mobile only */
-.coach-toggle{display:none}
-
-@media(max-width:768px){
-  .sa.on{grid-template-columns:1fr;position:relative}
-  .right{position:absolute;top:0;bottom:0;right:0;width:88%;max-width:340px;z-index:50;transform:translateX(100%);transition:transform 0.28s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 24px rgba(0,0,0,0.4)}
-  .right.open{transform:translateX(0)}
-  .coach-toggle{display:flex;align-items:center;justify-content:center;position:absolute;top:50%;right:0;transform:translateY(-50%);z-index:51;width:22px;height:48px;background:var(--bg3);border:1px solid var(--border2);border-right:none;border-radius:8px 0 0 8px;cursor:pointer;transition:all 0.2s;flex-shrink:0}
-  .coach-toggle:hover{background:var(--bg4)}
-  .coach-toggle svg{width:12px;height:12px;fill:none;stroke:var(--green);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;transition:transform 0.28s}
-  .right.open ~ .coach-toggle{right:88%;max-right:340px}
-  .right.open ~ .coach-toggle svg{transform:rotate(180deg)}
-  .coach-toggle-wrap{position:absolute;top:0;bottom:0;right:0;width:22px;z-index:52;pointer-events:none}
-  .coach-toggle-wrap .coach-toggle{pointer-events:all;right:0;transform:translateY(-50%)}
+.trade-row:hover{background:var(--glass-hover)}
+.t-sym{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text)}
+.t-dir{
+  font-family:var(--mono);font-size:9px;padding:3px 8px;
+  letter-spacing:0.06em;text-align:center;border-radius:100px;border:1px solid;
+  width:fit-content;
 }
+.t-dir.long{color:var(--green);border-color:rgba(0,255,136,0.2);background:rgba(0,255,136,0.06)}
+.t-dir.short{color:var(--red);border-color:rgba(255,77,106,0.2);background:rgba(255,77,106,0.06)}
+.t-time{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.t-price{font-family:var(--mono);font-size:11px;color:var(--text2)}
+.t-pnl{font-family:var(--mono);font-size:12px;font-weight:500}
+.t-pnl.pos{color:var(--green)}
+.t-pnl.neg{color:var(--red)}
+.t-pnl.open{color:var(--text3);font-style:italic}
+.t-note{font-size:11px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.t-src{font-family:var(--mono);font-size:9px;text-align:right;letter-spacing:0.06em}
+.t-src.mt5{color:var(--accent2)}
+.t-src.tv{color:var(--amber)}
+.t-src.manual{color:var(--text3)}
+.empty{
+  padding:48px 20px;text-align:center;
+  font-family:var(--mono);font-size:11px;color:var(--text3);
+  letter-spacing:0.06em;line-height:2.2;
+}
+.empty-icon{font-size:32px;margin-bottom:12px;opacity:0.3}
 
-/* LEFT COL */
-.left{display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border)}
-.mkts{display:flex;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
-.mkt{display:flex;align-items:center;gap:8px;padding:7px 14px;border-right:1px solid var(--border);flex:1;position:relative}
-.mkt::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:var(--border);transition:background 0.3s}
-.mkt.open::before{background:var(--green)}
-.mkt-ico{font-size:16px;line-height:1}
-.mkt-name{font-size:11px;font-weight:600;color:var(--text2)}
-.mkt-time{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:1px}
-.mkt-badge{font-family:var(--mono);font-size:8px;padding:1px 6px;border-radius:3px;margin-left:auto;letter-spacing:0.08em;font-weight:600;border:1px solid}
-.mkt-badge.open{color:var(--green);border-color:rgba(16,185,129,0.25);background:var(--green-dim)}
-.mkt-badge.closed{color:var(--text3);border-color:var(--border)}
-.alerts{display:none;flex-direction:column;gap:2px;padding:5px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
-.alerts.on{display:flex}
-.alert{display:flex;align-items:center;gap:8px;padding:5px 10px;font-family:var(--mono);font-size:10px;border-radius:4px;animation:fadeUp 0.25s;border-left:2px solid}
-.alert.err{background:var(--red-dim);border-color:var(--red);color:var(--red)}
-.alert.warn{background:var(--amber-dim);border-color:var(--amber);color:var(--amber)}
-.alert.ok{background:var(--purple-dim);border-color:var(--purple);color:var(--purple)}
-.alert-x{margin-left:auto;cursor:pointer;opacity:0.4;font-size:11px;padding:0 3px}
-.alert-x:hover{opacity:1}
-.stats{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
-.stat{padding:11px 14px;border-right:1px solid var(--border);position:relative;overflow:hidden}
-.stat:last-child{border-right:none}
-.stat-line{position:absolute;top:0;left:0;right:0;height:1.5px;background:var(--border);transition:background 0.3s}
-.stat.up .stat-line{background:var(--green)}
-.stat.dn .stat-line{background:var(--red)}
-.stat.wn .stat-line{background:var(--amber)}
-.stat-lbl{font-size:9px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:5px}
-.stat-val{font-size:19px;font-weight:700;color:var(--text);letter-spacing:-0.4px;line-height:1;transition:color 0.2s}
-.stat-val.up{color:var(--green)}
-.stat-val.dn{color:var(--red)}
-.stat-val.wn{color:var(--amber)}
-.stat-sub{font-size:10px;color:var(--text3);margin-top:3px}
-.prot-ok{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:var(--green);margin-top:3px}
-.prot-err{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;color:var(--red);margin-top:3px}
-.j-hdr{display:flex;align-items:center;padding:7px 14px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;gap:10px}
-.j-title{font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--text2)}
-.j-meta{font-family:var(--mono);font-size:10px;color:var(--text3);margin-left:auto}
-.tbl-hdr{display:grid;grid-template-columns:94px 54px 50px 84px 1fr 68px 24px;gap:8px;padding:6px 14px;border-bottom:1px solid var(--border);background:var(--bg3);flex-shrink:0}
-.th{font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3)}
-.tbl{flex:1;overflow-y:auto;min-height:0}
-.tbl::-webkit-scrollbar{width:3px}
-.tbl::-webkit-scrollbar-thumb{background:var(--border2)}
-.trow{display:grid;grid-template-columns:94px 54px 50px 84px 1fr 68px 24px;gap:8px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border);transition:background 0.12s;animation:fadeUp 0.25s;position:relative}
-.trow::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;opacity:0;transition:opacity 0.2s}
-.trow:hover{background:rgba(255,255,255,0.02)}
-.trow.new{background:var(--green-dim)}
-.trow.new::before{opacity:1;background:var(--green)}
-.trow.revenge::before{opacity:1;background:var(--red)}
-.tsym{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text)}
-.tdir{font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:3px;font-weight:700;letter-spacing:0.04em;width:fit-content;border:1px solid}
-.tdir.long{color:var(--green);border-color:rgba(16,185,129,0.25);background:var(--green-dim)}
-.tdir.short{color:var(--red);border-color:rgba(239,68,68,0.25);background:var(--red-dim)}
-.ttime{font-family:var(--mono);font-size:10px;color:var(--text3)}
-.tpnl{font-family:var(--mono);font-size:12px;font-weight:700}
-.tpnl.up{color:var(--green)}
-.tpnl.dn{color:var(--red)}
-.tnote{font-size:11px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ttag{font-family:var(--mono);font-size:9px;color:var(--text3)}
-.ttag.revenge{color:var(--red)}
-.ttag.mt5{color:var(--blue)}
-.tpln{width:6px;height:6px;border-radius:50%;margin:0 auto}
-.tpln.ok{background:var(--green)}
-.tpln.no{background:var(--red)}
-.empty{padding:40px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text3);line-height:2.2}
-.add{padding:9px 14px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0}
-.add-grid{display:grid;grid-template-columns:1fr 66px 88px 98px auto;gap:6px;align-items:center}
-.fi{font-family:var(--mono);font-size:12px;background:var(--bg4);border:1px solid var(--border2);color:var(--text);padding:7px 9px;outline:none;width:100%;transition:border-color 0.15s;border-radius:5px}
-.fi:focus{border-color:var(--green)}
+/* ADD TRADE */
+.add-area{
+  padding:14px 20px;border-top:1px solid var(--glass-border);
+  background:var(--glass);backdrop-filter:var(--blur);flex-shrink:0;
+}
+.add-label{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.form-grid{display:grid;grid-template-columns:1fr 80px 100px 110px auto;gap:8px;align-items:center}
+.fi{
+  font-family:var(--mono);font-size:12px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--glass-border);
+  color:var(--text);padding:8px 12px;outline:none;width:100%;
+  transition:all 0.2s;border-radius:var(--radius-sm);
+}
+.fi:focus{border-color:rgba(123,92,240,0.4);background:rgba(123,92,240,0.04);box-shadow:0 0 0 3px rgba(123,92,240,0.08)}
 .fi::placeholder{color:var(--text3)}
 select.fi option{background:var(--bg3)}
-.add-btn{font-family:var(--mono);font-size:10px;font-weight:700;padding:7px 13px;background:var(--green);color:#fff;border:none;cursor:pointer;letter-spacing:0.05em;text-transform:uppercase;border-radius:5px;transition:opacity 0.15s;white-space:nowrap}
-.add-btn:hover{opacity:0.85}
-.note-r{margin-top:6px}
+.add-btn{
+  font-family:var(--mono);font-size:10px;padding:8px 16px;
+  background:var(--accent-grad);color:white;border:none;cursor:pointer;
+  letter-spacing:0.08em;text-transform:uppercase;font-weight:600;
+  white-space:nowrap;border-radius:var(--radius-sm);
+  transition:all 0.2s;box-shadow:0 0 16px rgba(123,92,240,0.2);
+}
+.add-btn:hover{box-shadow:0 0 24px rgba(123,92,240,0.35);transform:translateY(-1px)}
+.note-row{margin-top:8px}
 
-/* RIGHT COL */
-.right{display:flex;flex-direction:column;overflow:hidden;background:var(--bg);border-left:1px solid var(--border)}
-.rcard{background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;padding:12px 14px}
-.rcard-title{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);margin-bottom:9px}
-.rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:9px}
-.rule{background:var(--bg4);border:1px solid var(--border);padding:8px 10px;border-radius:5px;display:flex;align-items:center;justify-content:space-between;gap:5px}
-.rule-lbl{font-size:8px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3);margin-bottom:3px}
-.rule-row{display:flex;align-items:center;gap:4px}
-.rule-inp{width:40px;font-family:var(--mono);font-size:11px;font-weight:700;background:var(--bg5);border:1px solid var(--border2);color:var(--green);padding:3px 4px;text-align:center;outline:none;border-radius:3px}
-.rule-u{font-size:9px;color:var(--text3)}
-.tog{position:relative;width:26px;height:14px;flex-shrink:0}
+/* RULES */
+.rules-area{padding:14px 20px;border-top:1px solid var(--glass-border);flex-shrink:0}
+.rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.rule-card{
+  background:var(--glass);
+  border:1px solid var(--glass-border);
+  padding:12px 14px;border-radius:var(--radius-sm);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  transition:all 0.2s;
+}
+.rule-card:hover{background:var(--glass-hover);border-color:var(--glass-border-hover)}
+.rule-lbl{font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px}
+.rule-inp-row{display:flex;align-items:center;gap:6px}
+.rule-inp{
+  width:52px;font-family:var(--mono);font-size:12px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--glass-border);color:var(--text);
+  padding:4px 6px;text-align:center;outline:none;border-radius:6px;
+  transition:border-color 0.2s;
+}
+.rule-inp:focus{border-color:rgba(123,92,240,0.4)}
+.rule-unit{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.tog{position:relative;width:32px;height:18px;flex-shrink:0}
 .tog input{opacity:0;width:0;height:0}
-.tog-sl{position:absolute;inset:0;background:var(--border2);cursor:pointer;border-radius:7px;transition:background 0.2s}
-.tog input:checked+.tog-sl{background:var(--green)}
-.tog-sl::before{content:'';position:absolute;width:8px;height:8px;top:3px;left:3px;background:#fff;border-radius:50%;transition:transform 0.18s}
-.tog input:checked+.tog-sl::before{transform:translateX(12px)}
-.score-row{display:flex;align-items:center;gap:8px}
-.score-lbl{font-size:9px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3);flex-shrink:0}
-.score-track{flex:1;height:2px;background:var(--bg5);border-radius:1px;overflow:hidden}
-.score-fill{height:100%;border-radius:1px;transition:width 0.6s,background 0.4s}
-.score-val{font-family:var(--mono);font-size:12px;font-weight:700;min-width:44px;text-align:right}
-.locked{display:none;align-items:center;gap:6px;padding:6px 14px;background:var(--red-dim);border-top:1px solid rgba(239,68,68,0.15);font-family:var(--mono);font-size:10px;color:var(--red);flex-shrink:0}
-.locked.on{display:flex}
-.bcard{background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;padding:10px 14px;position:relative;overflow:hidden}
-.bcard::after{content:'';position:absolute;left:0;right:0;height:28px;background:linear-gradient(180deg,transparent,rgba(16,185,129,0.03),transparent);animation:scan 5s linear infinite;pointer-events:none}
-.bcard-title{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);margin-bottom:8px}
-.bgrid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
-.bc{padding:7px 9px;border:1px solid var(--border);border-radius:5px;background:var(--bg4);transition:all 0.2s;position:relative;cursor:help}
-.bc.ok{border-color:rgba(16,185,129,0.2);background:var(--green-dim)}
-.bc.warn{border-color:rgba(245,158,11,0.2);background:var(--amber-dim)}
-.bc.err{border-color:rgba(239,68,68,0.2);background:var(--red-dim)}
-.bc-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
-.bc-lbl{font-size:8px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2)}
-.bc-dot{width:7px;height:7px;border-radius:50%;background:var(--border2);flex-shrink:0;transition:background 0.2s}
-.bc.ok .bc-dot{background:var(--green);box-shadow:0 0 5px var(--green)}
-.bc.warn .bc-dot{background:var(--amber);box-shadow:0 0 5px var(--amber);animation:pulse 1.5s infinite}
-.bc.err .bc-dot{background:var(--red);box-shadow:0 0 5px var(--red);animation:pulse 0.8s infinite}
-.bc-val{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--text);transition:color 0.2s}
-.bc-val.ok{color:var(--green)}
-.bc-val.warn{color:var(--amber)}
-.bc-val.err{color:var(--red)}
-/* TOOLTIP */
-.bc-tip{display:none;position:absolute;bottom:calc(100% + 6px);left:0;right:0;background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:7px 9px;font-size:10px;color:var(--text2);line-height:1.5;z-index:200;pointer-events:none;font-family:var(--mono)}
-.bc:hover .bc-tip{display:block}
-.coach{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0}
-.coach-hdr{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg2)}
-.ai-orb{width:30px;height:30px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(16,185,129,0.3);background:var(--green-dim)}
-.ai-orb::before{content:'';position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(16,185,129,0.12);animation:spin 7s linear infinite}
-.ai-orb-core{width:9px;height:9px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;box-shadow:0 0 6px var(--green)}
-.ai-name{font-size:12px;font-weight:700;color:var(--text)}
-.ai-sub{font-family:var(--mono);font-size:9px;color:var(--green);margin-top:1px;display:flex;align-items:center;gap:4px}
-.ai-sub-dot{width:3px;height:3px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite}
-.msgs{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:7px;min-height:0}
+.tog-sl{
+  position:absolute;inset:0;
+  background:rgba(255,255,255,0.08);
+  cursor:pointer;border-radius:9px;transition:all 0.25s;
+  border:1px solid var(--glass-border);
+}
+.tog input:checked+.tog-sl{background:var(--accent-grad);border-color:transparent;box-shadow:0 0 10px rgba(123,92,240,0.3)}
+.tog-sl:before{
+  content:'';position:absolute;width:12px;height:12px;
+  top:2px;left:2px;background:white;border-radius:50%;transition:transform 0.25s;
+}
+.tog input:checked+.tog-sl:before{transform:translateX(14px)}
+
+/* SCORE */
+.score-row{display:flex;align-items:center;gap:12px;margin-top:12px}
+.score-lbl{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;flex-shrink:0}
+.score-track{flex:1;height:2px;background:rgba(255,255,255,0.06);border-radius:1px;overflow:hidden}
+.score-fill{height:100%;border-radius:1px;transition:width 0.6s,background 0.6s}
+.score-num{font-family:var(--mono);font-size:13px;font-weight:500;min-width:52px;text-align:right}
+.locked{
+  display:none;align-items:center;gap:10px;padding:12px 20px;
+  background:var(--red-dim);border-top:1px solid rgba(255,77,106,0.2);
+  font-family:var(--mono);font-size:11px;color:var(--red);letter-spacing:0.04em;flex-shrink:0;
+}
+.locked.show{display:flex}
+
+/* ══════════════════════════════════════
+   COACH PANEL
+══════════════════════════════════════ */
+.right{display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
+.coach-hdr{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;border-bottom:1px solid var(--glass-border);flex-shrink:0;
+  background:var(--glass);
+}
+.coach-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--accent-grad);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0;
+  box-shadow:0 0 12px rgba(123,92,240,0.3);
+}
+.coach-name{font-size:13px;font-weight:600;letter-spacing:0.02em;color:var(--text)}
+.coach-sub{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.06em;margin-top:2px}
+.coach-status{display:flex;align-items:center;gap:5px;margin-top:3px}
+.coach-status-dot{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green-glow);animation:pulse 2s infinite}
+.coach-status-txt{font-family:var(--mono);font-size:9px;color:var(--green);letter-spacing:0.06em}
+
+.msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:0}
 .msgs::-webkit-scrollbar{width:2px}
-.msgs::-webkit-scrollbar-thumb{background:var(--border2)}
-.msg{max-width:95%}
-.msg.ai{align-self:flex-start}
-.msg.me{align-self:flex-end}
-.msg.sys{align-self:stretch;max-width:100%}
-.bbl{padding:8px 11px;font-size:11px;line-height:1.6;border-radius:8px}
-.msg.ai .bbl{background:var(--bg3);color:var(--text);border:1px solid var(--border);border-left:2px solid var(--green);border-radius:2px 8px 8px 8px}
-.msg.me .bbl{background:var(--blue-dim);color:var(--text);border:1px solid rgba(59,130,246,0.15);border-radius:8px 2px 8px 8px}
-.msg.sys .bbl{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,0.15);font-family:var(--mono);font-size:10px;border-radius:5px}
-.msg.danger .bbl{background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,0.15);border-radius:5px}
-.msg.profit .bbl{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(139,92,246,0.15);border-radius:5px}
-.ts{font-family:var(--mono);font-size:8px;color:var(--text3);margin-top:2px;padding:0 3px}
-.msg.me .ts{text-align:right}
-.typing{display:flex;align-items:center;gap:4px;padding:8px 11px;background:var(--bg3);border:1px solid var(--border);border-left:2px solid var(--green);border-radius:2px 8px 8px 8px;width:fit-content}
-.td{width:4px;height:4px;border-radius:50%;background:var(--green);animation:dot 1.4s infinite}
-.td:nth-child(2){animation-delay:.2s}
-.td:nth-child(3){animation-delay:.4s}
-.quick{display:flex;gap:4px;flex-wrap:wrap;padding:7px 10px;border-top:1px solid var(--border);flex-shrink:0}
-.qbtn{font-family:var(--mono);font-size:9px;padding:3px 9px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;transition:all 0.15s;border-radius:20px;white-space:nowrap}
-.qbtn:hover{border-color:var(--green);color:var(--green);background:var(--green-dim)}
-.chat-row{display:flex;gap:6px;padding:9px 12px;border-top:1px solid var(--border);align-items:flex-end;flex-shrink:0;background:var(--bg2)}
-.chat-row textarea{flex:1;font-family:var(--mono);font-size:11px;background:var(--bg4);border:1px solid var(--border2);color:var(--text);padding:7px 9px;resize:none;min-height:34px;max-height:68px;outline:none;line-height:1.5;border-radius:5px;transition:border-color 0.15s}
-.chat-row textarea:focus{border-color:var(--green)}
-.chat-row textarea::placeholder{color:var(--text3)}
-.send{width:34px;height:34px;background:var(--green);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:5px;transition:opacity 0.15s}
-.send:hover{opacity:0.85}
-.send svg{width:13px;height:13px;fill:#fff}
+.msgs::-webkit-scrollbar-thumb{background:var(--glass-border)}
+.msg{max-width:88%}
+.msg.coach{align-self:flex-start}
+.msg.user{align-self:flex-end}
+.msg-bbl{padding:10px 14px;font-size:12px;line-height:1.7;border-radius:var(--radius-sm)}
+.msg.coach .msg-bbl{
+  background:var(--glass);color:var(--text);
+  border:1px solid var(--glass-border);
+  border-bottom-left-radius:2px;
+}
+.msg.user .msg-bbl{
+  background:rgba(123,92,240,0.1);color:var(--text);
+  border:1px solid rgba(123,92,240,0.2);
+  border-bottom-right-radius:2px;
+}
+.msg-ts{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:4px;letter-spacing:0.04em;padding:0 2px}
+.msg.user .msg-ts{text-align:right}
+.typing-bbl{
+  display:flex;align-items:center;gap:5px;padding:12px 14px;
+  background:var(--glass);border:1px solid var(--glass-border);
+  border-radius:var(--radius-sm);border-bottom-left-radius:2px;width:fit-content;
+}
+.td{width:4px;height:4px;border-radius:50%;background:var(--accent1);animation:tdot 1.4s infinite}
+.td:nth-child(2){animation-delay:0.2s}
+.td:nth-child(3){animation-delay:0.4s}
+@keyframes tdot{0%,80%,100%{opacity:0.2;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}
 
-/* HISTORY PAGE */
-.hist{flex:1;overflow-y:auto;padding:22px;min-height:0}
-.hist::-webkit-scrollbar{width:4px}
-.hist::-webkit-scrollbar-thumb{background:var(--border2)}
+.quick-row{display:flex;gap:6px;flex-wrap:wrap;padding:10px 14px;border-top:1px solid var(--glass-border);flex-shrink:0}
+.qbtn{
+  font-family:var(--mono);font-size:10px;padding:5px 12px;
+  border:1px solid var(--glass-border);background:var(--glass);
+  color:var(--text3);cursor:pointer;letter-spacing:0.04em;
+  transition:all 0.2s;white-space:nowrap;border-radius:100px;
+}
+.qbtn:hover{border-color:rgba(123,92,240,0.4);color:var(--text);background:rgba(123,92,240,0.08)}
 
-/* Period bar */
-.period-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px}
-.period-pills{display:flex;gap:4px}
-.ppill{font-family:var(--mono);font-size:10px;padding:5px 12px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;border-radius:20px;transition:all 0.15s;font-weight:500;letter-spacing:0.04em}
-.ppill:hover{color:var(--text2);border-color:var(--border2)}
-.ppill.active{background:var(--green-dim);border-color:rgba(16,185,129,0.3);color:var(--green)}
-.mnav-inline{display:flex;align-items:center;gap:8px}
-.mnav-title{font-size:14px;font-weight:700;letter-spacing:-0.3px;white-space:nowrap}
-
-/* Top row */
-.hist-top{display:grid;grid-template-columns:1fr 200px;gap:10px;margin-bottom:10px}
-
-/* Performance curve */
-.perf-card{background:var(--bg3);border:1px solid var(--border);padding:14px;border-radius:8px;display:flex;flex-direction:column;gap:10px}
-.perf-hdr{display:flex;justify-content:space-between;align-items:flex-start}
-.perf-val{font-size:22px;font-weight:700;color:var(--green);letter-spacing:-0.5px;margin-top:4px}
-.perf-val.neg{color:var(--red)}
-.perf-pct{font-family:var(--mono);font-size:11px;color:var(--green);margin-top:2px}
-.perf-pct.neg{color:var(--red)}
-.dd-val{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--red);margin-top:4px}
-
-/* Donut */
-.donut-card{background:var(--bg3);border:1px solid var(--border);padding:14px;border-radius:8px;display:flex;flex-direction:column;align-items:center}
-.donut-wrap{position:relative;display:flex;align-items:center;justify-content:center;margin:4px 0}
-.donut-center{position:absolute;text-align:center}
-.donut-pct{font-size:20px;font-weight:700;color:var(--text);letter-spacing:-0.5px}
-.donut-lbl{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.06em}
-.donut-legend{display:flex;gap:14px;margin-top:8px}
-.dl-item{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--text2)}
-.dl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-
-/* Drawdown bar */
-.dd-card{background:var(--bg3);border:1px solid var(--border);padding:14px;border-radius:8px;margin-bottom:10px}
-.dd-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px}
-.dd-cur{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-0.3px}
-.dd-sep{color:var(--text3);margin:0 4px}
-.dd-max-lbl{font-family:var(--mono);font-size:10px;color:var(--text3)}
-.dd-track{height:8px;background:var(--bg5);border-radius:4px;overflow:visible;position:relative;margin-bottom:6px}
-.dd-fill{height:100%;border-radius:4px;transition:width 0.6s,background 0.4s;background:var(--green)}
-.dd-fill.warn{background:var(--amber)}
-.dd-fill.danger{background:var(--red)}
-.dd-zones{position:absolute;inset:0;pointer-events:none}
-.dd-zone-line{position:absolute;top:-2px;bottom:-2px;width:1px;background:var(--border2)}
-.dd-zone-lbl{position:absolute;top:-16px;font-family:var(--mono);font-size:8px;color:var(--text3);transform:translateX(-50%)}
-.dd-sublbl{font-family:var(--mono);font-size:9px;color:var(--text3)}
-.mbtn{font-family:var(--mono);font-size:10px;padding:6px 13px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all 0.15s;border-radius:5px;font-weight:500}
-.mbtn:hover{border-color:var(--green);color:var(--green)}
-.hstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
-.hstat{background:var(--bg3);border:1px solid var(--border);padding:15px;border-radius:8px;position:relative;overflow:hidden}
-.hstat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:8px 8px 0 0}
-.hstat.up::before{background:var(--green)}
-.hstat.dn::before{background:var(--red)}
-.hstat.info::before{background:var(--blue)}
-.hstat.warn::before{background:var(--amber)}
-.hstat-lbl{font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);margin-bottom:7px}
-.hstat-val{font-size:22px;font-weight:700;letter-spacing:-0.5px}
-.hstat-val.up{color:var(--green)}
-.hstat-val.dn{color:var(--red)}
-.hstat-val.warn{color:var(--amber)}
-.hstat-val.info{color:var(--blue)}
-.hstat-sub{font-size:10px;color:var(--text3);margin-top:4px}
-.streak-card{display:flex;align-items:center;gap:14px;background:var(--bg3);border:1px solid var(--border);padding:14px;border-radius:8px;margin-bottom:14px}
-.streak-num{font-size:30px;font-weight:700;color:var(--amber);letter-spacing:-1px;line-height:1}
-.streak-lbl{font-size:10px;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-top:2px}
-.sdots{display:flex;gap:3px;flex-wrap:wrap;margin-left:auto}
-.sdot{width:8px;height:8px;border-radius:50%;background:var(--border2)}
-.sdot.on{background:var(--amber)}
-.chart-box{background:var(--bg3);border:1px solid var(--border);padding:12px;height:150px;display:flex;align-items:flex-end;gap:3px;border-radius:8px;margin-bottom:14px}
-.cw{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;height:100%}
-.cb{width:100%;min-height:2px;border-radius:2px 2px 0 0;transition:height 0.5s}
-.cb.up{background:var(--green)}
-.cb.dn{background:var(--red);border-radius:0 0 2px 2px;margin-top:auto}
-.cb-lbl{font-family:var(--mono);font-size:8px;color:var(--text3)}
-.sec-lbl{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;margin-top:14px}
-.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
-.cdh{font-family:var(--mono);font-size:8px;color:var(--text3);text-align:center;padding:3px 0;letter-spacing:0.05em}
-.cd{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:1px solid var(--border);font-family:var(--mono);border-radius:4px;transition:all 0.15s;padding:2px}
-.cd.empty{border-color:transparent}
-.cd.today{border-color:var(--green);color:var(--green)}
-.cd.win{background:var(--green-dim);border-color:rgba(16,185,129,0.2);color:var(--green)}
-.cd.loss{background:var(--red-dim);border-color:rgba(239,68,68,0.15);color:var(--red)}
-.cd-num{font-size:11px;font-weight:700;line-height:1}
-.cd-pnl{font-size:7px;font-weight:600;line-height:1;letter-spacing:-0.01em;opacity:0.9}
-.cd.flat{background:var(--bg3);color:var(--text3)}
-.cd-dot{width:3px;height:3px;border-radius:50%;margin-top:2px}
-.cd.win .cd-dot{background:var(--green)}
-.cd.loss .cd-dot{background:var(--red)}
-
-/* PAUSE OVERLAY */
-.pause-ov{display:none;position:fixed;inset:0;background:rgba(9,9,11,0.96);z-index:500;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px}
-.pause-ov.on{display:flex}
-.p-badge{font-family:var(--mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--amber);border:1px solid rgba(245,158,11,0.2);padding:4px 14px;border-radius:20px;background:var(--amber-dim)}
-.p-title{font-size:36px;font-weight:700;color:var(--amber);letter-spacing:-0.5px}
-.p-sub{font-size:13px;color:var(--text3);text-align:center;max-width:420px;line-height:1.9}
-/* STATS PENDANT LA PAUSE */
-.p-stats{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);padding:8px 20px;border-radius:8px;font-family:var(--mono)}
-.p-stat{display:flex;flex-direction:column;align-items:center;gap:2px}
-.p-stat-lbl{font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3)}
-.p-stat-val{font-size:14px;font-weight:700;color:var(--text)}
-.p-stat-sep{color:var(--border2);font-size:16px}
-.p-cd{font-family:var(--mono);font-size:64px;font-weight:300;color:var(--amber);letter-spacing:0.05em;line-height:1}
-.p-lbl{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase}
-.p-check{background:var(--bg3);border:1px solid var(--border);padding:16px 20px;max-width:400px;width:100%;border-radius:10px}
-.p-check-lbl{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
-.ci{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:all 0.12s}
-.ci:last-child{border-bottom:none}
-.cbox{width:16px;height:16px;border:1px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:3px;transition:all 0.15s}
-.cbox.checked{background:var(--green);border-color:var(--green)}
-.cbox.checked::after{content:'✓';color:#fff;font-size:10px;font-weight:700}
-.clbl{font-size:12px;color:var(--text2)}
-.ci.done .clbl{color:var(--text3);text-decoration:line-through}
-.resume{font-family:var(--mono);font-size:10px;font-weight:700;padding:11px 34px;background:transparent;border:1px solid var(--border2);color:var(--text3);cursor:not-allowed;letter-spacing:0.08em;text-transform:uppercase;transition:all 0.2s;border-radius:6px}
-.resume.ready{border-color:var(--green);color:var(--green);cursor:pointer;background:var(--green-dim)}
-.resume.ready:hover{background:var(--green);color:#fff}
-
-/* RESPONSABILISATION */
-.resp-ov{display:none;position:fixed;inset:0;background:rgba(9,9,11,0.97);z-index:510;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px}
-.resp-ov.on{display:flex}
-.resp-badge{font-family:var(--mono);font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--red);border:1px solid rgba(239,68,68,0.25);padding:4px 14px;border-radius:20px;background:var(--red-dim)}
-.resp-title{font-size:22px;font-weight:700;color:var(--text);letter-spacing:-0.3px;text-align:center;max-width:440px;line-height:1.3}
-.resp-sub{font-family:var(--mono);font-size:11px;color:var(--text3);text-align:center;max-width:400px;line-height:1.8}
-.resp-box{background:var(--bg3);border:1px solid var(--border2);padding:16px 20px;max-width:460px;width:100%;border-radius:10px;display:flex;flex-direction:column;gap:10px}
-.resp-lbl{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3)}
-.resp-textarea{font-family:var(--mono);font-size:12px;background:var(--bg4);border:1px solid var(--border2);color:var(--text);padding:10px 12px;outline:none;width:100%;resize:none;height:80px;border-radius:6px;transition:border-color 0.15s;line-height:1.6}
-.resp-textarea:focus{border-color:var(--amber)}
-.resp-textarea::placeholder{color:var(--text3)}
-.resp-count{font-family:var(--mono);font-size:9px;color:var(--text3);text-align:right;margin-top:-4px}
-.resp-count.ok{color:var(--green)}
-.resp-upload{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg4);border:1px solid var(--border2);border-radius:6px;cursor:pointer;transition:border-color 0.15s}
-.resp-upload:hover{border-color:var(--border2)}
-.resp-upload input{display:none}
-.resp-upload-ico{font-size:16px;flex-shrink:0}
-.resp-upload-lbl{font-family:var(--mono);font-size:11px;color:var(--text3)}
-.resp-upload-name{font-family:var(--mono);font-size:10px;color:var(--green);margin-left:auto;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.resp-btn{font-family:var(--mono);font-size:10px;font-weight:700;padding:12px 28px;background:transparent;border:1px solid var(--red);color:var(--red);cursor:not-allowed;letter-spacing:0.08em;text-transform:uppercase;transition:all 0.2s;border-radius:6px;opacity:0.4;max-width:460px;width:100%}
-.resp-btn.ready{opacity:1;cursor:pointer}
-.resp-btn.ready:hover{background:var(--red);color:#fff}
-.resp-back{font-family:var(--mono);font-size:10px;color:var(--text3);cursor:pointer;text-decoration:underline;opacity:0.5}
-.resp-back:hover{opacity:1}
-.resp-preview{max-width:460px;width:100%;border-radius:6px;overflow:hidden;border:1px solid var(--border2);display:none}
-.resp-preview img{width:100%;max-height:120px;object-fit:cover;display:block}
-
-/* LANGUAGE BUTTONS */
-.lang-btn{font-family:var(--mono);font-size:11px;font-weight:600;padding:8px 16px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;border-radius:6px;transition:all 0.15s;letter-spacing:0.02em}
-.lang-btn:hover{border-color:var(--green);color:var(--green)}
-.lang-btn.active{background:var(--green-dim);border-color:rgba(16,185,129,0.3);color:var(--green)}
-
-/* CHALLENGE 30J */
-.ch-wrap{flex:1;overflow-y:auto;padding:22px;min-height:0}
-.ch-wrap::-webkit-scrollbar{width:4px}
-.ch-wrap::-webkit-scrollbar-thumb{background:var(--border2)}
-.ch-hero{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden}
-.ch-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--green),var(--amber));border-radius:10px 10px 0 0}
-.ch-hero-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
-.ch-title{font-size:20px;font-weight:700;letter-spacing:-0.3px;margin-bottom:4px}
-.ch-sub{font-size:12px;color:var(--text3);line-height:1.6;max-width:400px}
-.ch-badge-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
-.ch-badge{font-size:40px;line-height:1}
-.ch-badge-lbl{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase}
-.ch-progress-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
-.ch-days-lbl{font-family:var(--mono);font-size:11px;color:var(--text2);flex-shrink:0}
-.ch-track{flex:1;height:6px;background:var(--bg5);border-radius:3px;overflow:hidden}
-.ch-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--green),var(--amber));transition:width 0.6s}
-.ch-pct{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--green);min-width:36px;text-align:right}
-.ch-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
-.ch-stat{background:var(--bg4);border:1px solid var(--border);padding:12px;border-radius:7px;text-align:center}
-.ch-stat-val{font-size:22px;font-weight:700;margin-bottom:3px}
-.ch-stat-val.green{color:var(--green)}
-.ch-stat-val.amber{color:var(--amber)}
-.ch-stat-val.red{color:var(--red)}
-.ch-stat-val.blue{color:var(--blue)}
-.ch-stat-lbl{font-size:9px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3)}
-.ch-actions{display:flex;gap:8px}
-.ch-btn{font-family:var(--mono);font-size:10px;font-weight:700;padding:8px 18px;border-radius:6px;border:none;cursor:pointer;letter-spacing:0.06em;text-transform:uppercase;transition:all 0.15s}
-.ch-btn.start{background:var(--green);color:#fff}
-.ch-btn.start:hover{opacity:0.88}
-.ch-btn.reset{background:transparent;border:1px solid var(--border2);color:var(--text3)}
-.ch-btn.reset:hover{border-color:var(--red);color:var(--red)}
-
-/* GRID 30 JOURS */
-.ch-grid-wrap{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px}
-.ch-grid-title{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);margin-bottom:12px}
-.ch-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}
-.ch-day{aspect-ratio:1;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid var(--border);font-family:var(--mono);font-size:9px;font-weight:700;cursor:default;transition:all 0.2s;position:relative}
-.ch-day.future{background:var(--bg4);color:var(--text3);border-color:var(--border)}
-.ch-day.validated{background:var(--green-dim);border-color:rgba(16,185,129,0.3);color:var(--green)}
-.ch-day.neutral{background:var(--bg4);border-color:var(--border2);color:var(--text2)}
-.ch-day.failed{background:var(--red-dim);border-color:rgba(239,68,68,0.2);color:var(--red)}
-.ch-day.joker{background:var(--amber-dim);border-color:rgba(245,158,11,0.3);color:var(--amber)}
-.ch-day.today{border-color:var(--green);box-shadow:0 0 8px rgba(16,185,129,0.2)}
-.ch-day-num{font-size:11px;font-weight:700;line-height:1}
-.ch-day-ico{font-size:10px;line-height:1;margin-top:1px}
-
-/* LÉGENDE CHALLENGE */
-.ch-legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
-.ch-leg-item{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.03em}
-.ch-leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;border:1px solid}
-.ch-leg-dot.validated{background:var(--green-dim);border-color:rgba(16,185,129,0.3)}
-.ch-leg-dot.failed{background:var(--red-dim);border-color:rgba(239,68,68,0.2)}
-.ch-leg-dot.joker{background:var(--amber-dim);border-color:rgba(245,158,11,0.3)}
-.ch-leg-dot.neutral{background:var(--bg4);border-color:var(--border2)}
-.ch-leg-dot.future{background:var(--bg4);border-color:var(--border);opacity:0.4}
-
-/* PANNEAU DÉTAIL JOUR */
-.ch-detail{background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:16px;margin-bottom:16px;animation:fadeUp 0.2s ease}
-.ch-detail-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.ch-detail-date{font-size:13px;font-weight:700;color:var(--text)}
-.ch-detail-close{background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px;transition:all 0.15s}
-.ch-detail-close:hover{background:var(--bg4);color:var(--text)}
-.ch-detail-score{font-family:var(--mono);font-size:28px;font-weight:700;color:var(--green);margin-bottom:12px}
-.ch-detail-rules{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
-.ch-detail-rule{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--text2)}
-.ch-detail-rule .r-ico{font-size:12px;flex-shrink:0}
-.ch-detail-summary{font-family:var(--mono);font-size:11px;color:var(--text3);line-height:1.8;padding:10px;background:var(--bg4);border-radius:6px;border-left:2px solid var(--green)}
-
-/* RÈGLES */
-.ch-rules{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px}
-.ch-rules-title{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);margin-bottom:10px}
-.ch-rule-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
-.ch-rule-item:last-child{border-bottom:none}
-.ch-rule-ico{font-size:16px;flex-shrink:0}
-.ch-rule-text{font-size:12px;color:var(--text2);flex:1}
-.ch-rule-badge{font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;font-weight:600;flex-shrink:0}
-.ch-rule-badge.req{background:var(--green-dim);color:var(--green);border:1px solid rgba(16,185,129,0.2)}
-.ch-rule-badge.opt{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(59,130,246,0.2)}
-.ch-rule-badge.joker{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,158,11,0.2)}
-
-/* BADGES */
-.ch-badges{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px}
-.ch-badges-title{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text2);margin-bottom:12px}
-.badges-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.badge-card{background:var(--bg4);border:1px solid var(--border);padding:12px;border-radius:8px;text-align:center;transition:all 0.2s}
-.badge-card.unlocked{border-color:var(--amber);background:var(--amber-dim)}
-.badge-ico{font-size:28px;margin-bottom:6px}
-.badge-name{font-size:10px;font-weight:700;color:var(--text2);margin-bottom:3px}
-.badge-cond{font-family:var(--mono);font-size:9px;color:var(--text3)}
-.badge-card.unlocked .badge-name{color:var(--amber)}
-.badge-locked{font-size:16px;opacity:0.2}
+.chat-foot{
+  display:flex;gap:8px;padding:12px 14px;
+  border-top:1px solid var(--glass-border);
+  align-items:flex-end;flex-shrink:0;
+  background:var(--glass);
+}
+.chat-foot textarea{
+  flex:1;font-family:var(--mono);font-size:12px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--glass-border);color:var(--text);
+  padding:9px 12px;resize:none;min-height:38px;max-height:80px;outline:none;
+  transition:all 0.2s;line-height:1.5;border-radius:var(--radius-sm);
+}
+.chat-foot textarea:focus{border-color:rgba(123,92,240,0.4);background:rgba(123,92,240,0.03);box-shadow:0 0 0 3px rgba(123,92,240,0.08)}
+.chat-foot textarea::placeholder{color:var(--text3)}
+.snd{
+  width:38px;height:38px;
+  background:var(--accent-grad);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:all 0.2s;border-radius:var(--radius-sm);
+  box-shadow:0 0 12px rgba(123,92,240,0.25);
+}
+.snd:hover{box-shadow:0 0 20px rgba(123,92,240,0.4);transform:translateY(-1px)}
+.snd svg{width:15px;height:15px;fill:white}
 </style>
 </head>
 <body>
-<div class="shell">
+<div class="app">
+
+  <!-- CAPITAL BAR -->
+  <div class="capital-bar">
+    <div class="capital-card">
+      <div class="cap-item">
+        <div class="cap-dot capital"></div>
+        <span class="cap-label">Capital</span>
+        <span class="cap-val" id="cap-capital">50 000.00 $</span>
+      </div>
+      <div class="cap-item">
+        <div class="cap-dot pnl"></div>
+        <span class="cap-label">P&L</span>
+        <span class="cap-val" id="cap-pnl">+0.00 €</span>
+      </div>
+      <div class="cap-item">
+        <div class="cap-dot equity"></div>
+        <span class="cap-label">Equity</span>
+        <span class="cap-val" id="cap-equity">50 000.00 $</span>
+      </div>
+    </div>
+  </div>
 
   <!-- HEADER -->
   <div class="hdr">
     <div class="brand">
-      <img src="logo-cercle.png" alt="DisciplineAI" style="height:36px;width:36px;object-fit:contain;flex-shrink:0">
-      <div class="brand-name">Discipline<span>AI</span><span class="brand-pill">BETA</span></div>
+      <div class="brand-logo"><svg viewBox="0 0 24 24"><path d="M3 3h18v2H3V3zm0 4h12v2H3V7zm0 4h18v2H3v-2zm0 4h12v2H3v-2zm0 4h18v2H3v-2z"/></svg></div>
+      <div class="brand-name">Trade<span>Coach</span></div>
+      <div class="brand-badge">Beta</div>
     </div>
     <div class="hdr-mid">
-      <div class="sess-box">
-        <div class="sess-led" id="sess-led"></div>
-        <span class="sess-lbl" id="sess-lbl">INACTIVE</span>
-      </div>
-      <div class="timer" id="timer">00:00:00</div>
-      <div class="hbtns">
-        <button class="hbtn brk" id="brk-btn" style="display:none" onclick="triggerPause(10,'Pause volontaire.')">⏸ Pause</button>
-        <button class="hbtn go" id="go-btn" onclick="startSession()">Démarrer</button>
-        <button class="hbtn end" id="end-btn" style="display:none" onclick="endSession()">Terminer</button>
-      </div>
+      <button class="ntab active">Session</button>
+      <button class="ntab">Historique</button>
+      <button class="ntab">Règles</button>
     </div>
     <div class="hdr-right">
-      <div class="ibtn" onclick="toggleTheme()" id="theme-btn">🌙</div>
-      <div class="ws-chip">
-        <div class="ws-led" id="ws-led"></div>
-        <span id="ws-txt" style="color:var(--text3)">Déconnecté</span>
+      <div class="ws-pill">
+        <div class="ws-dot" id="ws-dot"></div>
+        <span class="ws-label" id="ws-label">Déconnecté</span>
       </div>
+      <div class="timer-wrap" id="timer">00:00:00</div>
+      <button class="btn go" id="start-btn" onclick="startSession()">▶ Démarrer</button>
+      <button class="btn stop" id="end-btn" style="display:none" onclick="endSession()">■ Terminer</button>
     </div>
   </div>
 
-  <!-- TAB NAV -->
-  <div class="tabnav">
-    <button class="tab active" onclick="showTab('session',this)">Session</button>
-    <button class="tab" onclick="showTab('history',this)">Historique</button>
-    <button class="tab" onclick="showTab('challenge',this)">🔥 Challenge 30J</button>
-    <button class="tab" onclick="showTab('settings',this)">Réglages</button>
+  <!-- ALERT -->
+  <div class="alert" id="alert-strip"><span id="alert-msg"></span></div>
+
+  <!-- METRICS -->
+  <div class="metrics">
+    <div class="met" id="m-pnl"><div class="met-accent"></div><div class="met-label">P&L journalier</div><div class="met-val" id="pnl-val">+0.00€</div><div class="met-sub" id="pnl-sub">0 trades</div></div>
+    <div class="met" id="m-trades"><div class="met-accent"></div><div class="met-label">Trades</div><div class="met-val" id="trades-val">0</div><div class="met-sub" id="trades-sub">/ 5 max</div></div>
+    <div class="met" id="m-wr"><div class="met-accent"></div><div class="met-label">Win rate</div><div class="met-val" id="wr-val">—</div><div class="met-sub" id="wr-sub">—</div></div>
+    <div class="met" id="m-consec"><div class="met-accent"></div><div class="met-label">Pertes consec.</div><div class="met-val" id="consec-val">—</div><div class="met-sub">série en cours</div></div>
+    <div class="met" id="m-score"><div class="met-accent"></div><div class="met-label">Discipline</div><div class="met-val" id="score-val">—</div><div class="met-sub">score du jour</div></div>
   </div>
 
-  <!-- PAGES -->
-  <div class="pages">
-
-    <!-- SESSION -->
-    <div class="pg on" id="pg-session">
-      <!-- WELCOME -->
-      <div class="welcome" id="welcome">
-        <div class="w-badge">AI Trading Coach · Institutional Grade</div>
-        <div class="w-title">Protège ton capital.<br><span>Discipline ta stratégie.</span></div>
-        <div class="w-sub">Détection comportementale · MT5 Live · Pause Shield · Profit Guard · Score mensuel</div>
-        <div class="w-cards">
-          <div class="w-card"><div class="w-card-ico">🔗</div><div class="w-card-ttl">MT5 Live</div><div class="w-card-desc">Import automatique de toutes tes positions</div></div>
-          <div class="w-card"><div class="w-card-ico">🧠</div><div class="w-card-ttl">Analyse IA</div><div class="w-card-desc">Détection FOMO, revenge et overtrading</div></div>
-          <div class="w-card"><div class="w-card-ico">⏸</div><div class="w-card-ttl">Pause Shield</div><div class="w-card-desc">Check mental avant reprise</div></div>
-          <div class="w-card"><div class="w-card-ico">📊</div><div class="w-card-ttl">Score mensuel</div><div class="w-card-desc">Progression et calendrier</div></div>
-        </div>
-        <button class="w-btn" onclick="startSession()">Démarrer la session</button>
-        <div class="w-ws"><div class="w-ws-dot" id="w-dot"></div><span id="w-txt">Connexion MT5 en attente...</span></div>
+  <!-- MAIN -->
+  <div class="main">
+    <div class="left">
+      <div class="sec-hdr">
+        <span class="sec-title">Journal de trades<em id="trade-count-lbl"></em></span>
+        <span class="sec-title" id="plan-pct"></span>
       </div>
-      <!-- SESSION ACTIVE -->
-      <div class="sa" id="sa">
-        <div class="left">
-          <div class="mkts" id="mkts"></div>
-          <div class="alerts" id="alerts"></div>
-          <div class="stats">
-            <div class="stat" id="s-pnl"><div class="stat-line"></div><div class="stat-lbl">P&L Journalier</div><div class="stat-val" id="pnl-v">+0.00</div><div class="stat-sub" id="pnl-s">0 trades</div></div>
-            <div class="stat" id="s-wr"><div class="stat-line"></div><div class="stat-lbl">Win Rate</div><div class="stat-val" id="wr-v">—</div><div class="stat-sub" id="wr-s">—</div></div>
-            <div class="stat" id="s-tr"><div class="stat-line"></div><div class="stat-lbl">Trades</div><div class="stat-val" id="tr-v">0</div><div class="stat-sub" id="tr-s">/ 5 max</div></div>
-            <div class="stat" id="s-sc"><div class="stat-line"></div><div class="stat-lbl">Discipline</div><div class="stat-val" id="sc-v">—</div><div class="stat-sub">score</div></div>
-            <div class="stat" id="s-pr"><div class="stat-line"></div><div class="stat-lbl">Protections</div><div class="prot-ok" id="pr-v">● Actives</div><div class="stat-sub" id="pr-s">Aucune alerte</div></div>
-          </div>
-          <div class="j-hdr">
-            <span class="j-title">Journal<span id="j-cnt" style="color:var(--green);font-weight:700;margin-left:6px"></span></span>
-            <span class="j-meta" id="j-plan"></span>
-          </div>
-          <div class="tbl-hdr">
-            <div class="th">Symbole</div><div class="th">Dir.</div><div class="th">Heure</div>
-            <div class="th">P&L</div><div class="th">Note</div><div class="th">Source</div><div class="th">Plan</div>
-          </div>
-          <div class="tbl" id="tbl"><div class="empty">[ MT5 connecté · En attente de positions ]</div></div>
-          <div class="add">
-            <div class="add-grid">
-              <input class="fi" id="t-sym" placeholder="XAUUSD · EURUSD · BTC..."/>
-              <select class="fi" id="t-dir"><option value="long">LONG</option><option value="short">SHORT</option></select>
-              <input class="fi" type="number" id="t-pnl" placeholder="P&L" step="0.01"/>
-              <select class="fi" id="t-plan"><option value="yes">Dans le plan</option><option value="no">Hors plan</option></select>
-              <button class="add-btn" onclick="addTrade()">+ Ajouter</button>
-            </div>
-            <div class="note-r"><input class="fi" id="t-note" placeholder="Note : FOMO · Revenge · Overtrading..."/></div>
-          </div>
-        </div>
-        <div class="right" id="right-panel">
-          <!-- BOUTON TOGGLE COACH IA — mobile uniquement -->
-          <button class="coach-toggle" id="coach-toggle-btn" onclick="toggleCoach()" aria-label="Toggle Coach IA">
-            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <div class="rcard">
-            <div class="rcard-title">Règles de protection</div>
-            <div class="rules-grid">
-              <div class="rule"><div><div class="rule-lbl" id="rl-loss">Perte max</div><div class="rule-row"><input type="number" class="rule-inp" id="r-loss" value="200" step="10" onchange="checkRules()"/><span class="rule-u" id="ru-loss">EUR</span></div></div><label class="tog"><input type="checkbox" id="r-loss-on" checked onchange="checkRules()"><span class="tog-sl"></span></label></div>
-              <div class="rule"><div><div class="rule-lbl" id="rl-trades">Max trades</div><div class="rule-row"><input type="number" class="rule-inp" id="r-trades" value="5" min="1" onchange="checkRules()"/><span class="rule-u" id="ru-trades">trades</span></div></div><label class="tog"><input type="checkbox" id="r-trades-on" checked onchange="checkRules()"><span class="tog-sl"></span></label></div>
-              <div class="rule"><div><div class="rule-lbl" id="rl-consec">Bloquer après</div><div class="rule-row"><input type="number" class="rule-inp" id="r-consec" value="2" min="1" onchange="checkRules()"/><span class="rule-u" id="ru-consec">pertes</span></div></div><label class="tog"><input type="checkbox" id="r-consec-on" checked onchange="checkRules()"><span class="tog-sl"></span></label></div>
-              <div class="rule"><div><div class="rule-lbl" id="rl-profit">Profit alert</div><div class="rule-row"><input type="number" class="rule-inp" id="r-profit" value="50" min="10"/><span class="rule-u" id="ru-profit">%</span></div></div><label class="tog"><input type="checkbox" id="r-profit-on" checked><span class="tog-sl"></span></label></div>
-            </div>
-            <div class="score-row">
-              <span class="score-lbl">Discipline</span>
-              <div class="score-track"><div class="score-fill" id="sc-fill" style="width:0%"></div></div>
-              <span class="score-val" id="sc-num" style="color:var(--text3)">—</span>
-            </div>
-          </div>
-          <div class="locked" id="locked">⛔ Session verrouillée — Ferme MT5.</div>
-          <div class="bcard">
-            <div class="bcard-title">Détection comportementale</div>
-            <div class="bgrid">
-              <div class="bc" id="bc-rev">
-                <div class="bc-tip">Tu trades pour récupérer une perte récente — décision émotionnelle.</div>
-                <div class="bc-hdr"><div class="bc-lbl">Revenge</div><div class="bc-dot"></div></div>
-                <div class="bc-val" id="bv-rev">—</div>
-              </div>
-              <div class="bc" id="bc-ov">
-                <div class="bc-tip">Tu dépasses ton nombre de trades — signe de perte de contrôle.</div>
-                <div class="bc-hdr"><div class="bc-lbl">Overtrading</div><div class="bc-dot"></div></div>
-                <div class="bc-val" id="bv-ov">—</div>
-              </div>
-              <div class="bc" id="bc-con">
-                <div class="bc-tip">Pertes consécutives détectées — risque élevé de revenge trading.</div>
-                <div class="bc-hdr"><div class="bc-lbl">Pertes consec.</div><div class="bc-dot"></div></div>
-                <div class="bc-val" id="bv-con">—</div>
-              </div>
-              <div class="bc" id="bc-pro">
-                <div class="bc-tip">Tu approches de ton objectif de profit — sécurise tes gains maintenant.</div>
-                <div class="bc-hdr"><div class="bc-lbl">Profit Guard</div><div class="bc-dot"></div></div>
-                <div class="bc-val" id="bv-pro">—</div>
-              </div>
-            </div>
-          </div>
-          <div class="coach">
-            <div class="coach-hdr">
-              <div class="ai-orb"><div class="ai-orb-core"></div></div>
-              <div>
-                <div class="ai-name">Coach IA</div>
-                <div class="ai-sub"><div class="ai-sub-dot"></div>Surveillance active</div>
-              </div>
-            </div>
-            <div class="msgs" id="msgs"></div>
-            <div class="quick">
-              <button class="qbtn" onclick="sq('Comment est ma discipline ?')">Discipline</button>
-              <button class="qbtn" onclick="sq('J ai du FOMO')">FOMO</button>
-              <button class="qbtn" onclick="sq('Trade revenge')">Revenge</button>
-              <button class="qbtn" onclick="sq('Je continue ?')">Continuer ?</button>
-              <button class="qbtn" onclick="triggerPause(10,'Pause.')">⏸ 10min</button>
-            </div>
-            <div class="chat-row">
-              <textarea id="chat-in" placeholder="Parle à ton coach IA..." onkeydown="hk(event)"></textarea>
-              <button class="send" onclick="sendMsg()"><svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg></button>
-            </div>
-          </div>
+      <div class="trade-col-hdr">
+        <span>Symbole</span><span>Direction</span><span>Heure</span>
+        <span>Prix</span><span>P&L</span><span>Note</span><span>Source</span>
+      </div>
+      <div class="trades-list" id="trade-list">
+        <div class="empty">
+          <div class="empty-icon">📊</div>
+          En attente de trades<br>MT5 connecté · Ouvre une position
         </div>
       </div>
+      <div class="add-area">
+        <div class="add-label">Ajouter manuellement</div>
+        <div class="form-grid">
+          <input class="fi" type="text" id="t-sym" placeholder="XAUUSD, EURUSD..."/>
+          <select class="fi" id="t-dir"><option value="long">LONG ↑</option><option value="short">SHORT ↓</option></select>
+          <input class="fi" type="number" id="t-pnl" placeholder="P&L €" step="0.01"/>
+          <select class="fi" id="t-plan"><option value="yes">Dans le plan</option><option value="no">Hors plan ⚠</option></select>
+          <button class="add-btn" onclick="addManualTrade()">+ Ajouter</button>
+        </div>
+        <div class="note-row"><input class="fi" type="text" id="t-note" placeholder="Note : FOMO · Revenge · Overtrading · Impatience..."/></div>
+      </div>
+      <div class="rules-area">
+        <div class="sec-title">Règles de protection</div>
+        <div class="rules-grid">
+          <div class="rule-card">
+            <div><div class="rule-lbl">Perte max / jour</div><div class="rule-inp-row"><input type="number" class="rule-inp" id="r-maxloss" value="200" step="10" onchange="checkRules()"/><span class="rule-unit">€</span></div></div>
+            <label class="tog"><input type="checkbox" id="r-maxloss-on" checked onchange="checkRules()"><span class="tog-sl"></span></label>
+          </div>
+          <div class="rule-card">
+            <div><div class="rule-lbl">Max trades / jour</div><div class="rule-inp-row"><input type="number" class="rule-inp" id="r-maxtrades" value="5" min="1" onchange="checkRules()"/><span class="rule-unit">trades</span></div></div>
+            <label class="tog"><input type="checkbox" id="r-maxtrades-on" checked onchange="checkRules()"><span class="tog-sl"></span></label>
+          </div>
+          <div class="rule-card">
+            <div><div class="rule-lbl">Bloquer après pertes consec.</div><div class="rule-inp-row"><input type="number" class="rule-inp" id="r-consec" value="2" min="1" onchange="checkRules()"/><span class="rule-unit">pertes</span></div></div>
+            <label class="tog"><input type="checkbox" id="r-consec-on" onchange="checkRules()"><span class="tog-sl"></span></label>
+          </div>
+          <div class="rule-card">
+            <div><div class="rule-lbl">Verrouillage strict</div><div class="rule-inp-row"><span class="rule-unit">Coupe la session auto</span></div></div>
+            <label class="tog"><input type="checkbox" id="r-enforce"><span class="tog-sl"></span></label>
+          </div>
+        </div>
+        <div class="score-row">
+          <span class="score-lbl">Discipline</span>
+          <div class="score-track"><div class="score-fill" id="score-fill" style="width:0%"></div></div>
+          <span class="score-num" id="score-num" style="color:var(--text3)">—</span>
+        </div>
+      </div>
+      <div class="locked" id="locked-bar">⛔ SESSION VERROUILLÉE — Ferme MT5 et repose-toi.</div>
     </div>
 
-    <!-- HISTORY -->
-    <div class="pg" id="pg-history">
-      <div class="hist">
-
-        <!-- PÉRIODE SELECTOR -->
-        <div class="period-bar">
-          <div class="period-pills">
-            <button class="ppill active" onclick="setPeriod('month',this)">Ce mois</button>
-            <button class="ppill" onclick="setPeriod('7d',this)">7 jours</button>
-            <button class="ppill" onclick="setPeriod('30d',this)">30 jours</button>
-            <button class="ppill" onclick="setPeriod('all',this)">Tout</button>
-          </div>
-          <div class="mnav-inline">
-            <button class="mbtn" onclick="changeMonth(-1)">←</button>
-            <div class="mnav-title" id="mnav-title">Chargement...</div>
-            <button class="mbtn" onclick="changeMonth(1)">→</button>
-          </div>
-        </div>
-
-        <!-- TOP ROW: Courbe + Donut -->
-        <div class="hist-top">
-
-          <!-- COURBE DE PERFORMANCE -->
-          <div class="perf-card">
-            <div class="perf-hdr">
-              <div>
-                <div class="hstat-lbl">Évolution du capital</div>
-                <div class="perf-val" id="perf-total">+0.00€</div>
-                <div class="perf-pct" id="perf-pct">+0.00%</div>
-              </div>
-              <div style="text-align:right">
-                <div class="hstat-lbl">Max drawdown</div>
-                <div class="dd-val" id="dd-val">0.00€</div>
-              </div>
-            </div>
-            <canvas id="perf-canvas" height="100" style="width:100%;display:block"></canvas>
-          </div>
-
-          <!-- DONUT WIN/LOSS -->
-          <div class="donut-card">
-            <div class="hstat-lbl" style="margin-bottom:12px">Win / Loss</div>
-            <div class="donut-wrap">
-              <canvas id="donut-canvas" width="120" height="120"></canvas>
-              <div class="donut-center">
-                <div class="donut-pct" id="donut-pct">—</div>
-                <div class="donut-lbl">win rate</div>
-              </div>
-            </div>
-            <div class="donut-legend">
-              <div class="dl-item"><span class="dl-dot" style="background:var(--green)"></span><span id="dl-wins">0W</span></div>
-              <div class="dl-item"><span class="dl-dot" style="background:var(--red)"></span><span id="dl-losses">0L</span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DRAWDOWN BAR -->
-        <div class="dd-card">
-          <div class="dd-hdr">
-            <div class="hstat-lbl">Drawdown journalier</div>
-            <div class="dd-hdr">
-              <span class="dd-cur" id="dd-cur">0.00€</span>
-              <span class="dd-sep">/</span>
-              <span class="dd-max-lbl">Max: <span id="dd-limit">200€</span></span>
-            </div>
-          </div>
-          <div class="dd-track">
-            <div class="dd-fill" id="dd-fill" style="width:0%"></div>
-            <div class="dd-zones">
-              <div class="dd-zone-lbl" style="left:50%">50%</div>
-              <div class="dd-zone-lbl" style="left:75%">75%</div>
-              <div class="dd-zone-line" style="left:50%"></div>
-              <div class="dd-zone-line" style="left:75%"></div>
-            </div>
-          </div>
-          <div class="dd-sublbl" id="dd-sublbl">En dessous de la limite</div>
-        </div>
-
-        <!-- STATS ROW -->
-        <div class="hstats">
-          <div class="hstat up"><div class="hstat-lbl">Score moyen</div><div class="hstat-val up" id="h-score">—</div><div class="hstat-sub">discipline</div></div>
-          <div class="hstat info"><div class="hstat-lbl">Jours rentables</div><div class="hstat-val info" id="h-prof">—</div><div class="hstat-sub" id="h-prof-s">sur 0 jours</div></div>
-          <div class="hstat warn"><div class="hstat-lbl">Streak</div><div class="hstat-val warn" id="h-str">—</div><div class="hstat-sub">jours disciplinés</div></div>
-          <div class="hstat" id="h-pnl-c"><div class="hstat-lbl">P&L total</div><div class="hstat-val" id="h-pnl">—</div><div class="hstat-sub">période</div></div>
-        </div>
-
-        <!-- STREAK -->
-        <div class="streak-card">
-          <div style="font-size:28px">🔥</div>
-          <div><div class="streak-num" id="str-v">0</div><div class="streak-lbl">Jours disciplinés consécutifs</div></div>
-          <div class="sdots" id="sdots"></div>
-        </div>
-
-        <!-- CALENDRIER -->
-        <div class="sec-lbl">Calendrier discipline</div>
-        <div class="cal" id="cal">
-          <div class="cdh">Lun</div><div class="cdh">Mar</div><div class="cdh">Mer</div>
-          <div class="cdh">Jeu</div><div class="cdh">Ven</div><div class="cdh">Sam</div><div class="cdh">Dim</div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- CHALLENGE 30J -->
-    <div class="pg" id="pg-challenge">
-      <div class="ch-wrap">
-
-        <!-- HERO -->
-        <div class="ch-hero">
-          <div class="ch-hero-top">
-            <div>
-              <div class="ch-title">Challenge 30 Jours 🔥</div>
-              <div class="ch-sub">30 jours de discipline consécutifs. Pas de revenge trading. Pas d'overtrading. Juste ton plan.</div>
-            </div>
-            <div class="ch-badge-wrap">
-              <div class="ch-badge" id="ch-main-badge">🎯</div>
-              <div class="ch-badge-lbl" id="ch-main-lbl">En attente</div>
-            </div>
-          </div>
-          <div class="ch-progress-row">
-            <span class="ch-days-lbl" id="ch-days-lbl">Jour 0 / 30</span>
-            <div class="ch-track"><div class="ch-fill" id="ch-fill" style="width:0%"></div></div>
-            <span class="ch-pct" id="ch-pct">0%</span>
-          </div>
-          <div class="ch-stats-row">
-            <div class="ch-stat"><div class="ch-stat-val green" id="ch-validated">0</div><div class="ch-stat-lbl">Jours validés ✅</div></div>
-            <div class="ch-stat"><div class="ch-stat-val amber" id="ch-neutral">0</div><div class="ch-stat-lbl">Jours neutres ⚪</div></div>
-            <div class="ch-stat"><div class="ch-stat-val amber" id="ch-jokers">1</div><div class="ch-stat-lbl">Jokers ⚡</div></div>
-            <div class="ch-stat"><div class="ch-stat-val red" id="ch-failed">0</div><div class="ch-stat-lbl">Jours ratés ❌</div></div>
-          </div>
-          <div class="ch-actions">
-            <button class="ch-btn start" id="ch-start-btn" onclick="startChallenge()">Démarrer le challenge</button>
-            <button class="ch-btn reset" id="ch-reset-btn" style="display:none" onclick="resetChallenge()">Recommencer</button>
-          </div>
-        </div>
-
-        <!-- GRILLE 30 JOURS -->
-        <div class="ch-grid-wrap">
-          <div class="ch-grid-title">Progression jour par jour</div>
-          <div class="ch-grid" id="ch-grid"></div>
-
-          <!-- LÉGENDE -->
-          <div class="ch-legend">
-            <div class="ch-leg-item"><span class="ch-leg-dot validated"></span>Jour validé — discipline ok</div>
-            <div class="ch-leg-item"><span class="ch-leg-dot failed"></span>Jour non validé — règles brisées</div>
-            <div class="ch-leg-item"><span class="ch-leg-dot joker"></span>Joker activé — rattrapage en cours</div>
-            <div class="ch-leg-item"><span class="ch-leg-dot neutral"></span>Pas de session ce jour</div>
-            <div class="ch-leg-item"><span class="ch-leg-dot future"></span>Jour à venir</div>
-          </div>
-        </div>
-
-        <!-- PANNEAU DÉTAIL JOUR (au clic) -->
-        <div class="ch-detail" id="ch-detail" style="display:none">
-          <div class="ch-detail-hdr">
-            <div class="ch-detail-date" id="ch-detail-date">—</div>
-            <button class="ch-detail-close" onclick="closeDayDetail()">✕</button>
-          </div>
-          <div class="ch-detail-body">
-            <div class="ch-detail-score" id="ch-detail-score">—</div>
-            <div class="ch-detail-rules" id="ch-detail-rules"></div>
-            <div class="ch-detail-summary" id="ch-detail-summary"></div>
-          </div>
-        </div>
-
-        <!-- RÈGLES -->
-        <div class="ch-rules">
-          <div class="ch-rules-title">Règles du challenge</div>
-          <div class="ch-rule-item">
-            <div class="ch-rule-ico">✅</div>
-            <div class="ch-rule-text">Score de discipline ≥ 70/100 — jour validé</div>
-            <div class="ch-rule-badge req">Requis</div>
-          </div>
-          <div class="ch-rule-item">
-            <div class="ch-rule-ico">⚪</div>
-            <div class="ch-rule-text">Pas de trade aujourd'hui — jour neutre, pas pénalisé</div>
-            <div class="ch-rule-badge opt">Neutre</div>
-          </div>
-          <div class="ch-rule-item">
-            <div class="ch-rule-ico">⚡</div>
-            <div class="ch-rule-text">1 joker par semaine — rattrapage si les 3 jours suivants font 80/100+</div>
-            <div class="ch-rule-badge joker">1x / semaine</div>
-          </div>
-          <div class="ch-rule-item">
-            <div class="ch-rule-ico">❌</div>
-            <div class="ch-rule-text">2 jours ratés consécutifs — pas de rattrapage possible</div>
-            <div class="ch-rule-badge req">Limite</div>
-          </div>
-          <div class="ch-rule-item">
-            <div class="ch-rule-ico">🏆</div>
-            <div class="ch-rule-text">30 jours validés ou neutres — badge "Trader Discipliné" débloqué</div>
-            <div class="ch-rule-badge req">Objectif</div>
-          </div>
-        </div>
-
-        <!-- BADGES -->
-        <div class="ch-badges">
-          <div class="ch-badges-title">Badges de certification</div>
-          <div class="badges-grid">
-            <div class="badge-card" id="badge-30" style="opacity:0.4">
-              <div class="badge-ico">🥉</div>
-              <div class="badge-name">Trader Discipliné</div>
-              <div class="badge-cond">30 jours validés</div>
-            </div>
-            <div class="badge-card" id="badge-90" style="opacity:0.4">
-              <div class="badge-ico">🥈</div>
-              <div class="badge-name">Trader Certifié</div>
-              <div class="badge-cond">3 mois disciplinés</div>
-            </div>
-            <div class="badge-card" id="badge-180" style="opacity:0.4">
-              <div class="badge-ico">🥇</div>
-              <div class="badge-name">Elite Trader</div>
-              <div class="badge-cond">6 mois disciplinés</div>
-            </div>
-            <div class="badge-card" id="badge-365" style="opacity:0.4">
-              <div class="badge-ico">💎</div>
-              <div class="badge-name">Master Discipline</div>
-              <div class="badge-cond">12 mois disciplinés</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- SETTINGS -->
-    <div class="pg" id="pg-settings">
-      <div style="padding:28px;width:100%;overflow-y:auto">
-        <div style="font-size:20px;font-weight:700;margin-bottom:4px" data-i18n="settings_title">Réglages</div>
-        <div style="font-size:13px;color:var(--text3);margin-bottom:24px" data-i18n="settings_sub">Configuration de DisciplineAI</div>
-
-        <!-- LANGUE -->
-        <div style="background:var(--bg3);border:1px solid var(--border);padding:18px;max-width:460px;border-radius:8px;margin-bottom:12px">
-          <div style="font-family:var(--mono);font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:12px" data-i18n="lang_label">Langue / Language / Idioma</div>
-          <div style="display:flex;gap:8px">
-            <button class="lang-btn active" id="lang-fr" onclick="setLang('fr',this)">🇫🇷 Français</button>
-            <button class="lang-btn" id="lang-en" onclick="setLang('en',this)">🇬🇧 English</button>
-            <button class="lang-btn" id="lang-es" onclick="setLang('es',this)">🇪🇸 Español</button>
-          </div>
-        </div>
-
-        <!-- NOTIFICATIONS -->
-        <div style="background:var(--bg3);border:1px solid var(--border);padding:18px;max-width:460px;border-radius:8px;margin-bottom:12px">
-          <div style="font-family:var(--mono);font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:12px">Notifications push</div>
-          <button id="notif-btn" onclick="initNotifications()" style="font-family:var(--mono);font-size:11px;font-weight:600;padding:8px 16px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;border-radius:6px;transition:all 0.2s">🔕 Activer les notifications</button>
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:8px;line-height:1.8">Reçois des alertes même quand l'app est fermée — revenge trading, perte max, pause obligatoire.</div>
-        </div>
-
-        <!-- SESSION ID -->
-        <div style="background:var(--bg3);border:1px solid var(--border);padding:18px;max-width:460px;border-radius:8px;margin-bottom:12px">
-          <div style="font-family:var(--mono);font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:8px" data-i18n="session_id_label">ID de session MT5</div>
-          <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green)">ma-session</div>
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:6px" data-i18n="session_id_hint">Utilise cet ID dans ton Expert Advisor MT5.</div>
-        </div>
-
-        <!-- THÈME -->
-        <div style="background:var(--bg3);border:1px solid var(--border);padding:18px;max-width:460px;border-radius:8px;margin-bottom:12px">
-          <div style="font-family:var(--mono);font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:12px" data-i18n="theme_label">Thème</div>
-          <div style="display:flex;gap:8px">
-            <button class="lang-btn active" id="theme-dark-btn" onclick="setThemeBtn('dark',this)">🌙 Dark</button>
-            <button class="lang-btn" id="theme-light-btn" onclick="setThemeBtn('light',this)">☀️ Light</button>
-          </div>
-        </div>
-
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text3);line-height:2.2" data-i18n="coming_soon">Prochainement : Prop Firm Mode · Push notifications · Export CSV</div>
-
-        <!-- PROFILS PRESETS -->
-        <div style="margin-top:20px">
-          <div style="font-size:20px;font-weight:700;margin-bottom:4px">Profils de protection</div>
-          <div style="font-size:13px;color:var(--text3);margin-bottom:16px">Choisis un profil qui correspond à ta situation — il configure automatiquement tes règles.</div>
-          <div style="display:flex;flex-direction:column;gap:10px;max-width:460px">
-
-            <!-- PROFIL 1 -->
-            <div style="background:var(--bg3);border:1px solid var(--border);padding:16px;border-radius:8px;cursor:pointer;transition:all 0.2s" onclick="applyPreset('impulsif')" onmouseenter="this.style.borderColor='var(--red)'" onmouseleave="this.style.borderColor='var(--border)'">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-                <div style="font-size:13px;font-weight:700">🔴 Trader Impulsif</div>
-                <div style="font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;background:rgba(239,68,68,0.1);color:var(--red);border:1px solid rgba(239,68,68,0.2)">Appliquer</div>
-              </div>
-              <div style="font-family:var(--mono);font-size:10px;color:var(--text3);line-height:1.8">Tu trades trop vite après une perte. Ce profil te force à ralentir.<br>Perte max : 100€ · Max 3 trades · Pause après 2 pertes</div>
-            </div>
-
-            <!-- PROFIL 2 -->
-            <div style="background:var(--bg3);border:1px solid var(--border);padding:16px;border-radius:8px;cursor:pointer;transition:all 0.2s" onclick="applyPreset('apres-gain')" onmouseenter="this.style.borderColor='var(--amber)'" onmouseleave="this.style.borderColor='var(--border)'">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-                <div style="font-size:13px;font-weight:700">🟡 Après Objectif Atteint</div>
-                <div style="font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;background:rgba(245,158,11,0.1);color:var(--amber);border:1px solid rgba(245,158,11,0.2)">Appliquer</div>
-              </div>
-              <div style="font-family:var(--mono);font-size:10px;color:var(--text3);line-height:1.8">Tu as tendance à tout redonner après un bon trade. Ce profil verrouille ton gain.<br>Profit alert : 30% · Max 2 trades après gain · Protection stricte</div>
-            </div>
-
-            <!-- PROFIL 3 -->
-            <div style="background:var(--bg3);border:1px solid var(--border);padding:16px;border-radius:8px;cursor:pointer;transition:all 0.2s" onclick="applyPreset('prop')" onmouseenter="this.style.borderColor='var(--blue)'" onmouseleave="this.style.borderColor='var(--border)'">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-                <div style="font-size:13px;font-weight:700">🔵 Mode Prop Trader</div>
-                <div style="font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;background:rgba(59,130,246,0.1);color:var(--blue);border:1px solid rgba(59,130,246,0.2)">Appliquer</div>
-              </div>
-              <div style="font-family:var(--mono);font-size:10px;color:var(--text3);line-height:1.8">Tu passes un challenge prop firm. Zéro marge d'erreur.<br>Perte max : 200€ · Max 4 trades · Règles FTMO/Topstep · Blocage auto</div>
-            </div>
-
-          </div>
+    <!-- COACH -->
+    <div class="right">
+      <div class="coach-hdr">
+        <div class="coach-avatar">🧠</div>
+        <div>
+          <div class="coach-name">Coach IA</div>
+          <div class="coach-sub">Psychologie · Discipline · Performance</div>
+          <div class="coach-status"><div class="coach-status-dot"></div><span class="coach-status-txt">En ligne</span></div>
         </div>
       </div>
+      <div class="msgs" id="msgs"></div>
+      <div class="quick-row">
+        <button class="qbtn" onclick="sq('Comment est ma discipline ?')">Ma discipline</button>
+        <button class="qbtn" onclick="sq('J\'ai du FOMO')">FOMO</button>
+        <button class="qbtn" onclick="sq('Trade revenge, j\'y pense')">Revenge</button>
+        <button class="qbtn" onclick="sq('Je continue à trader ?')">Continuer ?</button>
+        <button class="qbtn" onclick="sq('Analyse mon comportement')">Analyse</button>
+      </div>
+      <div class="chat-foot">
+        <textarea id="chat-in" placeholder="Parle à ton coach..." onkeydown="hk(event)"></textarea>
+        <button class="snd" onclick="sendMsg()"><svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg></button>
+      </div>
     </div>
-
   </div>
-</div>
-
-<!-- PAUSE -->
-<div class="pause-ov" id="pause-ov">
-  <div class="p-badge">⏸ Mode Protection Activé</div>
-  <div class="p-title">Pause.</div>
-  <div class="p-sub" id="p-reason">Ton objectif n'est pas de récupérer tes pertes.<br>C'est de ne pas tilter.</div>
-
-  <!-- STATS DU JOUR PENDANT LA PAUSE -->
-  <div class="p-stats" id="p-stats">
-    <div class="p-stat"><span class="p-stat-lbl">Trades</span><span class="p-stat-val" id="ps-trades">0</span></div>
-    <div class="p-stat-sep">·</div>
-    <div class="p-stat"><span class="p-stat-lbl">P&L</span><span class="p-stat-val" id="ps-pnl">0€</span></div>
-    <div class="p-stat-sep">·</div>
-    <div class="p-stat"><span class="p-stat-lbl">Score</span><span class="p-stat-val" id="ps-score">—</span></div>
-  </div>
-
-  <div class="p-cd" id="p-cd">10:00</div>
-  <div class="p-lbl">temps restant</div>
-
-  <div class="p-check">
-    <div class="p-check-lbl">Confirme avant de reprendre</div>
-    <div class="ci" onclick="tglCheck(this)"><div class="cbox"></div><div class="clbl">Je ne suis plus en colère ni frustré</div></div>
-    <div class="ci" onclick="tglCheck(this)"><div class="cbox"></div><div class="clbl">Je ne cherche pas à me refaire — je respecte mon plan</div></div>
-    <div class="ci" onclick="tglCheck(this)"><div class="cbox"></div><div class="clbl">Je vois un setup clair que je peux décrire précisément</div></div>
-    <div class="ci" onclick="tglCheck(this)"><div class="cbox"></div><div class="clbl">J'accepte pleinement le risque de mon prochain trade</div></div>
-  </div>
-  <button class="resume" id="resume-btn" onclick="resumeTrading()">Reprendre le trading</button>
-</div>
-
-<!-- RESPONSABILISATION -->
-<div class="resp-ov" id="resp-ov">
-  <div class="resp-badge">⚠️ Signal de risque actif</div>
-  <div class="resp-title">Tu choisis de continuer malgré un signal de risque.</div>
-  <div class="resp-sub" id="resp-context">Cette décision sera enregistrée dans ton journal avec le résultat de ton prochain trade.</div>
-  <div class="resp-box">
-    <div class="resp-lbl">Pourquoi veux-tu continuer ? <span style="color:var(--red)">*</span></div>
-    <textarea class="resp-textarea" id="resp-text" placeholder="Décris précisément : ton setup, le contexte de marché, ton niveau d'entrée, et ce que tu ressens en ce moment. (20 caractères minimum)" oninput="chkResp()"></textarea>
-    <div class="resp-count" id="resp-count">0 / 20 caractères minimum</div>
-    <div class="resp-lbl" style="margin-top:4px">Capture d'écran du setup <span style="color:var(--text3)">(optionnel)</span></div>
-    <label class="resp-upload" onclick="document.getElementById('resp-file').click()">
-      <input type="file" id="resp-file" accept="image/*,.pdf" onchange="handleRespFile(this)">
-      <span class="resp-upload-ico">📎</span>
-      <span class="resp-upload-lbl">Joindre graphique ou PDF</span>
-      <span class="resp-upload-name" id="resp-file-name"></span>
-    </label>
-    <div class="resp-preview" id="resp-preview"><img id="resp-preview-img" src="" alt="preview"/></div>
-  </div>
-  <button class="resp-btn" id="resp-btn" onclick="confirmResp()">Je prends la responsabilité de continuer</button>
-  <span class="resp-back" onclick="cancelResp()">← Retourner à la pause</span>
 </div>
 
 <script>
 const BACKEND='https://radecoach-backend-production.up.railway.app';
-const SID='ma-session';
-const WSU=BACKEND.replace('https','wss').replace('http','ws')+'?session='+SID;
-const MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-const MKTS=[{n:'London',i:'🏛️',tz:'Europe/London',o:8,c:17},{n:'New York',i:'🗽',tz:'America/New_York',o:9,c:17},{n:'Asia',i:'⛩️',tz:'Asia/Tokyo',o:9,c:18}];
-let on=false,trades=[],tInt=null,t0=null,locked=false,paused=false;
-let hist=[],ws=null,wsR=null,pTimer=null,pSec=0,deposit=0,profAl=false;
-let curM=new Date().getMonth(),curY=new Date().getFullYear(),dark=true;
+const SESSION_ID='ma-session';
+const WS_URL=BACKEND.replace('https','wss').replace('http','ws')+'?session='+SESSION_ID;
+const STARTING_BALANCE=50000;
 
-function toggleTheme(){dark=!dark;document.documentElement.setAttribute('data-theme',dark?'dark':'light');document.getElementById('theme-btn').textContent=dark?'🌙':'☀️';}
+let sessionOn=false,trades=[],timerInt=null,t0=null,locked=false,hist=[],ws=null,wsTimer=null;
+let mt5Balance=null;
 
-function showTab(t,btn){
-  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.pg').forEach(x=>x.classList.remove('on'));
-  btn.classList.add('active');
-  document.getElementById('pg-'+t).classList.add('on');
-  if(t==='history')loadHistory();
+// ── Capital bar ───────────────────────────────────────────────────────────
+function updateCapitalBar(){
+  const pnl=trades.reduce((a,t)=>a+t.pnl,0);
+  const capital=mt5Balance!==null?mt5Balance:STARTING_BALANCE;
+  const equity=capital+pnl;
+  const pnlEl=document.getElementById('cap-pnl');
+  const eqEl=document.getElementById('cap-equity');
+  document.getElementById('cap-capital').textContent=capital.toLocaleString('fr-FR',{minimumFractionDigits:2})+' $';
+  pnlEl.textContent=(pnl>=0?'+':'')+pnl.toFixed(2)+' €';
+  pnlEl.className='cap-val '+(pnl>0?'pos':pnl<0?'neg':'');
+  eqEl.textContent=equity.toLocaleString('fr-FR',{minimumFractionDigits:2})+' $';
+  eqEl.className='cap-val '+(equity>=capital?'pos':'neg');
 }
 
-function renderMkts(){
-  const el=document.getElementById('mkts');if(!el)return;
-  el.innerHTML=MKTS.map(m=>{
-    const h=parseInt(Intl.DateTimeFormat('en',{timeZone:m.tz,hour:'numeric',hour12:false}).format(new Date()));
-    const open=h>=m.o&&h<m.c;
-    const t=new Intl.DateTimeFormat('fr-FR',{timeZone:m.tz,hour:'2-digit',minute:'2-digit'}).format(new Date());
-    return`<div class="mkt ${open?'open':''}"><div class="mkt-ico">${m.i}</div><div><div class="mkt-name">${m.n}</div><div class="mkt-time">${t}</div></div><div class="mkt-badge ${open?'open':'closed'}">${open?'OPEN':'CLOSED'}</div></div>`;
-  }).join('');
-}
-
+// ── WebSocket ─────────────────────────────────────────────────────────────
 function connectWS(){
   if(ws&&ws.readyState===WebSocket.OPEN)return;
-  setWS('blink');
-  ws=new WebSocket(WSU);
-  ws.onopen=()=>{setWS('on');wsR&&clearInterval(wsR);wsR=null;};
+  setWS('connecting');
+  ws=new WebSocket(WS_URL);
+  ws.onopen=()=>{setWS('connected');if(wsTimer){clearInterval(wsTimer);wsTimer=null;}};
   ws.onmessage=(e)=>{
-    const m=JSON.parse(e.data);
-    if(m.type==='INIT'){m.trades.forEach(t=>push(t,false));upd();checkRules();}
-    if(m.type==='NEW_TRADE'){push(m.trade,true);upd();checkRules();if(on)analyse(m.trade,false);}
-    if(m.type==='TRADE_CLOSED'){
-      const t=trades.find(x=>x.id===m.trade.id||(m.trade.ticket&&x.ticket===m.trade.ticket));
-      if(t){t.pnl=m.trade.pnl;t.status='closed';}
-      render();upd();checkRules();if(on)analyse(m.trade,true);
+    const msg=JSON.parse(e.data);
+    if(msg.type==='INIT'){msg.trades.forEach(t=>addTradeUI(t,false));updateMetrics();checkRules();}
+    if(msg.type==='NEW_TRADE'){addTradeUI(msg.trade,true);updateMetrics();checkRules();if(sessionOn)autoCoach(msg.trade);}
+    if(msg.type==='TRADE_CLOSED'){
+      const t=trades.find(x=>x.id===msg.trade.id);
+      if(t){t.pnl=msg.trade.pnl;t.status='closed';}
+      renderTrades();updateMetrics();updateCapitalBar();
     }
-    if(m.type==='STATUS'&&m.locked&&!locked){locked=true;document.getElementById('locked').className='locked on';}
   };
-  ws.onclose=()=>{setWS('');if(!wsR)wsR=setInterval(connectWS,5000);};
+  ws.onclose=()=>{setWS('disconnected');if(!wsTimer)wsTimer=setInterval(()=>connectWS(),5000);};
   ws.onerror=()=>ws.close();
 }
 
 function setWS(s){
-  document.getElementById('ws-led').className='ws-led'+(s?' '+s:'');
-  document.getElementById('ws-txt').textContent=s==='on'?'MT5 Connecté':s==='blink'?'Connexion...':'Déconnecté';
-  document.getElementById('ws-txt').style.color=s==='on'?'var(--green)':'var(--text3)';
-  const d=document.getElementById('w-dot');if(d)d.className='w-ws-dot'+(s==='on'?' on':'');
-  const t=document.getElementById('w-txt');if(t){t.textContent=s==='on'?'MT5 Connecté':s==='blink'?'Connexion...':'Déconnecté';t.style.color=s==='on'?'var(--green)':'var(--text3)';}
+  const d=document.getElementById('ws-dot'),l=document.getElementById('ws-label');
+  d.className='ws-dot '+s;
+  const labels={connected:'MT5 · Live',connecting:'Connexion...',disconnected:'Déconnecté'};
+  l.textContent=labels[s];l.className=s==='connected'?'ws-label connected':'ws-label';
 }
 
+// ── Session ───────────────────────────────────────────────────────────────
 function startSession(){
-  const d=prompt('Dépôt de départ (EUR) — OK pour passer :');
-  deposit=parseFloat(d)||0;profAl=false;on=true;locked=false;t0=Date.now();
-  document.getElementById('welcome').style.display='none';
-  document.getElementById('sa').className='sa on';
-  document.getElementById('go-btn').style.display='none';
+  sessionOn=true;locked=false;t0=Date.now();
+  document.getElementById('start-btn').style.display='none';
   document.getElementById('end-btn').style.display='inline-block';
-  document.getElementById('brk-btn').style.display='inline-block';
-  document.getElementById('sess-led').className='sess-led live';
-  document.getElementById('sess-lbl').textContent='OPEN';
-  document.getElementById('sess-lbl').className='sess-lbl live';
-  tInt=setInterval(()=>{
+  timerInt=setInterval(()=>{
     const e=Math.floor((Date.now()-t0)/1000);
-    document.getElementById('timer').textContent=p(Math.floor(e/3600))+':'+p(Math.floor((e%3600)/60))+':'+p(e%60);
-    document.getElementById('timer').className='timer on';
+    document.getElementById('timer').textContent=
+      String(Math.floor(e/3600)).padStart(2,'0')+':'+
+      String(Math.floor((e%3600)/60)).padStart(2,'0')+':'+
+      String(e%60).padStart(2,'0');
+    document.getElementById('timer').className='timer-wrap active';
   },1000);
-  renderMkts();setInterval(renderMkts,30000);
-  initNotifications(); // Demande permission notifications au démarrage
-  bot('Session démarrée'+(deposit?' avec '+deposit+'€':'')+'. Je surveille ton comportement. Quel est ton plan de trading ?');
+  coachMsg("Session démarrée. Je surveille tes trades MT5 en temps réel. Quel est ton plan de trading aujourd'hui ?");
   connectWS();
 }
 
-function p(n){return String(n).padStart(2,'0')}
-
 function endSession(){
-  on=false;clearInterval(tInt);
-  document.getElementById('timer').className='timer';
-  document.getElementById('sess-led').className='sess-led';
-  document.getElementById('sess-lbl').textContent='CLOSED';
-  document.getElementById('sess-lbl').className='sess-lbl';
-  document.getElementById('go-btn').style.display='inline-block';
-  document.getElementById('go-btn').textContent='Nouvelle session';
+  sessionOn=false;clearInterval(timerInt);
+  document.getElementById('timer').className='timer-wrap';
+  document.getElementById('start-btn').style.display='inline-block';
+  document.getElementById('start-btn').textContent='▶ Nouvelle session';
   document.getElementById('end-btn').style.display='none';
-  document.getElementById('brk-btn').style.display='none';
-  // Valider le jour du challenge si actif
-  if(challenge.active){
-    const todayStr=new Date().toISOString().split('T')[0];
-    const sc=calcScore();
-    validateDay(todayStr,sc||0,trades.length>0);
-  }
-  saveSession();bilan();
+  bilan();
 }
 
-function saveSession(){
-  const tp=trades.reduce((a,t)=>a+t.pnl,0),wins=trades.filter(t=>t.pnl>0).length,sc=calcScore();
-  if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'SAVE_SESSION',data:{trades_count:trades.length,wins,losses:trades.length-wins,pnl:tp,discipline_score:sc||0,revenge_count:trades.filter(t=>t.behaviour==='revenge').length}}));
-}
-
-function push(trade,isNew){
+// ── Trades ────────────────────────────────────────────────────────────────
+function addTradeUI(trade,isNew){
   if(trades.find(t=>t.id===trade.id))return;
-  // Attache la justification de reprise forcée si présente
-  if(window._nextTradeJustif){
-    trade.forced_justif=window._nextTradeJustif.text;
-    trade.forced_file=window._nextTradeJustif.file;
-    trade.forced_screenshot=window._nextTradeJustif.screenshot;
-    trade.forced_at=window._nextTradeJustif.timestamp;
-    window._nextTradeJustif=null;
-  }
-  trades.push(trade);render(isNew?trade.id:null);
+  trades.push(trade);renderTrades(isNew?trade.id:null);
+  updateCapitalBar();
 }
 
-function addTrade(){
-  if(!on||locked||paused)return;
+function addManualTrade(){
+  if(!sessionOn||locked)return;
   const sym=document.getElementById('t-sym').value.trim();
   const dir=document.getElementById('t-dir').value;
   const pnl=parseFloat(document.getElementById('t-pnl').value);
   const plan=document.getElementById('t-plan').value;
   const note=document.getElementById('t-note').value.trim();
   if(!sym||isNaN(pnl))return;
-  const trade={id:crypto.randomUUID(),symbol:sym.toUpperCase(),direction:dir,pnl,plan,note,source:'manual',status:'closed',time:new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),timestamp:new Date().toISOString()};
-  trades.push(trade);['t-sym','t-pnl','t-note'].forEach(id=>document.getElementById(id).value='');
-  render(trade.id);upd();checkRules();analyse(trade,true);
-}
-
-function render(newId){
-  const el=document.getElementById('tbl');
-  if(!trades.length){el.innerHTML='<div class="empty">[ MT5 connecté · En attente de positions ]</div>';return;}
-  el.innerHTML=trades.slice().reverse().map(t=>`
-    <div class="trow ${t.id===newId?'new':''} ${t.behaviour||''}">
-      <span class="tsym">${t.symbol}</span>
-      <span class="tdir ${t.direction}">${t.direction==='long'?'LONG':'SHORT'}</span>
-      <span class="ttime">${t.time}</span>
-      <span class="tpnl ${t.pnl>=0?'up':'dn'}">${t.pnl>=0?'+':''}${t.pnl.toFixed(2)}</span>
-      <span class="tnote" title="${t.forced_justif?'⚠ Reprise forcée : '+t.forced_justif+(t.forced_file?' ['+t.forced_file+']':''):t.note||''}">${t.forced_justif?'<span style="color:var(--red);font-size:9px">⚠ FORCÉ</span> '+t.forced_justif.substring(0,30)+(t.forced_justif.length>30?'...':''):t.note||'—'}</span>
-      <span class="ttag ${t.behaviour||t.source||''}">${t.behaviour==='revenge'?'⚠ REVENGE':t.source==='mt5'?'MT5':'Manuel'}</span>
-      <div class="tpln ${t.plan==='yes'?'ok':'no'}"></div>
-    </div>`).join('');
-  if(newId)setTimeout(()=>el.querySelectorAll('.trow.new').forEach(r=>r.classList.remove('new')),2000);
-}
-
-function analyse(trade,isClosed){
-  const cl=maxC(),tp=trades.reduce((a,t)=>a+t.pnl,0),mt=parseInt(document.getElementById('r-trades').value)||5;
-  if(trades.length>=2){
-    const prev=trades[trades.length-2];
-    if(prev&&prev.pnl<0&&prev.status==='closed'){
-      const diff=(new Date(trade.timestamp)-new Date(prev.timestamp))/60000;
-      if(diff<3){trade.behaviour='revenge';al('err','REVENGE détecté — '+Math.round(diff)+'min après ta dernière perte.');bc('bc-rev','bv-rev','DÉTECTÉ','err');notifyRevenge(trade.symbol);}
-    }
-  }
-  if(trades.length>mt){al('warn','OVERTRADING — '+trades.length+'/'+mt+' trades.');bc('bc-ov','bv-ov',trades.length+'/'+mt,'warn');notifyOvertrading(trades.length,mt);}
-  else bc('bc-ov','bv-ov',trades.length+'/'+mt,trades.length>=mt-1?'warn':'ok');
-  bc('bc-con','bv-con',cl>0?cl+' pertes':'OK',cl>=2?'err':cl===1?'warn':'ok');
-  if(cl>=2&&!paused){al('err',cl+' PERTES CONSÉCUTIVES — Pause obligatoire.');triggerPause(10,cl+' pertes consécutives détectées.');notifyPause(cl+' pertes consécutives');}
-  if(deposit>0&&isClosed&&!profAl){
-    const pct=Math.round((tp/deposit)*100);
-    if(pct>=(parseInt(document.getElementById('r-profit').value)||50)&&document.getElementById('r-profit-on').checked){
-      profAl=true;al('ok','PROFIT GUARD — +'+pct+'% soit '+tp.toFixed(2)+'€. Sécurise !');bc('bc-pro','bv-pro','+'+pct+'%','ok');
-      notify('💰 Profit Guard', '+'+pct+'% atteint — '+tp.toFixed(2)+'€. Sécurise tes gains maintenant !', 'profit');
-    }
-  }
-  if(deposit>0){const pct=Math.round((tp/deposit)*100);bc('bc-pro','bv-pro',(tp>=0?'+':'')+pct+'%',tp>0?'ok':'err');}
-  // Alerte perte max
-  const ml=parseFloat(document.getElementById('r-loss').value)||200;
-  if(document.getElementById('r-loss-on').checked&&tp<=-ml){notifyMaxLoss(tp.toFixed(2));}
-  const h=new Date().getHours();if(h>=22||h<5)al('warn','TRADING NOCTURNE — Il est '+h+'h.');
-}
-
-function bc(cid,vid,val,state){
-  const c=document.getElementById(cid),v=document.getElementById(vid);
-  if(c)c.className='bc '+(state||'');if(v){v.className='bc-val '+(state||'');v.textContent=val;}
-}
-
-function al(type,msg){
-  const bar=document.getElementById('alerts');
-  const d=document.createElement('div');d.className='alert '+type;
-  d.innerHTML='<span>'+msg+'</span><span class="alert-x" onclick="this.parentElement.remove();chkBar()">✕</span>';
-  bar.appendChild(d);bar.className='alerts on';
-  bot(msg,type==='err'?'danger':type==='ok'?'profit':'sys');
-  setTimeout(()=>{if(d.parentElement){d.remove();chkBar();}},25000);
-}
-function chkBar(){const b=document.getElementById('alerts');if(!b.children.length)b.className='alerts';}
-
-function triggerPause(min,reason){
-  if(paused)return;paused=true;pSec=min*60;
-  document.getElementById('sess-led').className='sess-led pause';
-  document.getElementById('sess-lbl').textContent='PAUSE';
-  document.getElementById('sess-lbl').className='sess-lbl pause';
-  document.getElementById('p-reason').innerHTML=reason||'Ton objectif n\'est pas de récupérer tes pertes.<br>C\'est de ne pas tilter.';
-  // Stats du jour pendant la pause
-  const tp=trades.reduce((a,t)=>a+t.pnl,0);
-  const sc=calcScore();
-  document.getElementById('ps-trades').textContent=trades.length+' trade'+(trades.length>1?'s':'');
-  const pnlEl=document.getElementById('ps-pnl');
-  pnlEl.textContent=(tp>=0?'+':'')+tp.toFixed(2)+'€';
-  pnlEl.style.color=tp>=0?'var(--green)':'var(--red)';
-  const scEl=document.getElementById('ps-score');
-  scEl.textContent=sc!==null?sc+'/100':'—';
-  scEl.style.color=sc>=70?'var(--green)':sc>=40?'var(--amber)':'var(--red)';
-  document.getElementById('pause-ov').className='pause-ov on';
-  document.querySelectorAll('.ci').forEach(c=>{c.classList.remove('done');c.querySelector('.cbox').classList.remove('checked');});
-  document.getElementById('resume-btn').className='resume';
-  updCD();pTimer=setInterval(()=>{pSec--;updCD();if(pSec<=0){clearInterval(pTimer);chkResume();}},1000);
-}
-function updCD(){document.getElementById('p-cd').textContent=p(Math.floor(pSec/60))+':'+p(pSec%60);}
-function tglCheck(el){el.classList.toggle('done');el.querySelector('.cbox').classList.toggle('checked');chkResume();}
-function chkResume(){const a=document.querySelectorAll('.ci').length,d=document.querySelectorAll('.ci.done').length;document.getElementById('resume-btn').className=(pSec<=0&&d===a)?'resume ready':'resume';}
-function resumeTrading(){
-  if(!document.getElementById('resume-btn').classList.contains('ready'))return;
-  // Phrase dynamique avec les vraies stats
-  const cl=maxC();
-  const tp=trades.reduce((a,t)=>a+t.pnl,0);
-  let ctx='Cette décision sera enregistrée dans ton journal avec le résultat de ton prochain trade.';
-  if(cl>=2||trades.length>=3){
-    const parts=[];
-    if(cl>=2)parts.push(cl+' perte'+(cl>1?'s':'')+' consécutive'+(cl>1?'s':''));
-    if(trades.length>0)parts.push(trades.length+' trade'+(trades.length>1?'s':'')+' aujourd\'hui');
-    if(tp<0)parts.push('P&L : '+tp.toFixed(2)+'€');
-    ctx='Tu as déjà '+parts.join(', ')+'. Cette décision sera enregistrée dans ton journal.';
-  }
-  document.getElementById('resp-context').textContent=ctx;
-  // Affiche responsabilisation
-  document.getElementById('pause-ov').className='pause-ov';
-  document.getElementById('resp-ov').className='resp-ov on';
-  document.getElementById('resp-text').value='';
-  document.getElementById('resp-count').textContent='0 / 20 caractères minimum';
-  document.getElementById('resp-count').className='resp-count';
-  document.getElementById('resp-btn').className='resp-btn';
-  document.getElementById('resp-file-name').textContent='';
-  document.getElementById('resp-preview').style.display='none';
-  respFileData=null;
-}
-
-let respFileData=null;
-
-function chkResp(){
-  const txt=document.getElementById('resp-text').value.trim();
-  const len=txt.length;
-  const cEl=document.getElementById('resp-count');
-  cEl.textContent=len+' / 20 caractères minimum';
-  cEl.className='resp-count'+(len>=20?' ok':'');
-  document.getElementById('resp-btn').className='resp-btn'+(len>=20?' ready':'');
-}
-
-function handleRespFile(input){
-  const file=input.files[0];if(!file)return;
-  document.getElementById('resp-file-name').textContent=file.name;
-  if(file.type.startsWith('image/')){
-    const reader=new FileReader();
-    reader.onload=e=>{
-      respFileData={name:file.name,type:file.type,data:e.target.result};
-      document.getElementById('resp-preview-img').src=e.target.result;
-      document.getElementById('resp-preview').style.display='block';
-    };
-    reader.readAsDataURL(file);
-  } else {
-    respFileData={name:file.name,type:file.type,data:null};
-  }
-}
-
-function cancelResp(){
-  document.getElementById('resp-ov').className='resp-ov';
-  document.getElementById('pause-ov').className='pause-ov on';
-}
-
-function confirmResp(){
-  if(!document.getElementById('resp-btn').classList.contains('ready'))return;
-  const justif=document.getElementById('resp-text').value.trim();
-  window._nextTradeJustif={
-    text:justif,
-    file:respFileData?respFileData.name:null,
-    screenshot:respFileData?respFileData.data:null,
+  const trade={
+    id:crypto.randomUUID(),symbol:sym.toUpperCase(),direction:dir,pnl,plan,note,
+    source:'manual',status:'closed',price:0,
+    time:new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),
     timestamp:new Date().toISOString()
   };
-  paused=false;
-  document.getElementById('resp-ov').className='resp-ov';
-  document.getElementById('sess-led').className='sess-led live';
-  document.getElementById('sess-lbl').textContent='OPEN';
-  document.getElementById('sess-lbl').className='sess-lbl live';
-  clearInterval(pTimer);
-  document.querySelectorAll('.ci').forEach(c=>{c.classList.remove('done');c.querySelector('.cbox').classList.remove('checked');});
-  bot('Reprise enregistrée. Justification sauvegardée dans ton journal. Ce trade est sous surveillance — reste dans ton plan.','sys');
-  al('warn','⚠️ Reprise forcée — prochain trade marqué dans le journal');
+  trades.push(trade);
+  ['t-sym','t-pnl','t-note'].forEach(id=>document.getElementById(id).value='');
+  renderTrades(trade.id);updateMetrics();checkRules();autoCoach(trade);updateCapitalBar();
+}
+
+function renderTrades(newId){
+  const el=document.getElementById('trade-list');
+  if(!trades.length){
+    el.innerHTML='<div class="empty"><div class="empty-icon">📊</div>En attente de trades<br>MT5 connecté · Ouvre une position</div>';
+    return;
+  }
+  el.innerHTML=trades.slice().reverse().map(t=>`
+    <div class="trade-row">
+      <span class="t-sym">${t.symbol}</span>
+      <span class="t-dir ${t.direction}">${t.direction==='long'?'LONG ↑':'SHORT ↓'}</span>
+      <span class="t-time">${t.time}</span>
+      <span class="t-price">${t.price&&t.price>0?t.price.toFixed(2):'—'}</span>
+      <span class="t-pnl ${t.status==='open'?'open':t.pnl>=0?'pos':'neg'}">${t.status==='open'?'En cours…':((t.pnl>=0?'+':'')+t.pnl.toFixed(2)+'€')}</span>
+      <span class="t-note">${t.note||'—'}</span>
+      <span class="t-src ${t.source||'manual'}">${t.source==='mt5'?'MT5':t.source==='tradingview'?'TV':'Manuel'}</span>
+    </div>`).join('');
 }
 
 function calcScore(){
-  if(!trades.length)return null;let s=100;
+  if(!trades.length)return null;
+  let s=100;
   s-=trades.filter(t=>t.plan==='no').length*15;
-  const cl=maxC();if(cl>=3)s-=20;else if(cl>=2)s-=10;
-  const mt=parseInt(document.getElementById('r-trades').value)||5;if(trades.length>mt)s-=20;
-  const tp=trades.reduce((a,t)=>a+t.pnl,0);if(tp<-(parseFloat(document.getElementById('r-loss').value)||200))s-=25;
-  s-=trades.filter(t=>t.behaviour==='revenge').length*10;
+  const cl=maxConsec();
+  if(cl>=3)s-=20;else if(cl>=2)s-=10;
+  const mt=parseInt(document.getElementById('r-maxtrades').value)||5;
+  if(trades.length>mt)s-=20;
+  const tp=trades.reduce((a,t)=>a+t.pnl,0);
+  const ml=parseFloat(document.getElementById('r-maxloss').value)||200;
+  if(tp<-ml)s-=25;
   return Math.max(0,Math.min(100,s));
 }
-function maxC(){let max=0,cur=0;for(const t of trades){if(t.pnl<0){cur++;max=Math.max(max,cur);}else cur=0;}return max;}
 
-function upd(){
-  const tp=trades.reduce((a,t)=>a+t.pnl,0),wins=trades.filter(t=>t.pnl>0).length;
-  const wr=trades.length?Math.round(wins/trades.length*100):null,sc=calcScore(),cl=maxC();
-  const mt=parseInt(document.getElementById('r-trades').value)||5;
-  const pv=document.getElementById('pnl-v');pv.textContent=(tp>=0?'+':'')+tp.toFixed(2);pv.className='stat-val '+(tp>0?'up':tp<0?'dn':'');
-  document.getElementById('s-pnl').className='stat '+(tp>0?'up':tp<0?'dn':'');
-  document.getElementById('pnl-s').textContent=trades.length+' trade'+(trades.length>1?'s':'');
-  document.getElementById('wr-v').textContent=wr!==null?wr+'%':'—';document.getElementById('wr-v').className='stat-val '+(wr>=50?'up':wr!==null?'dn':'');
-  document.getElementById('s-wr').className='stat '+(wr>=50?'up':wr!==null&&wr<50?'dn':'');
-  document.getElementById('wr-s').textContent=wr!==null?(wins+'W / '+(trades.length-wins)+'L'):'—';
-  document.getElementById('tr-v').textContent=trades.length;document.getElementById('tr-s').textContent='/ '+mt+' max';
-  document.getElementById('s-tr').className='stat '+(trades.length>=mt?'wn':'');
+function maxConsec(){
+  let max=0,cur=0;
+  for(const t of trades){if(t.pnl<0){cur++;max=Math.max(max,cur);}else cur=0;}
+  return max;
+}
+
+function updateMetrics(){
+  const tp=trades.reduce((a,t)=>a+t.pnl,0);
+  const wins=trades.filter(t=>t.pnl>0).length;
+  const wr=trades.length?Math.round(wins/trades.length*100):null;
+  const sc=calcScore();
+  const cl=maxConsec();
+  const mt=parseInt(document.getElementById('r-maxtrades').value)||5;
+  const pEl=document.getElementById('pnl-val');
+  pEl.textContent=(tp>=0?'+':'')+tp.toFixed(2)+'€';
+  pEl.className='met-val '+(tp>0?'pos':tp<0?'neg':'');
+  document.getElementById('m-pnl').className='met '+(tp>0?'pos':tp<0?'neg':'');
+  document.getElementById('pnl-sub').textContent=trades.length+' trade'+(trades.length>1?'s':'');
+  document.getElementById('trades-val').textContent=trades.length;
+  document.getElementById('trades-sub').textContent='/ '+mt+' max';
+  document.getElementById('m-trades').className='met '+(trades.length>=mt?'warn':'');
+  document.getElementById('wr-val').textContent=wr!==null?wr+'%':'—';
+  document.getElementById('wr-val').className='met-val '+(wr>=50?'pos':wr!==null&&wr<50?'neg':'');
+  document.getElementById('wr-sub').textContent=wr!==null?(wins+'W / '+(trades.length-wins)+'L'):'—';
+  document.getElementById('consec-val').textContent=cl||'—';
+  document.getElementById('consec-val').className='met-val '+(cl>=2?'neg':'');
+  document.getElementById('m-consec').className='met '+(cl>=2?'neg':'');
   if(sc!==null){
-    document.getElementById('sc-v').textContent=sc+'/100';document.getElementById('sc-v').className='stat-val '+(sc>=70?'up':sc>=40?'wn':'dn');
-    document.getElementById('s-sc').className='stat '+(sc>=70?'up':sc>=40?'wn':'dn');
-    document.getElementById('sc-fill').style.width=sc+'%';document.getElementById('sc-fill').style.background=sc>=70?'var(--green)':sc>=40?'var(--amber)':'var(--red)';
-    document.getElementById('sc-num').textContent=sc+'/100';document.getElementById('sc-num').style.color=sc>=70?'var(--green)':sc>=40?'var(--amber)':'var(--red)';
+    document.getElementById('score-val').textContent=sc+'/100';
+    document.getElementById('score-val').className='met-val '+(sc>=70?'pos':sc>=40?'warn':'neg');
+    document.getElementById('m-score').className='met '+(sc>=70?'pos':sc>=40?'warn':'neg');
+    document.getElementById('score-fill').style.width=sc+'%';
+    document.getElementById('score-fill').style.background=sc>=70?'var(--green)':sc>=40?'var(--amber)':'var(--red)';
+    document.getElementById('score-num').textContent=sc+'/100';
+    document.getElementById('score-num').style.color=sc>=70?'var(--green)':sc>=40?'var(--amber)':'var(--red)';
   }
-  const alts=[];
-  if(tp<=(-(parseFloat(document.getElementById('r-loss').value)||200)))alts.push('Perte max');
-  if(trades.length>=(parseInt(document.getElementById('r-trades').value)||5))alts.push('Max trades');
-  if(cl>=(parseInt(document.getElementById('r-consec').value)||2))alts.push(cl+' pertes consec.');
-  const pv2=document.getElementById('pr-v'),ps=document.getElementById('pr-s');
-  if(alts.length){pv2.className='prot-err';pv2.textContent='⚠ '+alts[0];ps.textContent=alts.length+' alerte'+(alts.length>1?'s':'');document.getElementById('s-pr').className='stat dn';}
-  else{pv2.className='prot-ok';pv2.textContent='● Actives';ps.textContent='Aucune alerte';document.getElementById('s-pr').className='stat up';}
-  const planOk=trades.filter(t=>t.plan==='yes').length,pp=trades.length?Math.round(planOk/trades.length*100):null;
-  document.getElementById('j-cnt').textContent=trades.length?' — '+trades.length+' trade'+(trades.length>1?'s':''):'';
-  document.getElementById('j-plan').textContent=pp!==null?pp+'% dans le plan':'';
+  const planOk=trades.filter(t=>t.plan==='yes').length;
+  const pp=trades.length?Math.round(planOk/trades.length*100):null;
+  document.getElementById('trade-count-lbl').textContent=trades.length?' · '+trades.length+' trade'+(trades.length>1?'s':''):'';
+  document.getElementById('plan-pct').textContent=pp!==null?pp+'% dans le plan':'';
+  updateCapitalBar();
 }
 
 function checkRules(){
-  if(!on)return;const tp=trades.reduce((a,t)=>a+t.pnl,0),ml=parseFloat(document.getElementById('r-loss').value)||200;
-  if(document.getElementById('r-loss-on').checked&&tp<=-ml&&!locked){
-    locked=true;document.getElementById('locked').className='locked on';
-    bot('Perte max de '+ml+'€ atteinte. Session verrouillée.','sys');
-    if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'LOCK',reason:'Perte max'}));
-  }
-  upd();
-}
-
-let currentPeriod='month';
-function setPeriod(p,btn){
-  currentPeriod=p;
-  document.querySelectorAll('.ppill').forEach(x=>x.classList.remove('active'));
-  btn.classList.add('active');
-  loadHistory();
-}
-function changeMonth(d){curM+=d;if(curM>11){curM=0;curY++;}if(curM<0){curM=11;curY--;}loadHistory();}
-
-async function loadHistory(){
-  document.getElementById('mnav-title').textContent=MONTHS[curM]+' '+curY;
-  try{
-    const r=await fetch(BACKEND+'/monthly/'+SID+'/'+curY+'/'+(curM+1)),data=await r.json();
-    const days=data.days||[];
-
-    // Filter by period
-    let filtered=days;
-    const now=new Date();
-    if(currentPeriod==='7d'){const cutoff=new Date(now-7*86400000);filtered=days.filter(d=>new Date(d.date)>=cutoff);}
-    else if(currentPeriod==='30d'){const cutoff=new Date(now-30*86400000);filtered=days.filter(d=>new Date(d.date)>=cutoff);}
-
-    // Compute stats
-    const totalPnl=filtered.reduce((a,d)=>a+(d.pnl||0),0);
-    const wins=filtered.filter(d=>d.pnl>0).length;
-    const losses=filtered.filter(d=>d.pnl<0).length;
-    const wr=filtered.length?Math.round(wins/filtered.length*100):null;
-    const avgScore=filtered.length?Math.round(filtered.reduce((a,d)=>a+(d.discipline_score||0),0)/filtered.length):null;
-    const profDays=wins;
-
-    // Max drawdown
-    let peak=0,maxDD=0,running=0;
-    filtered.forEach(d=>{running+=d.pnl||0;if(running>peak)peak=running;const dd=peak-running;if(dd>maxDD)maxDD=dd;});
-
-    // Capital curve (cumulative)
-    let cum=0;const curve=filtered.map(d=>{cum+=(d.pnl||0);return{date:new Date(d.date).getDate(),val:cum};});
-
-    // Stats cards
-    const sv=document.getElementById('h-score');sv.textContent=avgScore!==null?avgScore+'/100':'—';sv.className='hstat-val '+(avgScore>=70?'up':avgScore>=40?'warn':'dn');
-    document.getElementById('h-prof').textContent=profDays||'—';
-    document.getElementById('h-prof-s').textContent='sur '+filtered.length+' jours';
-    document.getElementById('h-str').textContent=data.best_streak||'—';
-    const pv=document.getElementById('h-pnl');pv.textContent=(totalPnl>=0?'+':'')+totalPnl.toFixed(2);pv.className='hstat-val '+(totalPnl>0?'up':totalPnl<0?'dn':'');
-    document.getElementById('h-pnl-c').className='hstat '+(totalPnl>0?'up':totalPnl<0?'dn':'');
-
-    // Perf card
-    const perfV=document.getElementById('perf-total');perfV.textContent=(totalPnl>=0?'+':'')+totalPnl.toFixed(2)+'€';perfV.className='perf-val'+(totalPnl<0?' neg':'');
-    const pctV=document.getElementById('perf-pct');
-    const dep=deposit||1000;const pct=Math.round((totalPnl/dep)*100*10)/10;
-    pctV.textContent=(pct>=0?'+':'')+pct+'%';pctV.className='perf-pct'+(pct<0?' neg':'');
-    document.getElementById('dd-val').textContent='-'+maxDD.toFixed(2)+'€';
-
-    // Draw performance curve
-    drawCurve(curve);
-
-    // Draw donut
-    drawDonut(wins,losses,wr);
-
-    // Drawdown bar
-    const ddLimit=parseFloat(document.getElementById('r-loss')?.value)||200;
-    const todayDD=Math.max(0,-totalPnl);
-    const ddPct=Math.min(100,Math.round((todayDD/ddLimit)*100));
-    document.getElementById('dd-cur').textContent=todayDD.toFixed(2)+'€';
-    document.getElementById('dd-limit').textContent=ddLimit+'€';
-    const fill=document.getElementById('dd-fill');
-    fill.style.width=ddPct+'%';
-    fill.className='dd-fill'+(ddPct>=75?' danger':ddPct>=50?' warn':'');
-    document.getElementById('dd-sublbl').textContent=ddPct>=75?'⚠ Proche de la limite journalière':ddPct>=50?'Attention — Mi-limite atteinte':'En dessous de la limite';
-
-    // Streak
-    document.getElementById('str-v').textContent=data.best_streak||0;
-    const dots=document.getElementById('sdots');dots.innerHTML='';
-    for(let i=0;i<Math.min(data.total_days||0,28);i++){const d=document.createElement('div');d.className='sdot'+(i<(data.best_streak||0)?' on':'');dots.appendChild(d);}
-
-    // Calendar
-    renderCal(days);
-
-  }catch(e){document.getElementById('mnav-title').textContent=MONTHS[curM]+' '+curY;}
-}
-
-function drawCurve(curve){
-  const canvas=document.getElementById('perf-canvas');
-  if(!canvas)return;
-  const ctx=canvas.getContext('2d');
-  const W=canvas.offsetWidth||600,H=100;
-  canvas.width=W;canvas.height=H;
-  ctx.clearRect(0,0,W,H);
-  if(!curve.length){ctx.fillStyle='rgba(255,255,255,0.1)';ctx.font='11px monospace';ctx.fillText('Aucune donnée',W/2-40,H/2);return;}
-  const vals=curve.map(c=>c.val);
-  const min=Math.min(...vals,0),max=Math.max(...vals,0);
-  const range=max-min||1;
-  const toY=v=>H-8-((v-min)/range)*(H-16);
-  const toX=(i)=>8+(i/(curve.length-1||1))*(W-16);
-  // Zero line
-  const zy=toY(0);
-  ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
-  ctx.beginPath();ctx.moveTo(0,zy);ctx.lineTo(W,zy);ctx.stroke();ctx.setLineDash([]);
-  // Gradient fill
-  const isPos=vals[vals.length-1]>=0;
-  const grad=ctx.createLinearGradient(0,0,0,H);
-  grad.addColorStop(0,isPos?'rgba(16,185,129,0.25)':'rgba(239,68,68,0.25)');
-  grad.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.beginPath();
-  curve.forEach((c,i)=>{const x=toX(i),y=toY(c.val);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
-  ctx.lineTo(toX(curve.length-1),zy);ctx.lineTo(toX(0),zy);ctx.closePath();
-  ctx.fillStyle=grad;ctx.fill();
-  // Line
-  ctx.strokeStyle=isPos?'#10B981':'#EF4444';ctx.lineWidth=2;ctx.lineJoin='round';
-  ctx.beginPath();
-  curve.forEach((c,i)=>{const x=toX(i),y=toY(c.val);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
-  ctx.stroke();
-  // Last dot
-  const lx=toX(curve.length-1),ly=toY(vals[vals.length-1]);
-  ctx.beginPath();ctx.arc(lx,ly,4,0,Math.PI*2);
-  ctx.fillStyle=isPos?'#10B981':'#EF4444';ctx.fill();
-}
-
-function drawDonut(wins,losses,wr){
-  const canvas=document.getElementById('donut-canvas');if(!canvas)return;
-  const ctx=canvas.getContext('2d');
-  const W=120,H=120,cx=60,cy=60,r=46,thick=12;
-  canvas.width=W;canvas.height=H;
-  ctx.clearRect(0,0,W,H);
-  const total=wins+losses;
-  if(!total){
-    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
-    ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=thick;ctx.stroke();
-    document.getElementById('donut-pct').textContent='—';
-    document.getElementById('dl-wins').textContent='0W';
-    document.getElementById('dl-losses').textContent='0L';
-    return;
-  }
-  const winAng=(wins/total)*Math.PI*2;
-  const start=-Math.PI/2;
-  // Background
-  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
-  ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=thick;ctx.stroke();
-  // Losses
-  if(losses>0){
-    ctx.beginPath();ctx.arc(cx,cy,r,start,start+Math.PI*2);
-    ctx.strokeStyle='#EF4444';ctx.lineWidth=thick;ctx.lineCap='butt';ctx.stroke();
-  }
-  // Wins
-  if(wins>0){
-    ctx.beginPath();ctx.arc(cx,cy,r,start,start+winAng);
-    ctx.strokeStyle='#10B981';ctx.lineWidth=thick;ctx.lineCap='butt';ctx.stroke();
-  }
-  document.getElementById('donut-pct').textContent=wr+'%';
-  document.getElementById('dl-wins').textContent=wins+'W';
-  document.getElementById('dl-losses').textContent=losses+'L';
-}
-
-function renderCal(days){
-  const cal=document.getElementById('cal');
-  const hdrs=Array.from(cal.querySelectorAll('.cdh'));cal.innerHTML='';hdrs.forEach(h=>cal.appendChild(h.cloneNode(true)));
-  const first=new Date(curY,curM,1).getDay(),off=first===0?6:first-1,dim=new Date(curY,curM+1,0).getDate(),today=new Date();
-  for(let i=0;i<off;i++){const d=document.createElement('div');d.className='cd empty';cal.appendChild(d);}
-  const map={};if(days)days.forEach(d=>{map[d.date.split('T')[0]]=d;});
-  for(let d=1;d<=dim;d++){
-    const ds=curY+'-'+String(curM+1).padStart(2,'0')+'-'+String(d).padStart(2,'0'),dd=map[ds];
-    const isT=today.getDate()===d&&today.getMonth()===curM&&today.getFullYear()===curY;
-    const div=document.createElement('div');
-    div.className='cd'+(isT?' today':dd?dd.pnl>0?' win':' loss':new Date(ds)<=today?' flat':'');
-    let pnlHtml='';
-    if(dd&&dd.pnl!==undefined&&dd.pnl!==0){
-      const pnlVal=parseFloat(dd.pnl);
-      const pnlStr=(pnlVal>0?'+':'')+pnlVal.toFixed(0)+'€';
-      pnlHtml='<div class="cd-pnl">'+pnlStr+'</div>';
+  if(!sessionOn)return;
+  const mlOn=document.getElementById('r-maxloss-on').checked;
+  const ml=parseFloat(document.getElementById('r-maxloss').value)||200;
+  const mtOn=document.getElementById('r-maxtrades-on').checked;
+  const mt=parseInt(document.getElementById('r-maxtrades').value)||5;
+  const cOn=document.getElementById('r-consec-on').checked;
+  const cv=parseInt(document.getElementById('r-consec').value)||2;
+  const enforce=document.getElementById('r-enforce').checked;
+  const tp=trades.reduce((a,t)=>a+t.pnl,0);
+  const cl=maxConsec();
+  let alerts=[];
+  if(mlOn&&tp<=-ml)alerts.push('Perte max de '+ml+'€ atteinte');
+  if(mtOn&&trades.length>=mt)alerts.push('Limite de '+mt+' trades atteinte');
+  if(cOn&&cl>=cv)alerts.push(cv+' pertes consécutives — risque revenge trading');
+  const strip=document.getElementById('alert-strip');
+  if(alerts.length){
+    strip.className='alert show '+(cl>=cv&&cOn?'warn':'danger');
+    document.getElementById('alert-msg').textContent='⚠ '+alerts.join('  ·  ');
+    if(enforce&&!locked){
+      locked=true;
+      document.getElementById('locked-bar').className='locked show';
+      coachMsg("⛔ STOP. Session verrouillée. Ferme MT5 et repose-toi. Tu fais le bon choix.");
     }
-    div.innerHTML='<div class="cd-num">'+d+'</div>'+pnlHtml;
-    if(dd)div.title='Score: '+dd.discipline_score+'/100 | PnL: '+dd.pnl+'€';
-    cal.appendChild(div);
-  }
+  }else{strip.className='alert';}
+  updateMetrics();
 }
 
+// ── Coach ─────────────────────────────────────────────────────────────────
 const gt=()=>new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-function bot(txt,type){
-  const d=document.createElement('div');d.className='msg '+(type||'ai');
-  d.innerHTML='<div class="bbl">'+txt+'</div><div class="ts">'+gt()+'</div>';
+
+function coachMsg(txt){
+  const d=document.createElement('div');d.className='msg coach';
+  d.innerHTML=`<div class="msg-bbl">${txt}</div><div class="msg-ts">${gt()}</div>`;
   const m=document.getElementById('msgs');m.appendChild(d);m.scrollTop=99999;
   hist.push({role:'assistant',content:txt});
 }
-function usr(txt){const d=document.createElement('div');d.className='msg me';d.innerHTML='<div class="bbl">'+txt+'</div><div class="ts">'+gt()+'</div>';document.getElementById('msgs').appendChild(d);document.getElementById('msgs').scrollTop=99999;}
-function showTyping(){const d=document.createElement('div');d.className='msg ai';d.id='typi';d.innerHTML='<div class="typing"><span class="td"></span><span class="td"></span><span class="td"></span></div>';document.getElementById('msgs').appendChild(d);document.getElementById('msgs').scrollTop=99999;}
+function userMsg(txt){
+  const d=document.createElement('div');d.className='msg user';
+  d.innerHTML=`<div class="msg-bbl">${txt}</div><div class="msg-ts">${gt()}</div>`;
+  const m=document.getElementById('msgs');m.appendChild(d);m.scrollTop=99999;
+}
+function showTyping(){
+  const d=document.createElement('div');d.className='msg coach';d.id='typi';
+  d.innerHTML='<div class="typing-bbl"><span class="td"></span><span class="td"></span><span class="td"></span></div>';
+  const m=document.getElementById('msgs');m.appendChild(d);m.scrollTop=99999;
+}
 function rmTyping(){const t=document.getElementById('typi');if(t)t.remove();}
-function ctx(){const tp=trades.reduce((a,t)=>a+t.pnl,0),wins=trades.filter(t=>t.pnl>0).length,sc=calcScore(),el=t0?Math.floor((Date.now()-t0)/60000):0;return'Session ('+el+'min) Dépôt:'+deposit+'€ PnL:'+tp.toFixed(2)+'€ Trades:'+trades.length+' Wins:'+wins+' Score:'+sc+'/100';}
-async function ai(txt,short){
+
+function getCtx(){
+  const tp=trades.reduce((a,t)=>a+t.pnl,0);
+  const wins=trades.filter(t=>t.pnl>0).length;
+  const bad=trades.filter(t=>t.plan==='no').length;
+  const sc=calcScore();
+  const el=t0?Math.floor((Date.now()-t0)/60000):0;
+  return `Session: ${el}min | Trades:${trades.length} | P&L:${tp.toFixed(2)}€ | Wins:${wins} Losses:${trades.length-wins} | Hors plan:${bad} | Pertes consec:${maxConsec()} | Score:${sc??'N/A'}/100 | Verrouillé:${locked?'OUI':'non'}${trades.length?' | Derniers:'+trades.slice(-3).map(t=>`${t.symbol} ${t.direction} ${t.pnl>=0?'+':''}${t.pnl.toFixed(2)}€${t.status==='open'?' (ouvert)':''}`).join(','):''}`;
+}
+
+async function callAI(userTxt,short=false){
   showTyping();
+  const sys=`Tu es un coach de trading psychologique expert. Tu aides les traders à gérer FOMO, revenge trading, overtrading, manque de discipline. Tu vois les trades MT5 en temps réel. Bienveillant, direct, concis. ${short?'2-3 phrases max.':'4-5 phrases max.'} Réponds en français. Pas de markdown.`;
+  const msgs=[...hist.slice(-8),{role:'user',content:getCtx()+'\n\n'+userTxt}];
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,system:'Tu es DisciplineAI, coach de trading psychologique. Bienveillant et direct. '+(short?'2-3 phrases.':'4-5 phrases.')+' Français. Pas de markdown.',messages:[...hist.slice(-8),{role:'user',content:ctx()+'\n\n'+txt}]})});
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:msgs})
+    });
     const d=await r.json();rmTyping();
-    bot(d.content&&d.content[0]?d.content[0].text:'Reste focus sur ton plan.');
-    hist.push({role:'user',content:txt});
-  }catch(e){rmTyping();bot('Reste focus sur ton plan. Respecte tes règles.');}
+    const rep=d.content?.[0]?.text||'Connexion interrompue.';
+    coachMsg(rep);hist.push({role:'user',content:userTxt});
+  }catch(e){rmTyping();coachMsg('Connexion momentanément interrompue. Reste focus !');}
 }
+
+async function autoCoach(tr){
+  const cl=maxConsec();
+  if(trades.length===1||tr.plan==='no'||tr.pnl<-100||cl>=2){
+    const p=tr.plan==='no'
+      ?`Trade hors plan: ${tr.symbol} ${tr.direction} ${tr.pnl.toFixed(2)}€. Commente brièvement, bienveillant.`
+      :tr.pnl<-100?`Grosse perte: ${tr.symbol} ${tr.pnl.toFixed(2)}€. Soutien + mise en garde revenge.`
+      :cl>=2?`${cl} pertes consécutives. Alerte douce.`
+      :`1er trade: ${tr.symbol} ${tr.direction}. Encouragement bref.`;
+    await callAI(p,true);
+  }
+}
+
 async function bilan(){
-  const tp=trades.reduce((a,t)=>a+t.pnl,0),sc=calcScore();
-  bot('Bilan — Score: '+sc+'/100 | PnL: '+(tp>=0?'+':'')+tp.toFixed(2)+'€ | '+trades.length+' trades','sys');
-  if(sc!==null) notifyScore(sc); // Notification bilan
-  await ai('Bilan psychologique. Points forts, axes d\'amélioration, conseil clé pour demain.',false);
+  coachMsg("Génération de ton bilan de discipline...");
+  await callAI("Génère un bilan de fin de session : score, points forts, axes d'amélioration, conseil pour demain.",false);
 }
-function sendMsg(){const inp=document.getElementById('chat-in'),txt=inp.value.trim();if(!txt)return;usr(txt);inp.value='';ai(txt);}
-function sq(t){usr(t);ai(t);}
+
+function sendMsg(){
+  const inp=document.getElementById('chat-in');
+  const txt=inp.value.trim();if(!txt)return;
+  userMsg(txt);inp.value='';callAI(txt);
+}
+function sq(t){userMsg(t);callAI(t);}
 function hk(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
 
-// ══ COACH TOGGLE — MOBILE ═══════════════════════════
-function toggleCoach(){
-  const panel=document.getElementById('right-panel');
-  const btn=document.getElementById('coach-toggle-btn');
-  const isOpen=panel.classList.contains('open');
-  panel.classList.toggle('open',!isOpen);
-  // Rotation flèche
-  const arrow=btn.querySelector('svg polyline');
-  if(arrow) arrow.setAttribute('points', isOpen ? '15 18 9 12 15 6' : '9 18 15 12 9 6');
-}
-
-// ══ PROFILS PRESETS ═══════════════════════════════════
-function applyPreset(type){
-  const presets={
-    'impulsif':{loss:100,lossOn:true,trades:3,tradesOn:true,consec:2,consecOn:true,profit:50,profitOn:false},
-    'apres-gain':{loss:200,lossOn:true,trades:4,tradesOn:true,consec:2,consecOn:true,profit:30,profitOn:true},
-    'prop':{loss:200,lossOn:true,trades:4,tradesOn:true,consec:2,consecOn:true,profit:50,profitOn:false}
-  };
-  const names={'impulsif':'🔴 Trader Impulsif','apres-gain':'🟡 Après Objectif Atteint','prop':'🔵 Mode Prop Trader'};
-  const p=presets[type];if(!p)return;
-  document.getElementById('r-loss').value=p.loss;
-  document.getElementById('r-loss-on').checked=p.lossOn;
-  document.getElementById('r-trades').value=p.trades;
-  document.getElementById('r-trades-on').checked=p.tradesOn;
-  document.getElementById('r-consec').value=p.consec;
-  document.getElementById('r-consec-on').checked=p.consecOn;
-  document.getElementById('r-profit').value=p.profit;
-  document.getElementById('r-profit-on').checked=p.profitOn;
-  checkRules();
-  bot('Profil '+names[type]+' appliqué. Tes règles ont été mises à jour automatiquement.','sys');
-  // Revenir à l'onglet session
-  showTab('session',document.querySelectorAll('.tab')[0]);
-}
-const I18N = {
-  fr: {
-    // Navigation
-    tab_session: 'Session', tab_history: 'Historique', tab_challenge: '🔥 Challenge 30J', tab_settings: 'Réglages',
-    // Header
-    status_inactive: 'INACTIVE', status_open: 'OPEN', status_pause: 'PAUSE', status_closed: 'CLOSED',
-    btn_start: 'Démarrer', btn_end: 'Terminer', btn_pause: '⏸ Pause', btn_new: 'Nouvelle session',
-    ws_connected: 'MT5 Connecté', ws_connecting: 'Connexion...', ws_disconnected: 'Déconnecté',
-    // Welcome
-    welcome_badge: 'AI Trading Coach · Institutional Grade',
-    welcome_title: 'Protège ton capital.<br><span>Discipline ta stratégie.</span>',
-    welcome_sub: 'Détection comportementale · MT5 Live · Pause Shield · Profit Guard · Score mensuel',
-    welcome_btn: 'Démarrer la session',
-    welcome_ws: 'Connexion MT5 en attente...',
-    feat1_title: 'MT5 Live', feat1_desc: 'Import automatique de toutes tes positions',
-    feat2_title: 'Analyse IA', feat2_desc: 'Détection FOMO, revenge et overtrading',
-    feat3_title: 'Pause Shield', feat3_desc: 'Check mental avant reprise',
-    feat4_title: 'Score mensuel', feat4_desc: 'Progression et calendrier',
-    // Stats
-    stat_pnl: 'P&L Journalier', stat_wr: 'Win Rate', stat_trades: 'Trades',
-    stat_discipline: 'Discipline', stat_protections: 'Protections',
-    prot_active: '● Actives', prot_alert: '⚠ ',
-    prot_ok: 'Aucune alerte',
-    // Journal
-    journal_title: 'Journal',
-    col_symbol: 'Symbole', col_dir: 'Dir.', col_time: 'Heure',
-    col_pnl: 'P&L', col_note: 'Note', col_source: 'Source', col_plan: 'Plan',
-    empty_trades: '[ MT5 connecté · En attente de positions ]',
-    placeholder_sym: 'XAUUSD · EURUSD · BTC...', placeholder_pnl: 'P&L',
-    placeholder_note: 'Note : FOMO · Revenge · Overtrading...',
-    in_plan: 'Dans le plan', out_plan: 'Hors plan',
-    btn_add: '+ Ajouter',
-    // Rules
-    rules_title: 'Règles de protection',
-    rule_loss: 'Perte max', rule_trades: 'Max trades',
-    rule_consec: 'Bloquer après', rule_profit: 'Profit alert',
-    unit_eur: 'EUR', unit_trades: 'trades', unit_pertes: 'pertes', unit_pct: '%',
-    discipline_lbl: 'Discipline',
-    locked_msg: '⛔ Session verrouillée — Ferme MT5.',
-    // Behaviour
-    behav_title: 'Détection comportementale',
-    bc_revenge: 'Revenge', bc_over: 'Overtrading', bc_consec: 'Pertes consec.', bc_profit: 'Profit Guard',
-    // Coach
-    coach_name: 'Coach IA', coach_status: 'Surveillance active',
-    qbtn1: 'Discipline', qbtn2: 'FOMO', qbtn3: 'Revenge', qbtn4: 'Continuer ?', qbtn5: '⏸ 10min',
-    chat_placeholder: 'Parle à ton coach IA...',
-    // Alerts
-    revenge_alert: 'REVENGE TRADING détecté — ',
-    overtrading_alert: 'OVERTRADING — ',
-    consec_alert: ' PERTES CONSÉCUTIVES — Pause obligatoire.',
-    profit_alert: 'PROFIT GUARD — Sécurise tes gains !',
-    nocturnal_alert: 'TRADING NOCTURNE — Il est ',
-    nocturnal_alert2: 'h. Tes décisions sont moins bonnes.',
-    locked_alert: '⛔ Perte max atteinte. Session verrouillée.',
-    // Pause
-    pause_badge: 'Pause Trading', pause_title: 'Respire.',
-    pause_sub: 'Ce moment est conçu pour te protéger. Utilise-le.',
-    pause_lbl: 'temps restant',
-    check_title: 'Check mental avant de reprendre',
-    check1: 'Je ne suis pas en colère ou frustré',
-    check2: 'Mon prochain trade respecte mon plan',
-    check3: 'Je ne cherche pas à rattraper des pertes',
-    check4: "Je suis dans un bon état d'esprit",
-    resume_btn: 'Reprendre le trading',
-    // History
-    hist_score: 'Score moyen', hist_prof: 'Jours rentables', hist_streak: 'Streak', hist_pnl: 'P&L total',
-    hist_discipline: 'discipline', hist_jours: 'sur 0 jours', hist_jours_disc: 'jours disciplinés', hist_periode: 'période',
-    streak_lbl: 'Jours disciplinés consécutifs',
-    period_month: 'Ce mois', period_7d: '7 jours', period_30d: '30 jours', period_all: 'Tout',
-    cal_days: ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'],
-    // Challenge
-    ch_title: 'Challenge 30 Jours 🔥',
-    ch_sub: '30 jours de discipline consécutifs. Pas de revenge trading. Pas d\'overtrading. Juste ton plan.',
-    ch_start: 'Démarrer le challenge', ch_reset: 'Recommencer',
-    ch_validated: 'Jours validés ✅', ch_neutral: 'Jours neutres ⚪',
-    ch_jokers: 'Jokers ⚡', ch_failed: 'Jours ratés ❌',
-    ch_grid_title: 'Progression jour par jour',
-    ch_rules_title: 'Règles du challenge',
-    ch_badges_title: 'Badges de certification',
-    // Settings
-    settings_title: 'Réglages', settings_sub: 'Configuration de DisciplineAI',
-    lang_label: 'Langue / Language / Idioma',
-    session_id_label: 'ID de session MT5',
-    session_id_hint: 'Utilise cet ID dans ton Expert Advisor MT5.',
-    theme_label: 'Thème',
-    coming_soon: 'Prochainement : Prop Firm Mode · Export CSV',
-    // Coach messages
-    coach_welcome: 'Session démarrée. Je surveille ton comportement. Quel est ton plan de trading ?',
-    pause_ended: 'Pause terminée. Tu es prêt à reprendre avec discipline.',
-    session_locked: 'atteinte. Session verrouillée.',
-    bilan_prefix: 'Bilan — Score: ',
-    // Pause Shield
-    pause_mode: '⏸ Mode Protection Activé',
-    pause_title: 'Pause.',
-    pause_sub: 'Ton objectif n\'est pas de récupérer tes pertes.<br>C\'est de ne pas tilter.',
-    pause_check_lbl: 'Confirme avant de reprendre',
-    check1: 'Je ne suis plus en colère ni frustré',
-    check2: 'Je ne cherche pas à me refaire — je respecte mon plan',
-    check3: 'Je vois un setup clair que je peux décrire précisément',
-    check4: 'J\'accepte pleinement le risque de mon prochain trade',
-    // Responsabilisation
-    resp_badge: '⚠️ Signal de risque actif',
-    resp_title: 'Tu choisis de continuer malgré un signal de risque.',
-    resp_why: 'Pourquoi veux-tu continuer ?',
-    resp_placeholder: 'Décris précisément : ton setup, le contexte de marché, ton niveau d\'entrée, et ce que tu ressens en ce moment. (20 caractères minimum)',
-    resp_file_lbl: 'Capture d\'écran du setup',
-    resp_file_opt: '(optionnel)',
-    resp_btn: 'Je prends la responsabilité de continuer',
-    resp_back: '← Retourner à la pause',
-    // Profils
-    preset_title: 'Profils de protection',
-    preset_sub: 'Choisis un profil qui correspond à ta situation.',
-    preset_apply: 'Appliquer',
-    preset1_name: '🔴 Trader Impulsif',
-    preset1_desc: 'Tu trades trop vite après une perte. Ce profil te force à ralentir.',
-    preset2_name: '🟡 Après Objectif Atteint',
-    preset2_desc: 'Tu as tendance à tout redonner après un bon trade. Ce profil verrouille ton gain.',
-    preset3_name: '🔵 Mode Prop Trader',
-    preset3_desc: 'Tu passes un challenge prop firm. Zéro marge d\'erreur.',
-    // Challenge légende
-    ch_leg_validated: 'Jour validé — discipline ok',
-    ch_leg_failed: 'Jour non validé — règles brisées',
-    ch_leg_joker: 'Joker activé — rattrapage en cours',
-    ch_leg_neutral: 'Pas de session ce jour',
-    ch_leg_future: 'Jour à venir',
-    // Notifications
-    notif_lbl: 'Notifications push',
-    notif_on: '🔔 Notifications activées',
-    notif_off: '🔕 Activer les notifications',
-    notif_desc: 'Reçois des alertes même quand l\'app est fermée.',
-  },
-  en: {
-    tab_session: 'Session', tab_history: 'History', tab_challenge: '🔥 30D Challenge', tab_settings: 'Settings',
-    status_inactive: 'INACTIVE', status_open: 'OPEN', status_pause: 'PAUSE', status_closed: 'CLOSED',
-    btn_start: 'Start', btn_end: 'End', btn_pause: '⏸ Pause', btn_new: 'New session',
-    ws_connected: 'MT5 Connected', ws_connecting: 'Connecting...', ws_disconnected: 'Disconnected',
-    welcome_badge: 'AI Trading Coach · Institutional Grade',
-    welcome_title: 'Protect your capital.<br><span>Discipline your strategy.</span>',
-    welcome_sub: 'Behavioural detection · MT5 Live · Pause Shield · Profit Guard · Monthly score',
-    welcome_btn: 'Start session',
-    welcome_ws: 'Waiting for MT5 connection...',
-    feat1_title: 'MT5 Live', feat1_desc: 'Automatic import of all your positions',
-    feat2_title: 'AI Analysis', feat2_desc: 'FOMO, revenge and overtrading detection',
-    feat3_title: 'Pause Shield', feat3_desc: 'Mental check before resuming',
-    feat4_title: 'Monthly score', feat4_desc: 'Progress and calendar',
-    stat_pnl: 'Daily P&L', stat_wr: 'Win Rate', stat_trades: 'Trades',
-    stat_discipline: 'Discipline', stat_protections: 'Protections',
-    prot_active: '● Active', prot_alert: '⚠ ', prot_ok: 'No alerts',
-    journal_title: 'Trade Journal',
-    col_symbol: 'Symbol', col_dir: 'Dir.', col_time: 'Time',
-    col_pnl: 'P&L', col_note: 'Note', col_source: 'Source', col_plan: 'Plan',
-    empty_trades: '[ MT5 connected · Waiting for positions ]',
-    placeholder_sym: 'XAUUSD · EURUSD · BTC...', placeholder_pnl: 'P&L',
-    placeholder_note: 'Note: FOMO · Revenge · Overtrading...',
-    in_plan: 'In plan', out_plan: 'Off plan', btn_add: '+ Add',
-    rules_title: 'Protection rules',
-    rule_loss: 'Max loss', rule_trades: 'Max trades',
-    rule_consec: 'Lock after', rule_profit: 'Profit alert',
-    unit_eur: 'EUR', unit_trades: 'trades', unit_pertes: 'losses', unit_pct: '%',
-    discipline_lbl: 'Discipline',
-    locked_msg: '⛔ Session locked — Close MT5.',
-    behav_title: 'Behavioural detection',
-    bc_revenge: 'Revenge', bc_over: 'Overtrading', bc_consec: 'Consec. losses', bc_profit: 'Profit Guard',
-    coach_name: 'AI Coach', coach_status: 'Active monitoring',
-    qbtn1: 'Discipline', qbtn2: 'FOMO', qbtn3: 'Revenge', qbtn4: 'Continue?', qbtn5: '⏸ 10min',
-    chat_placeholder: 'Talk to your AI coach...',
-    revenge_alert: 'REVENGE TRADING detected — ',
-    overtrading_alert: 'OVERTRADING — ',
-    consec_alert: ' CONSECUTIVE LOSSES — Mandatory pause.',
-    profit_alert: 'PROFIT GUARD — Secure your gains!',
-    nocturnal_alert: 'LATE NIGHT TRADING — It\'s ',
-    nocturnal_alert2: 'h. Your decisions are weaker now.',
-    locked_alert: '⛔ Max loss reached. Session locked.',
-    pause_badge: 'Trading Pause', pause_title: 'Breathe.',
-    pause_sub: 'This moment is designed to protect you. Use it.',
-    pause_lbl: 'time remaining',
-    check_title: 'Mental check before resuming',
-    check1: 'I am not angry or frustrated',
-    check2: 'My next trade follows my plan',
-    check3: 'I am not trying to recover losses',
-    check4: 'I am in a good mental state',
-    resume_btn: 'Resume trading',
-    hist_score: 'Avg score', hist_prof: 'Profitable days', hist_streak: 'Streak', hist_pnl: 'Total P&L',
-    hist_discipline: 'discipline', hist_jours: 'out of 0 days', hist_jours_disc: 'disciplined days', hist_periode: 'period',
-    streak_lbl: 'Consecutive disciplined days',
-    period_month: 'This month', period_7d: '7 days', period_30d: '30 days', period_all: 'All',
-    cal_days: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
-    ch_title: '30-Day Challenge 🔥',
-    ch_sub: '30 consecutive disciplined days. No revenge trading. No overtrading. Just your plan.',
-    ch_start: 'Start challenge', ch_reset: 'Restart',
-    ch_validated: 'Validated days ✅', ch_neutral: 'Neutral days ⚪',
-    ch_jokers: 'Jokers ⚡', ch_failed: 'Failed days ❌',
-    ch_grid_title: 'Day by day progress',
-    ch_rules_title: 'Challenge rules', ch_badges_title: 'Certification badges',
-    settings_title: 'Settings', settings_sub: 'DisciplineAI Configuration',
-    lang_label: 'Langue / Language / Idioma',
-    session_id_label: 'MT5 Session ID',
-    session_id_hint: 'Use this ID in your MT5 Expert Advisor.',
-    theme_label: 'Theme',
-    coming_soon: 'Coming soon: Prop Firm Mode · CSV Export',
-    coach_welcome: 'Session started. I am monitoring your behaviour. What is your trading plan?',
-    pause_ended: 'Break over. You are ready to resume with discipline.',
-    session_locked: 'reached. Session locked.',
-    bilan_prefix: 'Summary — Score: ',
-    pause_mode: '⏸ Protection Mode Activated',
-    pause_title: 'Pause.',
-    pause_sub: 'Your goal is not to recover your losses.<br>It\'s to not tilt.',
-    pause_check_lbl: 'Confirm before resuming',
-    check1: 'I am no longer angry or frustrated',
-    check2: 'I am not trying to recover losses — I follow my plan',
-    check3: 'I see a clear setup I can describe precisely',
-    check4: 'I fully accept the risk of my next trade',
-    resp_badge: '⚠️ Active risk signal',
-    resp_title: 'You choose to continue despite a risk signal.',
-    resp_why: 'Why do you want to continue?',
-    resp_placeholder: 'Describe precisely: your setup, market context, entry level, and what you feel right now. (20 characters minimum)',
-    resp_file_lbl: 'Setup screenshot',
-    resp_file_opt: '(optional)',
-    resp_btn: 'I take responsibility for continuing',
-    resp_back: '← Return to pause',
-    preset_title: 'Protection profiles',
-    preset_sub: 'Choose a profile that matches your situation.',
-    preset_apply: 'Apply',
-    preset1_name: '🔴 Impulsive Trader',
-    preset1_desc: 'You trade too fast after a loss. This profile forces you to slow down.',
-    preset2_name: '🟡 After Target Reached',
-    preset2_desc: 'You tend to give back profits after a big win. This profile locks your gain.',
-    preset3_name: '🔵 Prop Trader Mode',
-    preset3_desc: 'You are on a prop firm challenge. Zero margin for error.',
-    ch_leg_validated: 'Validated day — discipline ok',
-    ch_leg_failed: 'Failed day — important rules broken',
-    ch_leg_joker: 'Joker active — recovery in progress',
-    ch_leg_neutral: 'No session this day',
-    ch_leg_future: 'Upcoming day',
-    notif_lbl: 'Push notifications',
-    notif_on: '🔔 Notifications enabled',
-    notif_off: '🔕 Enable notifications',
-    notif_desc: 'Get alerts even when the app is closed.',
-  },
-  es: {
-    tab_session: 'Sesión', tab_history: 'Historial', tab_challenge: '🔥 Desafío 30D', tab_settings: 'Ajustes',
-    status_inactive: 'INACTIVO', status_open: 'ABIERTO', status_pause: 'PAUSA', status_closed: 'CERRADO',
-    btn_start: 'Iniciar', btn_end: 'Terminar', btn_pause: '⏸ Pausa', btn_new: 'Nueva sesión',
-    ws_connected: 'MT5 Conectado', ws_connecting: 'Conectando...', ws_disconnected: 'Desconectado',
-    welcome_badge: 'Coach IA de Trading · Grado Institucional',
-    welcome_title: 'Protege tu capital.<br><span>Disciplina tu estrategia.</span>',
-    welcome_sub: 'Detección de comportamiento · MT5 Live · Pause Shield · Profit Guard · Puntuación mensual',
-    welcome_btn: 'Iniciar sesión',
-    welcome_ws: 'Esperando conexión MT5...',
-    feat1_title: 'MT5 Live', feat1_desc: 'Importación automática de todas tus posiciones',
-    feat2_title: 'Análisis IA', feat2_desc: 'Detección de FOMO, revenge y overtrading',
-    feat3_title: 'Pause Shield', feat3_desc: 'Control mental antes de reanudar',
-    feat4_title: 'Puntuación mensual', feat4_desc: 'Progreso y calendario',
-    stat_pnl: 'P&L Diario', stat_wr: 'Tasa de aciertos', stat_trades: 'Operaciones',
-    stat_discipline: 'Disciplina', stat_protections: 'Protecciones',
-    prot_active: '● Activas', prot_alert: '⚠ ', prot_ok: 'Sin alertas',
-    journal_title: 'Diario de operaciones',
-    col_symbol: 'Símbolo', col_dir: 'Dir.', col_time: 'Hora',
-    col_pnl: 'P&L', col_note: 'Nota', col_source: 'Fuente', col_plan: 'Plan',
-    empty_trades: '[ MT5 conectado · Esperando posiciones ]',
-    placeholder_sym: 'XAUUSD · EURUSD · BTC...', placeholder_pnl: 'P&L',
-    placeholder_note: 'Nota: FOMO · Revenge · Overtrading...',
-    in_plan: 'En el plan', out_plan: 'Fuera del plan', btn_add: '+ Añadir',
-    rules_title: 'Reglas de protección',
-    rule_loss: 'Pérdida máx.', rule_trades: 'Máx. operaciones',
-    rule_consec: 'Bloquear tras', rule_profit: 'Alerta beneficio',
-    unit_eur: 'EUR', unit_trades: 'ops.', unit_pertes: 'pérdidas', unit_pct: '%',
-    discipline_lbl: 'Disciplina',
-    locked_msg: '⛔ Sesión bloqueada — Cierra MT5.',
-    behav_title: 'Detección de comportamiento',
-    bc_revenge: 'Revenge', bc_over: 'Overtrading', bc_consec: 'Pérdidas consec.', bc_profit: 'Profit Guard',
-    coach_name: 'Coach IA', coach_status: 'Supervisión activa',
-    qbtn1: 'Disciplina', qbtn2: 'FOMO', qbtn3: 'Revenge', qbtn4: '¿Continuar?', qbtn5: '⏸ 10min',
-    chat_placeholder: 'Habla con tu coach IA...',
-    revenge_alert: 'REVENGE TRADING detectado — ',
-    overtrading_alert: 'OVERTRADING — ',
-    consec_alert: ' PÉRDIDAS CONSECUTIVAS — Pausa obligatoria.',
-    profit_alert: '¡PROFIT GUARD — Asegura tus ganancias!',
-    nocturnal_alert: 'TRADING NOCTURNO — Son las ',
-    nocturnal_alert2: 'h. Tus decisiones son peores ahora.',
-    locked_alert: '⛔ Pérdida máxima alcanzada. Sesión bloqueada.',
-    pause_badge: 'Pausa Trading', pause_title: 'Respira.',
-    pause_sub: 'Este momento está diseñado para protegerte. Aprovéchalo.',
-    pause_lbl: 'tiempo restante',
-    check_title: 'Control mental antes de reanudar',
-    check1: 'No estoy enfadado ni frustrado',
-    check2: 'Mi próxima operación sigue mi plan',
-    check3: 'No intento recuperar pérdidas',
-    check4: 'Estoy en buen estado mental',
-    resume_btn: 'Reanudar el trading',
-    hist_score: 'Puntuación media', hist_prof: 'Días rentables', hist_streak: 'Racha', hist_pnl: 'P&L total',
-    hist_discipline: 'disciplina', hist_jours: 'de 0 días', hist_jours_disc: 'días disciplinados', hist_periode: 'período',
-    streak_lbl: 'Días disciplinados consecutivos',
-    period_month: 'Este mes', period_7d: '7 días', period_30d: '30 días', period_all: 'Todo',
-    cal_days: ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'],
-    ch_title: 'Desafío 30 Días 🔥',
-    ch_sub: '30 días consecutivos de disciplina. Sin revenge trading. Sin overtrading. Solo tu plan.',
-    ch_start: 'Iniciar desafío', ch_reset: 'Reiniciar',
-    ch_validated: 'Días validados ✅', ch_neutral: 'Días neutros ⚪',
-    ch_jokers: 'Comodines ⚡', ch_failed: 'Días fallidos ❌',
-    ch_grid_title: 'Progreso día a día',
-    ch_rules_title: 'Reglas del desafío', ch_badges_title: 'Insignias de certificación',
-    settings_title: 'Ajustes', settings_sub: 'Configuración de DisciplineAI',
-    lang_label: 'Langue / Language / Idioma',
-    session_id_label: 'ID de sesión MT5',
-    session_id_hint: 'Usa este ID en tu Expert Advisor de MT5.',
-    theme_label: 'Tema',
-    coming_soon: 'Próximamente: Modo Prop Firm · Exportar CSV',
-    coach_welcome: 'Sesión iniciada. Estoy monitoreando tu comportamiento. ¿Cuál es tu plan de trading?',
-    pause_ended: 'Pausa terminada. Estás listo para reanudar con disciplina.',
-    session_locked: 'alcanzada. Sesión bloqueada.',
-    bilan_prefix: 'Resumen — Puntuación: ',
-    pause_mode: '⏸ Modo Protección Activado',
-    pause_title: 'Pausa.',
-    pause_sub: 'Tu objetivo no es recuperar tus pérdidas.<br>Es no perder el control.',
-    pause_check_lbl: 'Confirma antes de reanudar',
-    check1: 'Ya no estoy enfadado ni frustrado',
-    check2: 'No intento recuperar pérdidas — respeto mi plan',
-    check3: 'Veo un setup claro que puedo describir con precisión',
-    check4: 'Acepto completamente el riesgo de mi próxima operación',
-    resp_badge: '⚠️ Señal de riesgo activa',
-    resp_title: 'Eliges continuar a pesar de una señal de riesgo.',
-    resp_why: '¿Por qué quieres continuar?',
-    resp_placeholder: 'Describe con precisión: tu setup, contexto de mercado, nivel de entrada y lo que sientes ahora mismo. (20 caracteres mínimo)',
-    resp_file_lbl: 'Captura de pantalla del setup',
-    resp_file_opt: '(opcional)',
-    resp_btn: 'Asumo la responsabilidad de continuar',
-    resp_back: '← Volver a la pausa',
-    preset_title: 'Perfiles de protección',
-    preset_sub: 'Elige un perfil que se adapte a tu situación.',
-    preset_apply: 'Aplicar',
-    preset1_name: '🔴 Trader Impulsivo',
-    preset1_desc: 'Operas demasiado rápido tras una pérdida. Este perfil te obliga a ralentizar.',
-    preset2_name: '🟡 Tras Objetivo Alcanzado',
-    preset2_desc: 'Tiendes a devolver ganancias tras un buen trade. Este perfil bloquea tu beneficio.',
-    preset3_name: '🔵 Modo Prop Trader',
-    preset3_desc: 'Estás en un desafío prop firm. Cero margen de error.',
-    ch_leg_validated: 'Día validado — disciplina ok',
-    ch_leg_failed: 'Día no validado — reglas rotas',
-    ch_leg_joker: 'Comodín activo — recuperación en curso',
-    ch_leg_neutral: 'Sin sesión este día',
-    ch_leg_future: 'Día futuro',
-    notif_lbl: 'Notificaciones push',
-    notif_on: '🔔 Notificaciones activadas',
-    notif_off: '🔕 Activar notificaciones',
-    notif_desc: 'Recibe alertas aunque la app esté cerrada.',
-  }
-};
-
-let currentLang = localStorage.getItem('dai-lang') || 'fr';
-
-function t(key){ return I18N[currentLang][key] || I18N['fr'][key] || key; }
-
-function setLang(lang, btn){
-  currentLang = lang;
-  localStorage.setItem('dai-lang', lang);
-  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('lang-'+lang).classList.add('active');
-  applyLang();
-}
-
-function setThemeBtn(theme, btn){
-  document.querySelectorAll('[id^="theme-"]').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  dark = theme === 'dark';
-  document.documentElement.setAttribute('data-theme', theme);
-  document.getElementById('theme-btn').textContent = dark ? '🌙' : '☀️';
-}
-
-function applyLang(){
-  // Tabs
-  document.querySelectorAll('.tab')[0].textContent = t('tab_session');
-  document.querySelectorAll('.tab')[1].textContent = t('tab_history');
-  document.querySelectorAll('.tab')[2].textContent = t('tab_challenge');
-  document.querySelectorAll('.tab')[3].textContent = t('tab_settings');
-
-  // Header buttons
-  const goBtn = document.getElementById('go-btn');
-  if(goBtn) goBtn.textContent = on ? t('btn_new') : t('btn_start');
-  const endBtn = document.getElementById('end-btn');
-  if(endBtn) endBtn.textContent = t('btn_end');
-  const brkBtn = document.getElementById('brk-btn');
-  if(brkBtn) brkBtn.textContent = t('btn_pause');
-
-  // Welcome
-  const wb = document.querySelector('.w-badge');
-  if(wb) wb.textContent = t('welcome_badge');
-  const wt = document.querySelector('.w-title');
-  if(wt) wt.innerHTML = t('welcome_title');
-  const ws2 = document.querySelector('.w-sub');
-  if(ws2) ws2.textContent = t('welcome_sub');
-  const wbtn = document.querySelector('.w-btn');
-  if(wbtn) wbtn.textContent = t('welcome_btn');
-  const wtxt = document.getElementById('w-txt');
-  if(wtxt) wtxt.textContent = t('welcome_ws');
-
-  // Feature cards
-  const cards = document.querySelectorAll('.w-card');
-  if(cards.length >= 4){
-    cards[0].querySelector('.w-card-ttl').textContent = t('feat1_title');
-    cards[0].querySelector('.w-card-desc').textContent = t('feat1_desc');
-    cards[1].querySelector('.w-card-ttl').textContent = t('feat2_title');
-    cards[1].querySelector('.w-card-desc').textContent = t('feat2_desc');
-    cards[2].querySelector('.w-card-ttl').textContent = t('feat3_title');
-    cards[2].querySelector('.w-card-desc').textContent = t('feat3_desc');
-    cards[3].querySelector('.w-card-ttl').textContent = t('feat4_title');
-    cards[3].querySelector('.w-card-desc').textContent = t('feat4_desc');
-  }
-
-  // Stats labels
-  const slbls = document.querySelectorAll('.stat-lbl');
-  const statKeys = ['stat_pnl','stat_wr','stat_trades','stat_discipline','stat_protections'];
-  slbls.forEach((el,i) => { if(statKeys[i]) el.textContent = t(statKeys[i]); });
-
-  // Journal
-  const jt = document.getElementById('j-cnt');
-  if(jt && !jt.textContent) document.querySelector('.j-title').firstChild.textContent = t('journal_title');
-  const ths = document.querySelectorAll('.th');
-  const colKeys = ['col_symbol','col_dir','col_time','col_pnl','col_note','col_source','col_plan'];
-  ths.forEach((el,i) => { if(colKeys[i]) el.textContent = t(colKeys[i]); });
-  const sym = document.getElementById('t-sym');
-  if(sym) sym.placeholder = t('placeholder_sym');
-  const pnlInp = document.getElementById('t-pnl');
-  if(pnlInp) pnlInp.placeholder = t('placeholder_pnl');
-  const noteInp = document.getElementById('t-note');
-  if(noteInp) noteInp.placeholder = t('placeholder_note');
-  const tplan = document.getElementById('t-plan');
-  if(tplan){ tplan.options[0].text = t('in_plan'); tplan.options[1].text = t('out_plan'); }
-  const addBtn = document.querySelector('.add-btn');
-  if(addBtn) addBtn.textContent = t('btn_add');
-
-  // Rules — ciblage par ID
-  const rtitle = document.querySelector('.rcard-title');
-  if(rtitle) rtitle.textContent = t('rules_title');
-  const rloss = document.getElementById('rl-loss'); if(rloss) rloss.textContent = t('rule_loss');
-  const rltrades = document.getElementById('rl-trades'); if(rltrades) rltrades.textContent = t('rule_trades');
-  const rlconsec = document.getElementById('rl-consec'); if(rlconsec) rlconsec.textContent = t('rule_consec');
-  const rlprofit = document.getElementById('rl-profit'); if(rlprofit) rlprofit.textContent = t('rule_profit');
-  const ruloss = document.getElementById('ru-loss'); if(ruloss) ruloss.textContent = t('unit_eur');
-  const rutrades = document.getElementById('ru-trades'); if(rutrades) rutrades.textContent = t('unit_trades');
-  const ruconsec = document.getElementById('ru-consec'); if(ruconsec) ruconsec.textContent = t('unit_pertes');
-  const ruprofit = document.getElementById('ru-profit'); if(ruprofit) ruprofit.textContent = t('unit_pct');
-  const scLbl = document.querySelector('.score-lbl');
-  if(scLbl) scLbl.textContent = t('discipline_lbl');
-  const lkd = document.getElementById('locked');
-  if(lkd) lkd.textContent = t('locked_msg');
-
-  // Behaviour
-  const btitle = document.querySelector('.bcard-title');
-  if(btitle) btitle.textContent = t('behav_title');
-  const bcKeys = ['bc_revenge','bc_over','bc_consec','bc_profit'];
-  const bcLbls = document.querySelectorAll('.bc-lbl');
-  bcLbls.forEach((el,i) => { if(bcKeys[i]) el.textContent = t(bcKeys[i]); });
-
-  // Coach
-  const cname = document.querySelector('.ai-name');
-  if(cname) cname.textContent = t('coach_name');
-  const csub = document.querySelector('.ai-sub');
-  if(csub) csub.innerHTML = '<div class="ai-sub-dot"></div>'+t('coach_status');
-  const qbtns = document.querySelectorAll('.qbtn');
-  const qkeys = ['qbtn1','qbtn2','qbtn3','qbtn4','qbtn5'];
-  qbtns.forEach((el,i) => { if(qkeys[i]) el.textContent = t(qkeys[i]); });
-  const chatIn = document.getElementById('chat-in');
-  if(chatIn) chatIn.placeholder = t('chat_placeholder');
-
-  // Pause overlay
-  const pbadge = document.querySelector('.p-badge');
-  if(pbadge) pbadge.textContent = t('pause_mode')||t('pause_badge');
-  const ptitle = document.querySelector('.p-title');
-  if(ptitle) ptitle.textContent = t('pause_title');
-  const psub = document.querySelector('.p-sub');
-  if(psub) psub.innerHTML = t('pause_sub');
-  const plbl = document.querySelector('.p-lbl');
-  if(plbl) plbl.textContent = t('pause_lbl');
-  const chtitle = document.querySelector('.p-check-lbl');
-  if(chtitle) chtitle.textContent = t('pause_check_lbl')||t('check_title');
-  const clbls = document.querySelectorAll('.clbl');
-  const checkKeys = ['check1','check2','check3','check4'];
-  clbls.forEach((el,i) => { if(checkKeys[i]) el.textContent = t(checkKeys[i]); });
-  const resbtn = document.getElementById('resume-btn');
-  if(resbtn) resbtn.textContent = t('resume_btn');
-
-  // Responsabilisation
-  const respBadge = document.querySelector('.resp-badge');
-  if(respBadge) respBadge.textContent = t('resp_badge');
-  const respTitle = document.querySelector('.resp-title');
-  if(respTitle) respTitle.textContent = t('resp_title');
-  const respBtn = document.getElementById('resp-btn');
-  if(respBtn && !respBtn.classList.contains('ready')) respBtn.textContent = t('resp_btn');
-  const respBack = document.querySelector('.resp-back');
-  if(respBack) respBack.textContent = t('resp_back');
-  const respTa = document.getElementById('resp-text');
-  if(respTa) respTa.placeholder = t('resp_placeholder');
-
-  // Légende challenge
-  const legItems = document.querySelectorAll('.ch-leg-item');
-  const legKeys = ['ch_leg_validated','ch_leg_failed','ch_leg_joker','ch_leg_neutral','ch_leg_future'];
-  legItems.forEach((el,i) => {
-    if(legKeys[i]) el.childNodes[legKeys[i]?1:0] && (el.lastChild.textContent = t(legKeys[i]));
-  });
-
-  // Notifications bouton
-  const notifBtn = document.getElementById('notif-btn');
-  if(notifBtn) notifBtn.textContent = notifGranted ? t('notif_on') : t('notif_off');
-
-  // History periods
-  const ppills = document.querySelectorAll('.ppill');
-  if(ppills.length >= 4){
-    ppills[0].textContent = t('period_month');
-    ppills[1].textContent = t('period_7d');
-    ppills[2].textContent = t('period_30d');
-    ppills[3].textContent = t('period_all');
-  }
-  const streakLbl = document.querySelector('.streak-lbl');
-  if(streakLbl) streakLbl.textContent = t('streak_lbl');
-  // Calendar headers
-  const cdhs = document.querySelectorAll('.cdh');
-  const days = t('cal_days');
-  cdhs.forEach((el,i) => { if(days[i]) el.textContent = days[i]; });
-
-  // Challenge
-  const chtitleEl = document.querySelector('.ch-title');
-  if(chtitleEl) chtitleEl.textContent = t('ch_title');
-  const chsub = document.querySelector('.ch-sub');
-  if(chsub) chsub.textContent = t('ch_sub');
-  const chstart = document.getElementById('ch-start-btn');
-  if(chstart) chstart.textContent = t('ch_start');
-  const chreset = document.getElementById('ch-reset-btn');
-  if(chreset) chreset.textContent = t('ch_reset');
-  const chstatLbls = document.querySelectorAll('.ch-stat-lbl');
-  const chstatKeys = ['ch_validated','ch_neutral','ch_jokers','ch_failed'];
-  chstatLbls.forEach((el,i) => { if(chstatKeys[i]) el.textContent = t(chstatKeys[i]); });
-  const chgridtitle = document.querySelector('.ch-grid-title');
-  if(chgridtitle) chgridtitle.textContent = t('ch_grid_title');
-  const chrulestitle = document.querySelector('.ch-rules-title');
-  if(chrulestitle) chrulestitle.textContent = t('ch_rules_title');
-  const chbadgestitle = document.querySelector('.ch-badges-title');
-  if(chbadgestitle) chbadgestitle.textContent = t('ch_badges_title');
-
-  // Settings
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    if(I18N[currentLang][key]) el.textContent = I18N[currentLang][key];
-  });
-}
-
-// Init langue au chargement
-applyLang();
-document.getElementById('lang-'+currentLang).classList.add('active');
-let challenge = JSON.parse(localStorage.getItem('dai-challenge')||'null') || {
-  active: false,
-  startDate: null,
-  days: [], // {date, status: 'validated'|'neutral'|'failed'|'joker'|'future', score}
-  jokersUsed: 0,
-  jokerWeek: null, // ISO week when joker was used
-  totalValidated: 0,
-  totalNeutral: 0,
-  totalFailed: 0
-};
-
-function saveChallenge(){localStorage.setItem('dai-challenge',JSON.stringify(challenge));}
-
-function startChallenge(){
-  if(challenge.active)return;
-  challenge = {
-    active: true,
-    startDate: new Date().toISOString().split('T')[0],
-    days: [],
-    jokersUsed: 0,
-    jokerWeek: null,
-    totalValidated: 0,
-    totalNeutral: 0,
-    totalFailed: 0
-  };
-  // Init 30 jours
-  for(let i=0;i<30;i++){
-    const d = new Date();
-    d.setDate(d.getDate()+i);
-    challenge.days.push({
-      date: d.toISOString().split('T')[0],
-      status: i===0?'today':'future',
-      score: null
-    });
-  }
-  saveChallenge();
-  renderChallenge();
-}
-
-function resetChallenge(){
-  if(!confirm('Recommencer le challenge ? Ta progression sera perdue.'))return;
-  challenge.active=false;
-  challenge.days=[];
-  saveChallenge();
-  renderChallenge();
-}
-
-function getISOWeek(dateStr){
-  const d=new Date(dateStr);
-  const thu=new Date(d);thu.setDate(d.getDate()-(d.getDay()+6)%7+3);
-  return thu.getFullYear()*100+Math.ceil((((thu-new Date(thu.getFullYear(),0,4))/86400000)+1)/7);
-}
-
-function validateDay(dateStr, score, hadTrades){
-  if(!challenge.active)return;
-  const day=challenge.days.find(d=>d.date===dateStr);
-  if(!day||day.status==='future')return;
-  day.score=score;
-  if(!hadTrades){
-    day.status='neutral';
-    challenge.totalNeutral++;
-  } else if(score>=70){
-    day.status='validated';
-    challenge.totalValidated++;
-  } else {
-    // Check joker availability
-    const week=getISOWeek(dateStr);
-    const prevDay=challenge.days[challenge.days.indexOf(day)-1];
-    const twoDaysFailed = prevDay&&prevDay.status==='failed';
-    if(!twoDaysFailed && challenge.jokerWeek!==week){
-      day.status='joker';
-      challenge.jokerWeek=week;
-      challenge.jokersUsed++;
-    } else {
-      day.status='failed';
-      challenge.totalFailed++;
-    }
-  }
-  // Check joker recovery — if last 3 days after a joker all ≥80
-  const jIdx=challenge.days.findIndex(d=>d.status==='joker');
-  if(jIdx>=0){
-    const after=challenge.days.slice(jIdx+1,jIdx+4);
-    if(after.length===3&&after.every(d=>d.score>=80)){
-      challenge.days[jIdx].status='validated';
-      challenge.totalValidated++;
-    }
-  }
-  // Advance today marker
-  const todayStr=new Date().toISOString().split('T')[0];
-  challenge.days.forEach(d=>{
-    if(d.date>todayStr)d.status='future';
-    else if(d.status==='future')d.status='neutral';
-  });
-  saveChallenge();
-  renderChallenge();
-  checkBadges();
-}
-
-function renderChallenge(){
-  const grid=document.getElementById('ch-grid');if(!grid)return;
-  const todayStr=new Date().toISOString().split('T')[0];
-  const validated=challenge.days.filter(d=>d.status==='validated').length;
-  const neutral=challenge.days.filter(d=>d.status==='neutral').length;
-  const failed=challenge.days.filter(d=>d.status==='failed').length;
-  const jokers=challenge.days.filter(d=>d.status==='joker').length;
-  const done=validated+neutral+jokers;
-  const pct=Math.round(done/30*100);
-  const jokersLeft=challenge.active?(challenge.jokerWeek===getISOWeek(todayStr)?0:1):1;
-
-  // Update stats
-  document.getElementById('ch-validated').textContent=validated;
-  document.getElementById('ch-neutral').textContent=neutral;
-  document.getElementById('ch-jokers').textContent=jokersLeft;
-  document.getElementById('ch-failed').textContent=failed;
-  document.getElementById('ch-days-lbl').textContent='Jour '+done+' / 30';
-  document.getElementById('ch-fill').style.width=pct+'%';
-  document.getElementById('ch-pct').textContent=pct+'%';
-
-  // Badge principal
-  const badge=document.getElementById('ch-main-badge');
-  const lbl=document.getElementById('ch-main-lbl');
-  if(!challenge.active){badge.textContent='🎯';lbl.textContent='Pas démarré';}
-  else if(pct===100){badge.textContent='🏆';lbl.textContent='Complété !';}
-  else if(pct>=50){badge.textContent='🔥';lbl.textContent='En feu !';}
-  else{badge.textContent='💪';lbl.textContent='En cours...';}
-
-  // Boutons
-  document.getElementById('ch-start-btn').style.display=challenge.active?'none':'inline-block';
-  document.getElementById('ch-reset-btn').style.display=challenge.active?'inline-block':'none';
-
-  // Grille
-  if(!challenge.active){
-    grid.innerHTML='';
-    for(let i=1;i<=30;i++){
-      const d=document.createElement('div');
-      d.className='ch-day future';
-      d.innerHTML='<div class="ch-day-num">'+i+'</div><div class="ch-day-ico">○</div>';
-      grid.appendChild(d);
-    }
-    return;
-  }
-
-  grid.innerHTML='';
-  challenge.days.forEach((day,i)=>{
-    const d=document.createElement('div');
-    const isToday=day.date===todayStr;
-    const icons={validated:'✅',neutral:'⚪',failed:'❌',joker:'⚡',future:'○',today:'▶'};
-    const status=isToday&&day.status==='future'?'today':day.status;
-    d.className='ch-day '+status+(isToday?' today':'');
-    d.innerHTML='<div class="ch-day-num">'+(i+1)+'</div><div class="ch-day-ico">'+(icons[status]||'○')+'</div>';
-    // Clic sur un jour non futur pour voir le détail
-    if(status!=='future'){
-      d.style.cursor='pointer';
-      d.onclick=()=>showDayDetail(day,i+1);
-    }
-    grid.appendChild(d);
-  });
-}
-
-function checkBadges(){
-  const validated=challenge.days.filter(d=>d.status==='validated').length;
-  if(validated>=30){
-    const b=document.getElementById('badge-30');
-    if(b){b.style.opacity='1';b.classList.add('unlocked');}
-  }
-}
-
-function showDayDetail(day, num){
-  const detail=document.getElementById('ch-detail');
-  if(!detail)return;
-  // Date lisible
-  const dateObj=new Date(day.date);
-  const opts={weekday:'long',day:'numeric',month:'long'};
-  const dateStr=dateObj.toLocaleDateString('fr-FR',opts);
-  document.getElementById('ch-detail-date').textContent='Jour '+num+' — '+dateStr.charAt(0).toUpperCase()+dateStr.slice(1);
-  // Score
-  const scoreEl=document.getElementById('ch-detail-score');
-  if(day.score){
-    scoreEl.textContent=day.score+'/100';
-    scoreEl.style.color=day.score>=70?'var(--green)':day.score>=40?'var(--amber)':'var(--red)';
-  } else {
-    scoreEl.textContent='Pas de session';
-    scoreEl.style.color='var(--text3)';
-  }
-  // Règles
-  const statusLabels={validated:'✅ Jour validé — discipline respectée',neutral:'⚪ Pas de session ce jour',failed:'❌ Jour non validé — règles importantes brisées',joker:'⚡ Joker activé — rattrapage en cours',today:'▶ Aujourd\'hui',future:'○ Jour à venir'};
-  const rulesEl=document.getElementById('ch-detail-rules');
-  rulesEl.innerHTML='';
-  const rules=[
-    {lbl:'Pertes max respectées',ok:day.score===null||(day.score&&day.score>75)},
-    {lbl:'Overtrading évité',ok:day.score===null||(day.score&&day.score>60)},
-    {lbl:'Score ≥ 70/100',ok:day.score&&day.score>=70},
-  ];
-  if(day.status!=='neutral'&&day.status!=='future'){
-    rules.forEach(r=>{
-      const div=document.createElement('div');
-      div.className='ch-detail-rule';
-      div.innerHTML='<span class="r-ico">'+(r.ok?'✅':'❌')+'</span>'+r.lbl;
-      rulesEl.appendChild(div);
-    });
-  }
-  // Résumé
-  const summaryEl=document.getElementById('ch-detail-summary');
-  const summaries={
-    validated:'Bonne journée. Discipline respectée — continue sur cette lancée.',
-    neutral:'Pas de session ce jour. Jour neutre — aucun impact sur ton challenge.',
-    failed:'Journée difficile. Analyse ce qui s\'est passé et reviens plus fort demain.',
-    joker:'Joker utilisé. Valide les 3 prochains jours à 80/100 pour rattraper.',
-    today:'Session en cours. Reste discipliné jusqu\'à la fin de ta session.',
-    future:'Ce jour n\'est pas encore arrivé.'
-  };
-  summaryEl.textContent=summaries[day.status]||'—';
-  detail.style.display='block';
-  detail.scrollIntoView({behavior:'smooth',block:'nearest'});
-}
-
-function closeDayDetail(){
-  const d=document.getElementById('ch-detail');
-  if(d)d.style.display='none';
-}
-
-// Auto-validate today's session when ended
-// Init challenge on load
-renderChallenge();
+coachMsg("Bienvenue. Démarre ta session quand tu es prêt. Je surveille tes trades MT5 en temps réel.");
 connectWS();
-
-// ══ PWA — Service Worker ═══════════════════════════════
-if('serviceWorker' in navigator){
-  window.addEventListener('load', ()=>{
-    navigator.serviceWorker.register('/sw.js')
-      .then(()=>console.log('[PWA] Service Worker enregistré'))
-      .catch(e=>console.log('[PWA] Erreur SW:', e));
-  });
-}
-
-// ══ NOTIFICATIONS PUSH ══════════════════════════════════
-let notifGranted = false;
-
-async function initNotifications(){
-  if(!('Notification' in window))return;
-  if(Notification.permission === 'granted'){
-    notifGranted = true; updateNotifBtn(); return;
-  }
-  if(Notification.permission !== 'denied'){
-    const perm = await Notification.requestPermission();
-    notifGranted = perm === 'granted';
-    updateNotifBtn();
-  }
-}
-
-function updateNotifBtn(){
-  const btn = document.getElementById('notif-btn');
-  if(!btn) return;
-  if(notifGranted){
-    btn.textContent = '🔔 Notifications activées';
-    btn.style.color = 'var(--green)';
-    btn.style.borderColor = 'rgba(16,185,129,0.3)';
-  } else {
-    btn.textContent = '🔕 Activer les notifications';
-    btn.style.color = 'var(--text3)';
-    btn.style.borderColor = 'var(--border2)';
-  }
-}
-
-function notify(title, body, tag){
-  if(!notifGranted) return;
-  if(document.visibilityState === 'visible') return; // App ouverte = pas besoin
-  try {
-    new Notification(title, {
-      body, icon: '/icon-192.png', badge: '/icon-192.png',
-      tag: tag || 'disciplineai', renotify: true, vibrate: [200,100,200]
-    });
-  } catch(e) {
-    // Fallback service worker
-    if(navigator.serviceWorker.controller){
-      navigator.serviceWorker.controller.postMessage({type:'NOTIFY', title, body, tag});
-    }
-  }
-}
-
-// Notifications sur les événements clés
-function notifyRevenge(symbol){ notify('⚠️ Revenge Trading détecté', symbol+' — Tu trades pour récupérer une perte. Fais une pause.', 'revenge'); }
-function notifyOvertrading(n, max){ notify('📈 Overtrading', n+' trades aujourd\'hui — ta limite est '+max+'. Ralentis.', 'overtrading'); }
-function notifyMaxLoss(pnl){ notify('🔒 Perte max atteinte', 'P&L : '+pnl+'€ — Session verrouillée. Ferme MT5.', 'maxloss'); }
-function notifyPause(reason){ notify('⏸ Pause obligatoire', reason+' — Check mental requis avant de reprendre.', 'pause'); }
-function notifyChallenge(day){ notify('🔥 Challenge 30J', 'Jour '+day+' validé ! Continue sur cette lancée.', 'challenge'); }
-function notifyScore(score){ notify('📊 Bilan de session', 'Score discipline : '+score+'/100. Bien joué !', 'score'); }
+updateCapitalBar();
 </script>
 </body>
 </html>
