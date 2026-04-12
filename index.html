@@ -2,427 +2,270 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TradeCoach — AI Discipline Coach</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>DisciplineAI — AI Discipline Coach</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#0B0B0F;
-  --bg2:#0F0F14;
-  --bg3:#141419;
-  --bg4:#1A1A22;
-  --glass:rgba(255,255,255,0.03);
-  --glass-hover:rgba(255,255,255,0.055);
-  --glass-border:rgba(255,255,255,0.07);
-  --glass-border-hover:rgba(255,255,255,0.14);
-  --text:#F0F0F5;
-  --text2:#8A8A9A;
-  --text3:#444455;
-  --green:#00FF88;
-  --green-dim:rgba(0,255,136,0.08);
-  --green-glow:rgba(0,255,136,0.2);
-  --red:#FF4D6A;
-  --red-dim:rgba(255,77,106,0.08);
-  --amber:#FFB547;
-  --amber-dim:rgba(255,181,71,0.08);
-  --accent1:#7B5CF0;
-  --accent2:#4D7EFF;
+  --bg:#0B0B0F;--bg2:#0F0F14;--bg3:#141419;--bg4:#1A1A22;
+  --glass:rgba(255,255,255,0.03);--glass-hover:rgba(255,255,255,0.055);
+  --glass-border:rgba(255,255,255,0.07);--glass-border-hover:rgba(255,255,255,0.14);
+  --text:#F0F0F5;--text2:#8A8A9A;--text3:#444455;
+  --green:#00FF88;--green-dim:rgba(0,255,136,0.08);--green-glow:rgba(0,255,136,0.2);
+  --red:#FF4D6A;--red-dim:rgba(255,77,106,0.08);
+  --amber:#FFB547;--amber-dim:rgba(255,181,71,0.08);
+  --accent1:#7B5CF0;--accent2:#4D7EFF;
   --accent-grad:linear-gradient(135deg,#7B5CF0,#4D7EFF);
-  --font:'Geist',sans-serif;
-  --mono:'DM Mono',monospace;
-  --radius:12px;
-  --radius-sm:8px;
-  --blur:blur(20px);
+  --font:'Geist',sans-serif;--mono:'DM Mono',monospace;
+  --radius:12px;--radius-sm:8px;--blur:blur(20px);
 }
-
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);overflow:hidden}
+body::after{content:'';position:fixed;width:600px;height:600px;background:radial-gradient(circle,rgba(123,92,240,0.05) 0%,transparent 70%);top:-200px;left:50%;transform:translateX(-50%);pointer-events:none;z-index:0}
 
-/* NOISE TEXTURE */
-body::before{
-  content:'';position:fixed;inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events:none;z-index:9998;opacity:0.6;
-}
+/* APP */
+.app{display:grid;grid-template-rows:auto 52px auto 1fr;height:100vh;position:relative;z-index:1}
 
-/* AMBIENT GLOW */
-body::after{
-  content:'';position:fixed;
-  width:600px;height:600px;
-  background:radial-gradient(circle,rgba(123,92,240,0.06) 0%,transparent 70%);
-  top:-200px;left:50%;transform:translateX(-50%);
-  pointer-events:none;z-index:0;
-}
-
-.app{display:grid;grid-template-rows:auto auto auto 1fr;height:100vh;position:relative;z-index:1}
-
-/* ══════════════════════════════════════
-   CAPITAL BAR — glass premium
-══════════════════════════════════════ */
-.capital-bar{
-  display:flex;justify-content:center;align-items:center;
-  padding:14px 24px;
-  border-bottom:1px solid var(--glass-border);
-  background:rgba(11,11,15,0.8);
-  backdrop-filter:var(--blur);
-  animation:fadeDown 0.6s ease;
-}
-@keyframes fadeDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-.capital-card{
-  display:flex;align-items:center;gap:0;
-  background:var(--glass);
-  border:1px solid var(--glass-border);
-  border-radius:100px;
-  padding:0;
-  overflow:hidden;
-  backdrop-filter:var(--blur);
-  box-shadow:0 0 0 1px rgba(255,255,255,0.04) inset;
-}
-.cap-item{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 24px;
-  border-right:1px solid var(--glass-border);
-  transition:background 0.2s;
-}
+/* CAPITAL BAR */
+.capital-bar{display:flex;justify-content:center;align-items:center;padding:10px 24px;border-bottom:1px solid var(--glass-border);background:rgba(11,11,15,0.9);backdrop-filter:var(--blur)}
+.capital-card{display:flex;align-items:center;background:var(--glass);border:1px solid var(--glass-border);border-radius:100px;overflow:hidden}
+.cap-item{display:flex;align-items:center;gap:8px;padding:8px 20px;border-right:1px solid var(--glass-border);transition:background 0.2s}
 .cap-item:last-child{border-right:none}
 .cap-item:hover{background:var(--glass-hover)}
-.cap-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.cap-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 .cap-dot.capital{background:var(--text3)}
-.cap-dot.pnl{background:var(--green);box-shadow:0 0 6px var(--green-glow)}
-.cap-dot.equity{background:var(--accent1);box-shadow:0 0 6px rgba(123,92,240,0.4)}
-.cap-label{font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3)}
-.cap-val{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text);transition:color 0.3s;min-width:80px}
+.cap-dot.pnl{background:var(--green);box-shadow:0 0 5px var(--green-glow)}
+.cap-dot.equity{background:var(--accent1)}
+.cap-label{font-family:var(--mono);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3)}
+.cap-val{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text);transition:color 0.3s;min-width:72px}
 .cap-val.pos{color:var(--green)}
 .cap-val.neg{color:var(--red)}
 
-/* ══════════════════════════════════════
-   HEADER
-══════════════════════════════════════ */
-.hdr{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 24px;height:52px;
-  border-bottom:1px solid var(--glass-border);
-  background:rgba(11,11,15,0.9);
-  backdrop-filter:var(--blur);
-  animation:fadeDown 0.5s ease;
-}
-.brand{display:flex;align-items:center;gap:12px}
-.brand-logo{
-  width:28px;height:28px;
-  background:var(--accent-grad);
-  border-radius:8px;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 0 16px rgba(123,92,240,0.3);
-}
-.brand-logo svg{width:14px;height:14px;fill:white}
-.brand-name{font-size:14px;font-weight:600;letter-spacing:0.02em;color:var(--text)}
-.brand-name span{
-  background:var(--accent-grad);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-}
-.brand-badge{
-  font-family:var(--mono);font-size:9px;letter-spacing:0.1em;
-  padding:2px 8px;border-radius:100px;
-  background:rgba(123,92,240,0.12);
-  border:1px solid rgba(123,92,240,0.25);
-  color:var(--accent1);text-transform:uppercase;
-}
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:52px;border-bottom:1px solid var(--glass-border);background:rgba(11,11,15,0.95);backdrop-filter:var(--blur)}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-logo{width:28px;height:28px;border-radius:8px;overflow:hidden;flex-shrink:0}
+.brand-logo img{width:100%;height:100%;object-fit:cover}
+.brand-name{font-size:14px;font-weight:700;letter-spacing:0.02em;color:var(--text)}
+.brand-name span{background:var(--accent-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.brand-badge{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;padding:2px 8px;border-radius:100px;background:rgba(123,92,240,0.12);border:1px solid rgba(123,92,240,0.25);color:var(--accent1);text-transform:uppercase}
 .hdr-mid{display:flex;align-items:center;gap:1px}
-.ntab{
-  font-family:var(--mono);font-size:10px;padding:6px 16px;
-  border:none;cursor:pointer;letter-spacing:0.08em;
-  color:var(--text3);background:transparent;text-transform:uppercase;
-  transition:all 0.2s;border-radius:6px;
-}
+.ntab{font-family:var(--mono);font-size:10px;padding:6px 14px;border:1px solid transparent;cursor:pointer;letter-spacing:0.06em;color:var(--text3);background:transparent;text-transform:uppercase;transition:all 0.2s;border-radius:6px}
 .ntab:hover{color:var(--text2);background:var(--glass)}
-.ntab.active{color:var(--text);background:var(--glass);border:1px solid var(--glass-border)}
-.hdr-right{display:flex;align-items:center;gap:12px}
-.ws-pill{
-  display:flex;align-items:center;gap:6px;
-  font-family:var(--mono);font-size:10px;letter-spacing:0.06em;
-  padding:5px 12px;border-radius:100px;
-  background:var(--glass);border:1px solid var(--glass-border);
-}
+.ntab.active{color:var(--text);background:var(--glass);border-color:var(--glass-border)}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.ws-pill{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;letter-spacing:0.06em;padding:5px 12px;border-radius:100px;background:var(--glass);border:1px solid var(--glass-border)}
 .ws-dot{width:5px;height:5px;border-radius:50%;background:var(--text3);transition:all 0.3s}
 .ws-dot.connected{background:var(--green);box-shadow:0 0 6px var(--green-glow);animation:pulse 2s infinite}
 .ws-dot.connecting{background:var(--amber);animation:pulse 1s infinite}
-.ws-label{color:var(--text3);transition:color 0.3s}
+.ws-label{color:var(--text3);transition:color 0.3s;font-size:10px}
 .ws-label.connected{color:var(--green)}
-.timer-wrap{font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.1em;min-width:72px;text-align:center}
+.timer-wrap{font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.1em;min-width:70px;text-align:center}
 .timer-wrap.active{color:var(--text)}
-.btn{
-  font-family:var(--mono);font-size:10px;padding:8px 18px;
-  border:1px solid var(--glass-border);cursor:pointer;
-  letter-spacing:0.08em;text-transform:uppercase;
-  transition:all 0.25s;background:var(--glass);
-  color:var(--text2);border-radius:var(--radius-sm);
-}
-.btn:hover{border-color:var(--glass-border-hover);color:var(--text);background:var(--glass-hover)}
-.btn.go{
-  background:var(--accent-grad);color:white;border:none;
-  box-shadow:0 0 20px rgba(123,92,240,0.25);
-}
-.btn.go:hover{box-shadow:0 0 30px rgba(123,92,240,0.4);transform:translateY(-1px)}
+.btn{font-family:var(--mono);font-size:10px;padding:7px 16px;border:1px solid var(--glass-border);cursor:pointer;letter-spacing:0.06em;text-transform:uppercase;transition:all 0.2s;background:var(--glass);color:var(--text2);border-radius:var(--radius-sm)}
+.btn:hover{border-color:var(--glass-border-hover);color:var(--text)}
+.btn.go{background:var(--accent-grad);color:white;border:none;box-shadow:0 0 16px rgba(123,92,240,0.25)}
+.btn.go:hover{box-shadow:0 0 24px rgba(123,92,240,0.4);transform:translateY(-1px)}
 .btn.stop{border-color:rgba(255,77,106,0.3);color:var(--red);background:var(--red-dim)}
 .btn.stop:hover{background:var(--red);color:white;border-color:var(--red)}
 
-/* ══════════════════════════════════════
-   ALERT
-══════════════════════════════════════ */
-.alert{display:none;align-items:center;gap:10px;padding:8px 24px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;border-bottom:1px solid}
+/* ALERT */
+.alert{display:none;align-items:center;gap:10px;padding:8px 20px;font-family:var(--mono);font-size:11px;letter-spacing:0.04em;border-bottom:1px solid}
 .alert.show{display:flex}
 .alert.danger{background:var(--red-dim);border-color:rgba(255,77,106,0.2);color:var(--red)}
 .alert.warn{background:var(--amber-dim);border-color:rgba(255,181,71,0.2);color:var(--amber)}
 
-/* ══════════════════════════════════════
-   METRICS
-══════════════════════════════════════ */
-.metrics{
-  display:grid;grid-template-columns:repeat(5,1fr);
-  border-bottom:1px solid var(--glass-border);
-  animation:fadeUp 0.5s ease 0.1s both;
-}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.met{
-  padding:16px 20px;border-right:1px solid var(--glass-border);
-  position:relative;overflow:hidden;transition:background 0.25s;
-}
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--glass-border)}
+.met{padding:12px 16px;border-right:1px solid var(--glass-border);position:relative;overflow:hidden;transition:background 0.2s}
 .met:last-child{border-right:none}
 .met:hover{background:var(--glass)}
 .met-accent{position:absolute;top:0;left:0;right:0;height:1px;background:var(--glass-border);transition:background 0.3s}
 .met.pos .met-accent{background:linear-gradient(90deg,transparent,var(--green),transparent);opacity:0.6}
 .met.neg .met-accent{background:linear-gradient(90deg,transparent,var(--red),transparent);opacity:0.6}
 .met.warn .met-accent{background:linear-gradient(90deg,transparent,var(--amber),transparent);opacity:0.6}
-.met.info .met-accent{background:var(--accent-grad);opacity:0.6}
-.met-label{font-family:var(--mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
-.met-val{font-family:var(--mono);font-size:18px;font-weight:500;color:var(--text);transition:color 0.3s}
+.met-label{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.met-val{font-family:var(--mono);font-size:17px;font-weight:500;color:var(--text);transition:color 0.3s}
 .met-val.pos{color:var(--green)}
 .met-val.neg{color:var(--red)}
 .met-val.warn{color:var(--amber)}
-.met-sub{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:5px}
+.met-sub{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:4px}
 
-/* ══════════════════════════════════════
-   MAIN LAYOUT
-══════════════════════════════════════ */
-.main{display:grid;grid-template-columns:1fr 320px;overflow:hidden}
+/* MAIN */
+.main{display:grid;grid-template-columns:1fr 300px;overflow:hidden}
+
+/* PAGES */
+.page{display:none;flex-direction:column;overflow:hidden}
+.page.active{display:flex}
+
+/* SESSION PAGE */
 .left{display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--glass-border)}
-
-/* TRADE LOG */
-.sec-hdr{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 20px;border-bottom:1px solid var(--glass-border);flex-shrink:0;
-}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-bottom:1px solid var(--glass-border);flex-shrink:0}
 .sec-title{font-family:var(--mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3)}
 .sec-title em{color:var(--green);font-style:normal;margin-left:8px}
-.trades-list{flex:1;overflow-y:auto;min-height:0}
+.trades-list{flex:1;overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch}
 .trades-list::-webkit-scrollbar{width:2px}
 .trades-list::-webkit-scrollbar-thumb{background:var(--glass-border)}
-
-.trade-col-hdr{
-  display:grid;grid-template-columns:90px 68px 54px 80px 80px 1fr 60px;
-  gap:6px;padding:6px 20px;
-  border-bottom:1px solid var(--glass-border);
-  background:var(--glass);
-}
-.trade-col-hdr span{font-family:var(--mono);font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3)}
-
-.trade-row{
-  display:grid;grid-template-columns:90px 68px 54px 80px 80px 1fr 60px;
-  gap:6px;align-items:center;padding:11px 20px;
-  border-bottom:1px solid var(--glass-border);
-  transition:background 0.2s;
-  animation:fadeIn 0.35s ease;
-}
+.trade-row{display:grid;grid-template-columns:80px 60px 50px 72px 72px 1fr 52px;gap:4px;align-items:center;padding:10px 18px;border-bottom:1px solid var(--glass-border);transition:background 0.2s;animation:fadeIn 0.35s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 .trade-row:hover{background:var(--glass-hover)}
-.t-sym{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text)}
-.t-dir{
-  font-family:var(--mono);font-size:9px;padding:3px 8px;
-  letter-spacing:0.06em;text-align:center;border-radius:100px;border:1px solid;
-  width:fit-content;
-}
+.t-sym{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--text)}
+.t-dir{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:100px;border:1px solid;width:fit-content}
 .t-dir.long{color:var(--green);border-color:rgba(0,255,136,0.2);background:rgba(0,255,136,0.06)}
 .t-dir.short{color:var(--red);border-color:rgba(255,77,106,0.2);background:rgba(255,77,106,0.06)}
-.t-time{font-family:var(--mono);font-size:10px;color:var(--text3)}
-.t-price{font-family:var(--mono);font-size:11px;color:var(--text2)}
-.t-pnl{font-family:var(--mono);font-size:12px;font-weight:500}
+.t-time{font-family:var(--mono);font-size:9px;color:var(--text3)}
+.t-price{font-family:var(--mono);font-size:10px;color:var(--text2)}
+.t-pnl{font-family:var(--mono);font-size:11px;font-weight:500}
 .t-pnl.pos{color:var(--green)}
 .t-pnl.neg{color:var(--red)}
 .t-pnl.open{color:var(--text3);font-style:italic}
-.t-note{font-size:11px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.t-src{font-family:var(--mono);font-size:9px;text-align:right;letter-spacing:0.06em}
+.t-note{font-size:10px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.t-src{font-family:var(--mono);font-size:9px;text-align:right;color:var(--text3)}
 .t-src.mt5{color:var(--accent2)}
 .t-src.tv{color:var(--amber)}
-.t-src.manual{color:var(--text3)}
-.empty{
-  padding:48px 20px;text-align:center;
-  font-family:var(--mono);font-size:11px;color:var(--text3);
-  letter-spacing:0.06em;line-height:2.2;
-}
-.empty-icon{font-size:32px;margin-bottom:12px;opacity:0.3}
-
-/* ADD TRADE */
-.add-area{
-  padding:14px 20px;border-top:1px solid var(--glass-border);
-  background:var(--glass);backdrop-filter:var(--blur);flex-shrink:0;
-}
-.add-label{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
-.form-grid{display:grid;grid-template-columns:1fr 80px 100px 110px auto;gap:8px;align-items:center}
-.fi{
-  font-family:var(--mono);font-size:12px;
-  background:rgba(255,255,255,0.03);
-  border:1px solid var(--glass-border);
-  color:var(--text);padding:8px 12px;outline:none;width:100%;
-  transition:all 0.2s;border-radius:var(--radius-sm);
-}
-.fi:focus{border-color:rgba(123,92,240,0.4);background:rgba(123,92,240,0.04);box-shadow:0 0 0 3px rgba(123,92,240,0.08)}
+.empty{padding:40px 18px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.06em;line-height:2.2}
+.add-area{padding:12px 18px;border-top:1px solid var(--glass-border);background:var(--glass);flex-shrink:0}
+.add-label{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.form-grid{display:grid;grid-template-columns:1fr 76px 90px 100px auto;gap:6px;align-items:center}
+.fi{font-family:var(--mono);font-size:11px;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);color:var(--text);padding:7px 10px;outline:none;width:100%;transition:all 0.2s;border-radius:var(--radius-sm)}
+.fi:focus{border-color:rgba(123,92,240,0.4);box-shadow:0 0 0 3px rgba(123,92,240,0.08)}
 .fi::placeholder{color:var(--text3)}
 select.fi option{background:var(--bg3)}
-.add-btn{
-  font-family:var(--mono);font-size:10px;padding:8px 16px;
-  background:var(--accent-grad);color:white;border:none;cursor:pointer;
-  letter-spacing:0.08em;text-transform:uppercase;font-weight:600;
-  white-space:nowrap;border-radius:var(--radius-sm);
-  transition:all 0.2s;box-shadow:0 0 16px rgba(123,92,240,0.2);
-}
-.add-btn:hover{box-shadow:0 0 24px rgba(123,92,240,0.35);transform:translateY(-1px)}
-.note-row{margin-top:8px}
-
-/* RULES */
-.rules-area{padding:14px 20px;border-top:1px solid var(--glass-border);flex-shrink:0}
-.rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-.rule-card{
-  background:var(--glass);
-  border:1px solid var(--glass-border);
-  padding:12px 14px;border-radius:var(--radius-sm);
-  display:flex;align-items:center;justify-content:space-between;gap:8px;
-  transition:all 0.2s;
-}
+.add-btn{font-family:var(--mono);font-size:10px;padding:7px 14px;background:var(--accent-grad);color:white;border:none;cursor:pointer;letter-spacing:0.06em;text-transform:uppercase;font-weight:600;white-space:nowrap;border-radius:var(--radius-sm);transition:all 0.2s}
+.add-btn:hover{opacity:0.85;transform:translateY(-1px)}
+.note-row{margin-top:6px}
+.rules-area{padding:12px 18px;border-top:1px solid var(--glass-border);flex-shrink:0}
+.rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.rule-card{background:var(--glass);border:1px solid var(--glass-border);padding:10px 12px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:space-between;gap:6px;transition:all 0.2s}
 .rule-card:hover{background:var(--glass-hover);border-color:var(--glass-border-hover)}
-.rule-lbl{font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px}
-.rule-inp-row{display:flex;align-items:center;gap:6px}
-.rule-inp{
-  width:52px;font-family:var(--mono);font-size:12px;
-  background:rgba(255,255,255,0.04);
-  border:1px solid var(--glass-border);color:var(--text);
-  padding:4px 6px;text-align:center;outline:none;border-radius:6px;
-  transition:border-color 0.2s;
-}
+.rule-lbl{font-family:var(--mono);font-size:9px;color:var(--text2);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:5px}
+.rule-inp-row{display:flex;align-items:center;gap:5px}
+.rule-inp{width:46px;font-family:var(--mono);font-size:11px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);color:var(--text);padding:3px 6px;text-align:center;outline:none;border-radius:6px;transition:border-color 0.2s}
 .rule-inp:focus{border-color:rgba(123,92,240,0.4)}
-.rule-unit{font-family:var(--mono);font-size:10px;color:var(--text3)}
-.tog{position:relative;width:32px;height:18px;flex-shrink:0}
+.rule-unit{font-family:var(--mono);font-size:9px;color:var(--text3)}
+.tog{position:relative;width:30px;height:16px;flex-shrink:0}
 .tog input{opacity:0;width:0;height:0}
-.tog-sl{
-  position:absolute;inset:0;
-  background:rgba(255,255,255,0.08);
-  cursor:pointer;border-radius:9px;transition:all 0.25s;
-  border:1px solid var(--glass-border);
-}
-.tog input:checked+.tog-sl{background:var(--accent-grad);border-color:transparent;box-shadow:0 0 10px rgba(123,92,240,0.3)}
-.tog-sl:before{
-  content:'';position:absolute;width:12px;height:12px;
-  top:2px;left:2px;background:white;border-radius:50%;transition:transform 0.25s;
-}
+.tog-sl{position:absolute;inset:0;background:rgba(255,255,255,0.08);cursor:pointer;border-radius:8px;transition:all 0.25s;border:1px solid var(--glass-border)}
+.tog input:checked+.tog-sl{background:var(--accent-grad);border-color:transparent;box-shadow:0 0 8px rgba(123,92,240,0.3)}
+.tog-sl:before{content:'';position:absolute;width:10px;height:10px;top:2px;left:2px;background:white;border-radius:50%;transition:transform 0.25s}
 .tog input:checked+.tog-sl:before{transform:translateX(14px)}
-
-/* SCORE */
-.score-row{display:flex;align-items:center;gap:12px;margin-top:12px}
+.score-row{display:flex;align-items:center;gap:10px;margin-top:10px}
 .score-lbl{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;flex-shrink:0}
 .score-track{flex:1;height:2px;background:rgba(255,255,255,0.06);border-radius:1px;overflow:hidden}
 .score-fill{height:100%;border-radius:1px;transition:width 0.6s,background 0.6s}
-.score-num{font-family:var(--mono);font-size:13px;font-weight:500;min-width:52px;text-align:right}
-.locked{
-  display:none;align-items:center;gap:10px;padding:12px 20px;
-  background:var(--red-dim);border-top:1px solid rgba(255,77,106,0.2);
-  font-family:var(--mono);font-size:11px;color:var(--red);letter-spacing:0.04em;flex-shrink:0;
-}
+.score-num{font-family:var(--mono);font-size:12px;font-weight:500;min-width:48px;text-align:right}
+.locked{display:none;align-items:center;gap:8px;padding:10px 18px;background:var(--red-dim);border-top:1px solid rgba(255,77,106,0.2);font-family:var(--mono);font-size:11px;color:var(--red);flex-shrink:0}
 .locked.show{display:flex}
 
-/* ══════════════════════════════════════
-   COACH PANEL
-══════════════════════════════════════ */
+/* COACH */
 .right{display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
-.coach-hdr{
-  display:flex;align-items:center;gap:12px;
-  padding:14px 16px;border-bottom:1px solid var(--glass-border);flex-shrink:0;
-  background:var(--glass);
-}
-.coach-avatar{
-  width:32px;height:32px;border-radius:50%;
-  background:var(--accent-grad);
-  display:flex;align-items:center;justify-content:center;
-  font-size:14px;flex-shrink:0;
-  box-shadow:0 0 12px rgba(123,92,240,0.3);
-}
-.coach-name{font-size:13px;font-weight:600;letter-spacing:0.02em;color:var(--text)}
-.coach-sub{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.06em;margin-top:2px}
-.coach-status{display:flex;align-items:center;gap:5px;margin-top:3px}
-.coach-status-dot{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green-glow);animation:pulse 2s infinite}
-.coach-status-txt{font-family:var(--mono);font-size:9px;color:var(--green);letter-spacing:0.06em}
-
-.msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.coach-hdr{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--glass-border);flex-shrink:0;background:var(--glass)}
+.coach-avatar{width:30px;height:30px;border-radius:50%;background:var(--accent-grad);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;box-shadow:0 0 10px rgba(123,92,240,0.3)}
+.coach-name{font-size:12px;font-weight:600;color:var(--text)}
+.coach-sub{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:1px}
+.coach-live{display:flex;align-items:center;gap:4px;margin-top:2px}
+.live-dot{width:4px;height:4px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.live-txt{font-family:var(--mono);font-size:9px;color:var(--green)}
+.msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:0;-webkit-overflow-scrolling:touch}
 .msgs::-webkit-scrollbar{width:2px}
 .msgs::-webkit-scrollbar-thumb{background:var(--glass-border)}
 .msg{max-width:88%}
 .msg.coach{align-self:flex-start}
 .msg.user{align-self:flex-end}
-.msg-bbl{padding:10px 14px;font-size:12px;line-height:1.7;border-radius:var(--radius-sm)}
-.msg.coach .msg-bbl{
-  background:var(--glass);color:var(--text);
-  border:1px solid var(--glass-border);
-  border-bottom-left-radius:2px;
-}
-.msg.user .msg-bbl{
-  background:rgba(123,92,240,0.1);color:var(--text);
-  border:1px solid rgba(123,92,240,0.2);
-  border-bottom-right-radius:2px;
-}
-.msg-ts{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:4px;letter-spacing:0.04em;padding:0 2px}
+.msg-bbl{padding:9px 12px;font-size:12px;line-height:1.65;border-radius:var(--radius-sm)}
+.msg.coach .msg-bbl{background:var(--glass);color:var(--text);border:1px solid var(--glass-border);border-bottom-left-radius:2px}
+.msg.user .msg-bbl{background:rgba(123,92,240,0.1);color:var(--text);border:1px solid rgba(123,92,240,0.2);border-bottom-right-radius:2px}
+.msg-ts{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:3px;padding:0 2px}
 .msg.user .msg-ts{text-align:right}
-.typing-bbl{
-  display:flex;align-items:center;gap:5px;padding:12px 14px;
-  background:var(--glass);border:1px solid var(--glass-border);
-  border-radius:var(--radius-sm);border-bottom-left-radius:2px;width:fit-content;
-}
+.typing-bbl{display:flex;align-items:center;gap:4px;padding:10px 12px;background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius-sm);border-bottom-left-radius:2px;width:fit-content}
 .td{width:4px;height:4px;border-radius:50%;background:var(--accent1);animation:tdot 1.4s infinite}
 .td:nth-child(2){animation-delay:0.2s}
 .td:nth-child(3){animation-delay:0.4s}
 @keyframes tdot{0%,80%,100%{opacity:0.2;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}
-
-.quick-row{display:flex;gap:6px;flex-wrap:wrap;padding:10px 14px;border-top:1px solid var(--glass-border);flex-shrink:0}
-.qbtn{
-  font-family:var(--mono);font-size:10px;padding:5px 12px;
-  border:1px solid var(--glass-border);background:var(--glass);
-  color:var(--text3);cursor:pointer;letter-spacing:0.04em;
-  transition:all 0.2s;white-space:nowrap;border-radius:100px;
-}
+.quick-row{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;border-top:1px solid var(--glass-border);flex-shrink:0}
+.qbtn{font-family:var(--mono);font-size:10px;padding:5px 10px;border:1px solid var(--glass-border);background:var(--glass);color:var(--text3);cursor:pointer;letter-spacing:0.04em;transition:all 0.2s;white-space:nowrap;border-radius:100px}
 .qbtn:hover{border-color:rgba(123,92,240,0.4);color:var(--text);background:rgba(123,92,240,0.08)}
-
-.chat-foot{
-  display:flex;gap:8px;padding:12px 14px;
-  border-top:1px solid var(--glass-border);
-  align-items:flex-end;flex-shrink:0;
-  background:var(--glass);
-}
-.chat-foot textarea{
-  flex:1;font-family:var(--mono);font-size:12px;
-  background:rgba(255,255,255,0.03);
-  border:1px solid var(--glass-border);color:var(--text);
-  padding:9px 12px;resize:none;min-height:38px;max-height:80px;outline:none;
-  transition:all 0.2s;line-height:1.5;border-radius:var(--radius-sm);
-}
-.chat-foot textarea:focus{border-color:rgba(123,92,240,0.4);background:rgba(123,92,240,0.03);box-shadow:0 0 0 3px rgba(123,92,240,0.08)}
+.chat-foot{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--glass-border);align-items:flex-end;flex-shrink:0;background:var(--glass)}
+.chat-foot textarea{flex:1;font-family:var(--mono);font-size:12px;background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);color:var(--text);padding:8px 10px;resize:none;min-height:36px;max-height:72px;outline:none;transition:all 0.2s;line-height:1.5;border-radius:var(--radius-sm)}
+.chat-foot textarea:focus{border-color:rgba(123,92,240,0.4);box-shadow:0 0 0 3px rgba(123,92,240,0.08)}
 .chat-foot textarea::placeholder{color:var(--text3)}
-.snd{
-  width:38px;height:38px;
-  background:var(--accent-grad);border:none;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  transition:all 0.2s;border-radius:var(--radius-sm);
-  box-shadow:0 0 12px rgba(123,92,240,0.25);
+.snd{width:36px;height:36px;background:var(--accent-grad);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.2s;border-radius:var(--radius-sm);box-shadow:0 0 10px rgba(123,92,240,0.2)}
+.snd:hover{box-shadow:0 0 18px rgba(123,92,240,0.4);transform:translateY(-1px)}
+.snd svg{width:14px;height:14px;fill:white}
+
+/* ══════════════════════════════════════
+   HISTORIQUE PAGE
+══════════════════════════════════════ */
+.history-page{display:none;grid-column:1/-1;flex-direction:column;overflow:hidden}
+.history-page.active{display:flex}
+.history-inner{flex:1;overflow-y:auto;padding:24px;-webkit-overflow-scrolling:touch}
+.history-inner::-webkit-scrollbar{width:3px}
+.history-inner::-webkit-scrollbar-thumb{background:var(--glass-border)}
+.hist-top{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.hist-stat{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:16px;transition:all 0.2s}
+.hist-stat:hover{background:var(--glass-hover);border-color:var(--glass-border-hover)}
+.hist-stat-label{font-family:var(--mono);font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.hist-stat-val{font-family:var(--mono);font-size:22px;font-weight:500;color:var(--text)}
+.hist-stat-val.pos{color:var(--green)}
+.hist-stat-val.neg{color:var(--red)}
+.hist-stat-sub{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:4px}
+.cal-section{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:20px;margin-bottom:20px}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.cal-title{font-size:16px;font-weight:600;color:var(--text)}
+.cal-nav{display:flex;align-items:center;gap:8px}
+.cal-nav-btn{font-family:var(--mono);font-size:12px;padding:6px 12px;background:var(--glass);border:1px solid var(--glass-border);color:var(--text2);cursor:pointer;border-radius:var(--radius-sm);transition:all 0.2s}
+.cal-nav-btn:hover{background:var(--glass-hover);color:var(--text)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-day-name{font-family:var(--mono);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);text-align:center;padding:4px 0;margin-bottom:4px}
+.cal-day{min-height:52px;border-radius:8px;padding:6px 8px;cursor:pointer;transition:all 0.2s;border:1px solid transparent;display:flex;flex-direction:column;gap:2px;position:relative}
+.cal-day:hover{background:var(--glass-hover);border-color:var(--glass-border)}
+.cal-day.empty{cursor:default}
+.cal-day.empty:hover{background:transparent;border-color:transparent}
+.cal-day.today{border-color:rgba(123,92,240,0.3);background:rgba(123,92,240,0.05)}
+.cal-day.has-trades.profit{background:rgba(0,255,136,0.06);border-color:rgba(0,255,136,0.15)}
+.cal-day.has-trades.profit:hover{background:rgba(0,255,136,0.1)}
+.cal-day.has-trades.loss{background:rgba(255,77,106,0.06);border-color:rgba(255,77,106,0.15)}
+.cal-day.has-trades.loss:hover{background:rgba(255,77,106,0.1)}
+.cal-day-num{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--text3)}
+.cal-day.has-trades .cal-day-num{color:var(--text)}
+.cal-day.today .cal-day-num{color:var(--accent1);font-weight:700}
+.cal-day-pnl{font-family:var(--mono);font-size:10px;font-weight:500}
+.cal-day-pnl.pos{color:var(--green)}
+.cal-day-pnl.neg{color:var(--red)}
+.cal-day-dot{width:4px;height:4px;border-radius:50%;margin-top:auto}
+.cal-day-dot.profit{background:var(--green)}
+.cal-day-dot.loss{background:var(--red)}
+.hist-trades-title{font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:12px}
+.hist-trade-row{display:grid;grid-template-columns:100px 70px 60px 80px 80px 1fr;gap:8px;align-items:center;padding:10px 16px;border-radius:var(--radius-sm);border:1px solid var(--glass-border);margin-bottom:6px;background:var(--glass);transition:all 0.2s}
+.hist-trade-row:hover{background:var(--glass-hover);border-color:var(--glass-border-hover)}
+.no-history{padding:40px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text3);line-height:2}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .app{grid-template-rows:auto 48px auto 1fr}
+  .capital-bar{padding:8px 12px}
+  .cap-item{padding:6px 12px;gap:6px}
+  .cap-label{display:none}
+  .cap-val{font-size:11px;min-width:60px}
+  .hdr{padding:0 12px}
+  .brand-badge{display:none}
+  .ntab{padding:5px 10px;font-size:9px}
+  .timer-wrap{display:none}
+  .main{grid-template-columns:1fr}
+  .left{border-right:none}
+  .right{display:none}
+  .metrics{grid-template-columns:repeat(3,1fr)}
+  .met:nth-child(4),.met:nth-child(5){display:none}
+  .form-grid{grid-template-columns:1fr 70px auto}
+  .fi:nth-child(3),.fi:nth-child(4){display:none}
+  .rules-grid{grid-template-columns:1fr}
+  .hist-top{grid-template-columns:repeat(2,1fr)}
+  .cal-day{min-height:44px;padding:4px 6px}
+  .cal-day-pnl{font-size:9px}
+  .hist-trade-row{grid-template-columns:80px 56px 56px 70px 1fr;font-size:11px}
+  .hist-trade-row > span:last-child{display:none}
 }
-.snd:hover{box-shadow:0 0 20px rgba(123,92,240,0.4);transform:translateY(-1px)}
-.snd svg{width:15px;height:15px;fill:white}
 </style>
 </head>
 <body>
@@ -431,41 +274,26 @@ select.fi option{background:var(--bg3)}
   <!-- CAPITAL BAR -->
   <div class="capital-bar">
     <div class="capital-card">
-      <div class="cap-item">
-        <div class="cap-dot capital"></div>
-        <span class="cap-label">Capital</span>
-        <span class="cap-val" id="cap-capital">50 000.00 $</span>
-      </div>
-      <div class="cap-item">
-        <div class="cap-dot pnl"></div>
-        <span class="cap-label">P&L</span>
-        <span class="cap-val" id="cap-pnl">+0.00 €</span>
-      </div>
-      <div class="cap-item">
-        <div class="cap-dot equity"></div>
-        <span class="cap-label">Equity</span>
-        <span class="cap-val" id="cap-equity">50 000.00 $</span>
-      </div>
+      <div class="cap-item"><div class="cap-dot capital"></div><span class="cap-label">Capital</span><span class="cap-val" id="cap-capital">50 000 $</span></div>
+      <div class="cap-item"><div class="cap-dot pnl"></div><span class="cap-label">P&L</span><span class="cap-val" id="cap-pnl">+0.00 €</span></div>
+      <div class="cap-item"><div class="cap-dot equity"></div><span class="cap-label">Equity</span><span class="cap-val" id="cap-equity">50 000 $</span></div>
     </div>
   </div>
 
   <!-- HEADER -->
   <div class="hdr">
     <div class="brand">
-      <div class="brand-logo"><svg viewBox="0 0 24 24"><path d="M3 3h18v2H3V3zm0 4h12v2H3V7zm0 4h18v2H3v-2zm0 4h12v2H3v-2zm0 4h18v2H3v-2z"/></svg></div>
-      <div class="brand-name">Trade<span>Coach</span></div>
+      <div class="brand-logo"><img src="https://raw.githubusercontent.com/lvin-boop/tradecoach-app/main/logo-cercle.png" alt="DisciplineAI" onerror="this.style.display='none'"/></div>
+      <div class="brand-name">Discipline<span>AI</span></div>
       <div class="brand-badge">Beta</div>
     </div>
     <div class="hdr-mid">
-      <button class="ntab active">Session</button>
-      <button class="ntab">Historique</button>
-      <button class="ntab">Règles</button>
+      <button class="ntab active" onclick="showPage('session',this)">Session</button>
+      <button class="ntab" onclick="showPage('history',this)">Historique</button>
+      <button class="ntab" onclick="showPage('rules',this)">Règles</button>
     </div>
     <div class="hdr-right">
-      <div class="ws-pill">
-        <div class="ws-dot" id="ws-dot"></div>
-        <span class="ws-label" id="ws-label">Déconnecté</span>
-      </div>
+      <div class="ws-pill"><div class="ws-dot" id="ws-dot"></div><span class="ws-label" id="ws-label">Déconnecté</span></div>
       <div class="timer-wrap" id="timer">00:00:00</div>
       <button class="btn go" id="start-btn" onclick="startSession()">▶ Démarrer</button>
       <button class="btn stop" id="end-btn" style="display:none" onclick="endSession()">■ Terminer</button>
@@ -477,93 +305,164 @@ select.fi option{background:var(--bg3)}
 
   <!-- METRICS -->
   <div class="metrics">
-    <div class="met" id="m-pnl"><div class="met-accent"></div><div class="met-label">P&L journalier</div><div class="met-val" id="pnl-val">+0.00€</div><div class="met-sub" id="pnl-sub">0 trades</div></div>
+    <div class="met" id="m-pnl"><div class="met-accent"></div><div class="met-label">P&L jour</div><div class="met-val" id="pnl-val">+0.00€</div><div class="met-sub" id="pnl-sub">0 trades</div></div>
     <div class="met" id="m-trades"><div class="met-accent"></div><div class="met-label">Trades</div><div class="met-val" id="trades-val">0</div><div class="met-sub" id="trades-sub">/ 5 max</div></div>
     <div class="met" id="m-wr"><div class="met-accent"></div><div class="met-label">Win rate</div><div class="met-val" id="wr-val">—</div><div class="met-sub" id="wr-sub">—</div></div>
-    <div class="met" id="m-consec"><div class="met-accent"></div><div class="met-label">Pertes consec.</div><div class="met-val" id="consec-val">—</div><div class="met-sub">série en cours</div></div>
-    <div class="met" id="m-score"><div class="met-accent"></div><div class="met-label">Discipline</div><div class="met-val" id="score-val">—</div><div class="met-sub">score du jour</div></div>
+    <div class="met" id="m-consec"><div class="met-accent"></div><div class="met-label">Pertes consec.</div><div class="met-val" id="consec-val">—</div><div class="met-sub">série</div></div>
+    <div class="met" id="m-score"><div class="met-accent"></div><div class="met-label">Discipline</div><div class="met-val" id="score-val">—</div><div class="met-sub">score</div></div>
   </div>
 
   <!-- MAIN -->
   <div class="main">
-    <div class="left">
-      <div class="sec-hdr">
-        <span class="sec-title">Journal de trades<em id="trade-count-lbl"></em></span>
-        <span class="sec-title" id="plan-pct"></span>
+
+    <!-- SESSION PAGE -->
+    <div class="page active" id="page-session" style="grid-column:1/-1;display:grid;grid-template-columns:1fr 300px">
+
+      <div class="left">
+        <div class="sec-hdr">
+          <span class="sec-title">Journal<em id="trade-count-lbl"></em></span>
+          <span class="sec-title" id="plan-pct"></span>
+        </div>
+        <div class="trades-list" id="trade-list">
+          <div class="empty">📊 En attente de trades<br>MT5 connecté · Ouvre une position</div>
+        </div>
+        <div class="add-area">
+          <div class="add-label">Ajouter manuellement</div>
+          <div class="form-grid">
+            <input class="fi" type="text" id="t-sym" placeholder="XAUUSD, EURUSD..."/>
+            <select class="fi" id="t-dir"><option value="long">LONG ↑</option><option value="short">SHORT ↓</option></select>
+            <input class="fi" type="number" id="t-pnl" placeholder="P&L €" step="0.01"/>
+            <select class="fi" id="t-plan"><option value="yes">Dans le plan</option><option value="no">Hors plan ⚠</option></select>
+            <button class="add-btn" onclick="addManualTrade()">+</button>
+          </div>
+          <div class="note-row"><input class="fi" type="text" id="t-note" placeholder="FOMO · Revenge · Overtrading..."/></div>
+        </div>
+        <div class="rules-area">
+          <div class="sec-title">Règles de protection</div>
+          <div class="rules-grid">
+            <div class="rule-card">
+              <div><div class="rule-lbl">Perte max / jour</div><div class="rule-inp-row"><input type="number" class="rule-inp" id="r-maxloss" value="200" step="10" onchange="checkRules()"/><span class="rule-unit">€</span></div></div>
+              <label class="tog"><input type="checkbox" id="r-maxloss-on" checked onchange="checkRules()"><span class="tog-sl"></span></label>
+            </div>
+            <div class="rule-card">
+              <div><div class="rule-lbl">Max trades / jour</div><div class="rule-inp-row"><input type="number" class="rule-inp" id="r-maxtrades" value="5" min="1" onchange="checkRules()"/><span class="rule-unit">trades</span></div></div>
+              <label class="tog"><input type="checkbox" id="r-maxtrades-on" checked onchange="checkRules()"><span class="tog-sl"></span></label>
+            </div>
+            <div class="rule-card">
+              <div><div class="rule-lbl">Bloquer pertes consec.</div><div class="rule-inp-row"><input type="number" class="rule-inp" id="r-consec" value="2" min="1" onchange="checkRules()"/><span class="rule-unit">pertes</span></div></div>
+              <label class="tog"><input type="checkbox" id="r-consec-on" onchange="checkRules()"><span class="tog-sl"></span></label>
+            </div>
+            <div class="rule-card">
+              <div><div class="rule-lbl">Verrouillage strict</div><div class="rule-inp-row"><span class="rule-unit">Auto stop</span></div></div>
+              <label class="tog"><input type="checkbox" id="r-enforce"><span class="tog-sl"></span></label>
+            </div>
+          </div>
+          <div class="score-row">
+            <span class="score-lbl">Discipline</span>
+            <div class="score-track"><div class="score-fill" id="score-fill" style="width:0%"></div></div>
+            <span class="score-num" id="score-num" style="color:var(--text3)">—</span>
+          </div>
+        </div>
+        <div class="locked" id="locked-bar">⛔ SESSION VERROUILLÉE — Ferme MT5 et repose-toi.</div>
       </div>
-      <div class="trade-col-hdr">
-        <span>Symbole</span><span>Direction</span><span>Heure</span>
-        <span>Prix</span><span>P&L</span><span>Note</span><span>Source</span>
-      </div>
-      <div class="trades-list" id="trade-list">
-        <div class="empty">
-          <div class="empty-icon">📊</div>
-          En attente de trades<br>MT5 connecté · Ouvre une position
+
+      <!-- COACH -->
+      <div class="right">
+        <div class="coach-hdr">
+          <div class="coach-avatar">🧠</div>
+          <div>
+            <div class="coach-name">Coach IA</div>
+            <div class="coach-sub">Psychologie · Discipline</div>
+            <div class="coach-live"><div class="live-dot"></div><span class="live-txt">En ligne</span></div>
+          </div>
+        </div>
+        <div class="msgs" id="msgs"></div>
+        <div class="quick-row">
+          <button class="qbtn" onclick="sq('Comment est ma discipline ?')">Discipline</button>
+          <button class="qbtn" onclick="sq('J\'ai du FOMO')">FOMO</button>
+          <button class="qbtn" onclick="sq('Trade revenge')">Revenge</button>
+          <button class="qbtn" onclick="sq('Continuer à trader ?')">Continuer ?</button>
+        </div>
+        <div class="chat-foot">
+          <textarea id="chat-in" placeholder="Parle à ton coach..." onkeydown="hk(event)"></textarea>
+          <button class="snd" onclick="sendMsg()"><svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg></button>
         </div>
       </div>
-      <div class="add-area">
-        <div class="add-label">Ajouter manuellement</div>
-        <div class="form-grid">
-          <input class="fi" type="text" id="t-sym" placeholder="XAUUSD, EURUSD..."/>
-          <select class="fi" id="t-dir"><option value="long">LONG ↑</option><option value="short">SHORT ↓</option></select>
-          <input class="fi" type="number" id="t-pnl" placeholder="P&L €" step="0.01"/>
-          <select class="fi" id="t-plan"><option value="yes">Dans le plan</option><option value="no">Hors plan ⚠</option></select>
-          <button class="add-btn" onclick="addManualTrade()">+ Ajouter</button>
-        </div>
-        <div class="note-row"><input class="fi" type="text" id="t-note" placeholder="Note : FOMO · Revenge · Overtrading · Impatience..."/></div>
-      </div>
-      <div class="rules-area">
-        <div class="sec-title">Règles de protection</div>
-        <div class="rules-grid">
-          <div class="rule-card">
-            <div><div class="rule-lbl">Perte max / jour</div><div class="rule-inp-row"><input type="number" class="rule-inp" id="r-maxloss" value="200" step="10" onchange="checkRules()"/><span class="rule-unit">€</span></div></div>
-            <label class="tog"><input type="checkbox" id="r-maxloss-on" checked onchange="checkRules()"><span class="tog-sl"></span></label>
-          </div>
-          <div class="rule-card">
-            <div><div class="rule-lbl">Max trades / jour</div><div class="rule-inp-row"><input type="number" class="rule-inp" id="r-maxtrades" value="5" min="1" onchange="checkRules()"/><span class="rule-unit">trades</span></div></div>
-            <label class="tog"><input type="checkbox" id="r-maxtrades-on" checked onchange="checkRules()"><span class="tog-sl"></span></label>
-          </div>
-          <div class="rule-card">
-            <div><div class="rule-lbl">Bloquer après pertes consec.</div><div class="rule-inp-row"><input type="number" class="rule-inp" id="r-consec" value="2" min="1" onchange="checkRules()"/><span class="rule-unit">pertes</span></div></div>
-            <label class="tog"><input type="checkbox" id="r-consec-on" onchange="checkRules()"><span class="tog-sl"></span></label>
-          </div>
-          <div class="rule-card">
-            <div><div class="rule-lbl">Verrouillage strict</div><div class="rule-inp-row"><span class="rule-unit">Coupe la session auto</span></div></div>
-            <label class="tog"><input type="checkbox" id="r-enforce"><span class="tog-sl"></span></label>
-          </div>
-        </div>
-        <div class="score-row">
-          <span class="score-lbl">Discipline</span>
-          <div class="score-track"><div class="score-fill" id="score-fill" style="width:0%"></div></div>
-          <span class="score-num" id="score-num" style="color:var(--text3)">—</span>
-        </div>
-      </div>
-      <div class="locked" id="locked-bar">⛔ SESSION VERROUILLÉE — Ferme MT5 et repose-toi.</div>
     </div>
 
-    <!-- COACH -->
-    <div class="right">
-      <div class="coach-hdr">
-        <div class="coach-avatar">🧠</div>
-        <div>
-          <div class="coach-name">Coach IA</div>
-          <div class="coach-sub">Psychologie · Discipline · Performance</div>
-          <div class="coach-status"><div class="coach-status-dot"></div><span class="coach-status-txt">En ligne</span></div>
+    <!-- HISTORIQUE PAGE -->
+    <div class="history-page" id="page-history">
+      <div class="history-inner">
+        <div class="hist-top">
+          <div class="hist-stat">
+            <div class="hist-stat-label">P&L ce mois</div>
+            <div class="hist-stat-val" id="hist-month-pnl">+0.00€</div>
+            <div class="hist-stat-sub" id="hist-month-trades">0 sessions</div>
+          </div>
+          <div class="hist-stat">
+            <div class="hist-stat-label">Win rate</div>
+            <div class="hist-stat-val" id="hist-wr">—</div>
+            <div class="hist-stat-sub" id="hist-wr-sub">—</div>
+          </div>
+          <div class="hist-stat">
+            <div class="hist-stat-label">Meilleur jour</div>
+            <div class="hist-stat-val pos" id="hist-best">—</div>
+            <div class="hist-stat-sub" id="hist-best-date">—</div>
+          </div>
+          <div class="hist-stat">
+            <div class="hist-stat-label">Score moyen</div>
+            <div class="hist-stat-val" id="hist-avg-score">—</div>
+            <div class="hist-stat-sub">discipline</div>
+          </div>
+        </div>
+
+        <!-- CALENDRIER -->
+        <div class="cal-section">
+          <div class="cal-header">
+            <div class="cal-title" id="cal-month-title">Avril 2026</div>
+            <div class="cal-nav">
+              <button class="cal-nav-btn" onclick="prevMonth()">‹</button>
+              <button class="cal-nav-btn" onclick="nextMonth()">›</button>
+            </div>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+
+        <!-- TRADES DU JOUR SÉLECTIONNÉ -->
+        <div id="hist-trades-section" style="display:none">
+          <div class="hist-trades-title" id="hist-trades-title">Trades du jour</div>
+          <div id="hist-trades-list"></div>
+        </div>
+
+        <div class="no-history" id="no-history">
+          📅 Aucun historique disponible.<br>
+          Commence à trader pour voir tes stats ici.
         </div>
       </div>
-      <div class="msgs" id="msgs"></div>
-      <div class="quick-row">
-        <button class="qbtn" onclick="sq('Comment est ma discipline ?')">Ma discipline</button>
-        <button class="qbtn" onclick="sq('J\'ai du FOMO')">FOMO</button>
-        <button class="qbtn" onclick="sq('Trade revenge, j\'y pense')">Revenge</button>
-        <button class="qbtn" onclick="sq('Je continue à trader ?')">Continuer ?</button>
-        <button class="qbtn" onclick="sq('Analyse mon comportement')">Analyse</button>
-      </div>
-      <div class="chat-foot">
-        <textarea id="chat-in" placeholder="Parle à ton coach..." onkeydown="hk(event)"></textarea>
-        <button class="snd" onclick="sendMsg()"><svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg></button>
+    </div>
+
+    <!-- RULES PAGE -->
+    <div class="page" id="page-rules" style="grid-column:1/-1;padding:24px;overflow-y:auto">
+      <div style="max-width:600px;margin:0 auto">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:16px">Configuration avancée</div>
+        <div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:20px">
+          <div style="font-size:14px;font-weight:600;margin-bottom:6px">Règles de protection</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:16px">Configurez vos garde-fous depuis l'onglet Session.</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text2);line-height:2">
+            ✓ Perte max journalière<br>
+            ✓ Nombre max de trades<br>
+            ✓ Blocage après pertes consécutives<br>
+            ✓ Verrouillage strict automatique<br>
+            <br>
+            <span style="color:var(--text3)">Prochainement :</span><br>
+            ○ Objectif de profit journalier<br>
+            ○ Alerte TP/SL intelligent<br>
+            ○ Mode surveillance avancé
+          </div>
+        </div>
       </div>
     </div>
+
   </div>
 </div>
 
@@ -574,20 +473,38 @@ const WS_URL=BACKEND.replace('https','wss').replace('http','ws')+'?session='+SES
 const STARTING_BALANCE=50000;
 
 let sessionOn=false,trades=[],timerInt=null,t0=null,locked=false,hist=[],ws=null,wsTimer=null;
-let mt5Balance=null;
+let allTrades=[]; // tous les trades historiques
+let calYear=new Date().getFullYear();
+let calMonth=new Date().getMonth();
+
+// ── Navigation ────────────────────────────────────────────────────────────
+function showPage(page,btn){
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('page-session').style.display='none';
+  document.getElementById('page-history').style.display='none';
+  document.getElementById('page-rules').style.display='none';
+  if(page==='session'){
+    document.getElementById('page-session').style.display='grid';
+  } else if(page==='history'){
+    document.getElementById('page-history').style.display='flex';
+    renderCalendar();
+    updateHistStats();
+  } else if(page==='rules'){
+    document.getElementById('page-rules').style.display='flex';
+  }
+}
 
 // ── Capital bar ───────────────────────────────────────────────────────────
 function updateCapitalBar(){
   const pnl=trades.reduce((a,t)=>a+t.pnl,0);
-  const capital=mt5Balance!==null?mt5Balance:STARTING_BALANCE;
+  const capital=STARTING_BALANCE;
   const equity=capital+pnl;
   const pnlEl=document.getElementById('cap-pnl');
-  const eqEl=document.getElementById('cap-equity');
-  document.getElementById('cap-capital').textContent=capital.toLocaleString('fr-FR',{minimumFractionDigits:2})+' $';
+  document.getElementById('cap-capital').textContent=capital.toLocaleString('fr-FR',{minimumFractionDigits:0})+' $';
   pnlEl.textContent=(pnl>=0?'+':'')+pnl.toFixed(2)+' €';
   pnlEl.className='cap-val '+(pnl>0?'pos':pnl<0?'neg':'');
-  eqEl.textContent=equity.toLocaleString('fr-FR',{minimumFractionDigits:2})+' $';
-  eqEl.className='cap-val '+(equity>=capital?'pos':'neg');
+  document.getElementById('cap-equity').textContent=equity.toLocaleString('fr-FR',{minimumFractionDigits:0})+' $';
 }
 
 // ── WebSocket ─────────────────────────────────────────────────────────────
@@ -613,7 +530,7 @@ function connectWS(){
 function setWS(s){
   const d=document.getElementById('ws-dot'),l=document.getElementById('ws-label');
   d.className='ws-dot '+s;
-  const labels={connected:'MT5 · Live',connecting:'Connexion...',disconnected:'Déconnecté'};
+  const labels={connected:'MT5 Live',connecting:'Connexion...',disconnected:'Déconnecté'};
   l.textContent=labels[s];l.className=s==='connected'?'ws-label connected':'ws-label';
 }
 
@@ -630,7 +547,7 @@ function startSession(){
       String(e%60).padStart(2,'0');
     document.getElementById('timer').className='timer-wrap active';
   },1000);
-  coachMsg("Session démarrée. Je surveille tes trades MT5 en temps réel. Quel est ton plan de trading aujourd'hui ?");
+  coachMsg("Session démarrée 🟢 Je surveille tes trades MT5 en temps réel. Quel est ton plan aujourd'hui ?");
   connectWS();
 }
 
@@ -640,14 +557,21 @@ function endSession(){
   document.getElementById('start-btn').style.display='inline-block';
   document.getElementById('start-btn').textContent='▶ Nouvelle session';
   document.getElementById('end-btn').style.display='none';
+  // Sauvegarde dans l'historique local
+  if(trades.length>0){
+    const today=new Date().toISOString().split('T')[0];
+    const saved=JSON.parse(localStorage.getItem('dai_history')||'{}');
+    if(!saved[today])saved[today]=[];
+    saved[today]=saved[today].concat(trades);
+    localStorage.setItem('dai_history',JSON.stringify(saved));
+  }
   bilan();
 }
 
 // ── Trades ────────────────────────────────────────────────────────────────
 function addTradeUI(trade,isNew){
   if(trades.find(t=>t.id===trade.id))return;
-  trades.push(trade);renderTrades(isNew?trade.id:null);
-  updateCapitalBar();
+  trades.push(trade);renderTrades(isNew?trade.id:null);updateCapitalBar();
 }
 
 function addManualTrade(){
@@ -658,12 +582,10 @@ function addManualTrade(){
   const plan=document.getElementById('t-plan').value;
   const note=document.getElementById('t-note').value.trim();
   if(!sym||isNaN(pnl))return;
-  const trade={
-    id:crypto.randomUUID(),symbol:sym.toUpperCase(),direction:dir,pnl,plan,note,
+  const trade={id:crypto.randomUUID(),symbol:sym.toUpperCase(),direction:dir,pnl,plan,note,
     source:'manual',status:'closed',price:0,
     time:new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),
-    timestamp:new Date().toISOString()
-  };
+    timestamp:new Date().toISOString()};
   trades.push(trade);
   ['t-sym','t-pnl','t-note'].forEach(id=>document.getElementById(id).value='');
   renderTrades(trade.id);updateMetrics();checkRules();autoCoach(trade);updateCapitalBar();
@@ -671,19 +593,16 @@ function addManualTrade(){
 
 function renderTrades(newId){
   const el=document.getElementById('trade-list');
-  if(!trades.length){
-    el.innerHTML='<div class="empty"><div class="empty-icon">📊</div>En attente de trades<br>MT5 connecté · Ouvre une position</div>';
-    return;
-  }
+  if(!trades.length){el.innerHTML='<div class="empty">📊 En attente de trades<br>MT5 connecté · Ouvre une position</div>';return;}
   el.innerHTML=trades.slice().reverse().map(t=>`
     <div class="trade-row">
       <span class="t-sym">${t.symbol}</span>
-      <span class="t-dir ${t.direction}">${t.direction==='long'?'LONG ↑':'SHORT ↓'}</span>
+      <span class="t-dir ${t.direction}">${t.direction==='long'?'L ↑':'S ↓'}</span>
       <span class="t-time">${t.time}</span>
       <span class="t-price">${t.price&&t.price>0?t.price.toFixed(2):'—'}</span>
-      <span class="t-pnl ${t.status==='open'?'open':t.pnl>=0?'pos':'neg'}">${t.status==='open'?'En cours…':((t.pnl>=0?'+':'')+t.pnl.toFixed(2)+'€')}</span>
+      <span class="t-pnl ${t.status==='open'?'open':t.pnl>=0?'pos':'neg'}">${t.status==='open'?'En cours':((t.pnl>=0?'+':'')+t.pnl.toFixed(2)+'€')}</span>
       <span class="t-note">${t.note||'—'}</span>
-      <span class="t-src ${t.source||'manual'}">${t.source==='mt5'?'MT5':t.source==='tradingview'?'TV':'Manuel'}</span>
+      <span class="t-src ${t.source||'manual'}">${t.source==='mt5'?'MT5':t.source==='tradingview'?'TV':'Man'}</span>
     </div>`).join('');
 }
 
@@ -739,8 +658,8 @@ function updateMetrics(){
   }
   const planOk=trades.filter(t=>t.plan==='yes').length;
   const pp=trades.length?Math.round(planOk/trades.length*100):null;
-  document.getElementById('trade-count-lbl').textContent=trades.length?' · '+trades.length+' trade'+(trades.length>1?'s':''):'';
-  document.getElementById('plan-pct').textContent=pp!==null?pp+'% dans le plan':'';
+  document.getElementById('trade-count-lbl').textContent=trades.length?' · '+trades.length:'';
+  document.getElementById('plan-pct').textContent=pp!==null?pp+'% plan':'';
   updateCapitalBar();
 }
 
@@ -758,23 +677,116 @@ function checkRules(){
   let alerts=[];
   if(mlOn&&tp<=-ml)alerts.push('Perte max de '+ml+'€ atteinte');
   if(mtOn&&trades.length>=mt)alerts.push('Limite de '+mt+' trades atteinte');
-  if(cOn&&cl>=cv)alerts.push(cv+' pertes consécutives — risque revenge trading');
+  if(cOn&&cl>=cv)alerts.push(cv+' pertes consécutives');
   const strip=document.getElementById('alert-strip');
   if(alerts.length){
     strip.className='alert show '+(cl>=cv&&cOn?'warn':'danger');
     document.getElementById('alert-msg').textContent='⚠ '+alerts.join('  ·  ');
-    if(enforce&&!locked){
-      locked=true;
-      document.getElementById('locked-bar').className='locked show';
-      coachMsg("⛔ STOP. Session verrouillée. Ferme MT5 et repose-toi. Tu fais le bon choix.");
-    }
+    if(enforce&&!locked){locked=true;document.getElementById('locked-bar').className='locked show';coachMsg("⛔ STOP. Session verrouillée. Ferme MT5 et repose-toi.");}
   }else{strip.className='alert';}
   updateMetrics();
 }
 
+// ── HISTORIQUE ─────────────────────────────────────────────────────────────
+function getHistory(){
+  const saved=JSON.parse(localStorage.getItem('dai_history')||'{}');
+  // Ajoute aussi les trades de la session actuelle si elle est active
+  if(trades.length>0){
+    const today=new Date().toISOString().split('T')[0];
+    if(!saved[today])saved[today]=[];
+    // Merge sans doublons
+    const existingIds=new Set(saved[today].map(t=>t.id));
+    trades.forEach(t=>{if(!existingIds.has(t.id))saved[today].push(t);});
+  }
+  return saved;
+}
+
+function renderCalendar(){
+  const months=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  document.getElementById('cal-month-title').textContent=months[calMonth]+' '+calYear;
+  const history=getHistory();
+  const grid=document.getElementById('cal-grid');
+  const days=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  let html=days.map(d=>`<div class="cal-day-name">${d}</div>`).join('');
+  const firstDay=new Date(calYear,calMonth,1);
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  let startOffset=(firstDay.getDay()+6)%7;
+  for(let i=0;i<startOffset;i++)html+='<div class="cal-day empty"></div>';
+  const today=new Date();
+  for(let d=1;d<=daysInMonth;d++){
+    const dateKey=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayTrades=history[dateKey]||[];
+    const isToday=d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear();
+    const pnl=dayTrades.reduce((a,t)=>a+t.pnl,0);
+    const hasTrades=dayTrades.length>0;
+    const profitClass=hasTrades?(pnl>=0?'profit':'loss'):'';
+    html+=`<div class="cal-day ${isToday?'today':''} ${hasTrades?'has-trades':''} ${profitClass}" onclick="selectDay('${dateKey}')">
+      <span class="cal-day-num">${d}</span>
+      ${hasTrades?`<span class="cal-day-pnl ${pnl>=0?'pos':'neg'}">${pnl>=0?'+':''}${pnl.toFixed(0)}€</span>`:''}
+      ${hasTrades?`<div class="cal-day-dot ${profitClass}"></div>`:''}
+    </div>`;
+  }
+  grid.innerHTML=html;
+}
+
+function selectDay(dateKey){
+  const history=getHistory();
+  const dayTrades=history[dateKey]||[];
+  const section=document.getElementById('hist-trades-section');
+  const list=document.getElementById('hist-trades-list');
+  const noHist=document.getElementById('no-history');
+  if(!dayTrades.length){section.style.display='none';return;}
+  section.style.display='block';
+  noHist.style.display='none';
+  const [y,m,d]=dateKey.split('-');
+  document.getElementById('hist-trades-title').textContent=`Trades du ${d}/${m}/${y} (${dayTrades.length} trades)`;
+  list.innerHTML=dayTrades.map(t=>`
+    <div class="hist-trade-row">
+      <span style="font-family:var(--mono);font-size:11px;font-weight:500">${t.symbol}</span>
+      <span class="t-dir ${t.direction}" style="font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:100px;border:1px solid;${t.direction==='long'?'color:var(--green);border-color:rgba(0,255,136,0.2)':'color:var(--red);border-color:rgba(255,77,106,0.2)'}">${t.direction==='long'?'LONG':'SHORT'}</span>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text3)">${t.time||'—'}</span>
+      <span style="font-family:var(--mono);font-size:11px;font-weight:500;color:${t.pnl>=0?'var(--green)':'var(--red)'}">${t.pnl>=0?'+':''}${t.pnl.toFixed(2)}€</span>
+      <span style="font-family:var(--mono);font-size:9px;color:${t.source==='mt5'?'var(--accent2)':'var(--text3)'}">${t.source==='mt5'?'MT5':t.source==='tradingview'?'TV':'Manuel'}</span>
+      <span style="font-size:10px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.note||'—'}</span>
+    </div>`).join('');
+}
+
+function updateHistStats(){
+  const history=getHistory();
+  const allT=Object.values(history).flat();
+  if(!allT.length){
+    document.getElementById('no-history').style.display='block';
+    return;
+  }
+  document.getElementById('no-history').style.display='none';
+  // Stats du mois
+  const monthKey=`${calYear}-${String(calMonth+1).padStart(2,'0')}`;
+  const monthTrades=Object.entries(history).filter(([k])=>k.startsWith(monthKey)).flatMap(([,v])=>v);
+  const monthPnl=monthTrades.reduce((a,t)=>a+t.pnl,0);
+  const monthDays=Object.keys(history).filter(k=>k.startsWith(monthKey)).length;
+  const wins=allT.filter(t=>t.pnl>0).length;
+  const wr=allT.length?Math.round(wins/allT.length*100):null;
+  // Meilleur jour
+  let bestDay={pnl:-Infinity,date:'—'};
+  Object.entries(history).forEach(([date,ts])=>{
+    const p=ts.reduce((a,t)=>a+t.pnl,0);
+    if(p>bestDay.pnl){bestDay={pnl:p,date};}
+  });
+  document.getElementById('hist-month-pnl').textContent=(monthPnl>=0?'+':'')+monthPnl.toFixed(2)+'€';
+  document.getElementById('hist-month-pnl').className='hist-stat-val '+(monthPnl>=0?'pos':'neg');
+  document.getElementById('hist-month-trades').textContent=monthDays+' jour'+(monthDays>1?'s':'');
+  document.getElementById('hist-wr').textContent=wr!==null?wr+'%':'—';
+  document.getElementById('hist-wr-sub').textContent=wr!==null?(wins+'W / '+(allT.length-wins)+'L'):'—';
+  document.getElementById('hist-best').textContent=bestDay.pnl>-Infinity?(bestDay.pnl>=0?'+':'')+bestDay.pnl.toFixed(2)+'€':'—';
+  document.getElementById('hist-best-date').textContent=bestDay.date!=='—'?bestDay.date.split('-').reverse().join('/'):'—';
+  document.getElementById('hist-avg-score').textContent='—';
+}
+
+function prevMonth(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar();updateHistStats();}
+function nextMonth(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar();updateHistStats();}
+
 // ── Coach ─────────────────────────────────────────────────────────────────
 const gt=()=>new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-
 function coachMsg(txt){
   const d=document.createElement('div');d.className='msg coach';
   d.innerHTML=`<div class="msg-bbl">${txt}</div><div class="msg-ts">${gt()}</div>`;
@@ -799,18 +811,16 @@ function getCtx(){
   const bad=trades.filter(t=>t.plan==='no').length;
   const sc=calcScore();
   const el=t0?Math.floor((Date.now()-t0)/60000):0;
-  return `Session: ${el}min | Trades:${trades.length} | P&L:${tp.toFixed(2)}€ | Wins:${wins} Losses:${trades.length-wins} | Hors plan:${bad} | Pertes consec:${maxConsec()} | Score:${sc??'N/A'}/100 | Verrouillé:${locked?'OUI':'non'}${trades.length?' | Derniers:'+trades.slice(-3).map(t=>`${t.symbol} ${t.direction} ${t.pnl>=0?'+':''}${t.pnl.toFixed(2)}€${t.status==='open'?' (ouvert)':''}`).join(','):''}`;
+  return `Session: ${el}min | Trades:${trades.length} | P&L:${tp.toFixed(2)}€ | Wins:${wins} Losses:${trades.length-wins} | Hors plan:${bad} | Consec:${maxConsec()} | Score:${sc??'N/A'}/100 | Verr:${locked?'OUI':'non'}${trades.length?' | '+trades.slice(-3).map(t=>`${t.symbol} ${t.direction} ${t.pnl>=0?'+':''}${t.pnl.toFixed(2)}€`).join(','):''}`;
 }
 
 async function callAI(userTxt,short=false){
   showTyping();
-  const sys=`Tu es un coach de trading psychologique expert. Tu aides les traders à gérer FOMO, revenge trading, overtrading, manque de discipline. Tu vois les trades MT5 en temps réel. Bienveillant, direct, concis. ${short?'2-3 phrases max.':'4-5 phrases max.'} Réponds en français. Pas de markdown.`;
+  const sys=`Tu es un coach de trading psychologique expert de l'app DisciplineAI. Tu aides les traders à gérer FOMO, revenge trading, overtrading. Tu vois les trades MT5 en temps réel. Bienveillant, direct. ${short?'2-3 phrases max.':'4-5 phrases max.'} Réponds en français. Pas de markdown.`;
   const msgs=[...hist.slice(-8),{role:'user',content:getCtx()+'\n\n'+userTxt}];
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:msgs})
-    });
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:msgs})});
     const d=await r.json();rmTyping();
     const rep=d.content?.[0]?.text||'Connexion interrompue.';
     coachMsg(rep);hist.push({role:'user',content:userTxt});
@@ -820,9 +830,8 @@ async function callAI(userTxt,short=false){
 async function autoCoach(tr){
   const cl=maxConsec();
   if(trades.length===1||tr.plan==='no'||tr.pnl<-100||cl>=2){
-    const p=tr.plan==='no'
-      ?`Trade hors plan: ${tr.symbol} ${tr.direction} ${tr.pnl.toFixed(2)}€. Commente brièvement, bienveillant.`
-      :tr.pnl<-100?`Grosse perte: ${tr.symbol} ${tr.pnl.toFixed(2)}€. Soutien + mise en garde revenge.`
+    const p=tr.plan==='no'?`Trade hors plan: ${tr.symbol} ${tr.direction} ${tr.pnl.toFixed(2)}€. Commente brièvement.`
+      :tr.pnl<-100?`Grosse perte: ${tr.symbol} ${tr.pnl.toFixed(2)}€. Soutien + garde-fou revenge.`
       :cl>=2?`${cl} pertes consécutives. Alerte douce.`
       :`1er trade: ${tr.symbol} ${tr.direction}. Encouragement bref.`;
     await callAI(p,true);
@@ -830,19 +839,16 @@ async function autoCoach(tr){
 }
 
 async function bilan(){
-  coachMsg("Génération de ton bilan de discipline...");
+  coachMsg("Génération de ton bilan...");
   await callAI("Génère un bilan de fin de session : score, points forts, axes d'amélioration, conseil pour demain.",false);
 }
 
-function sendMsg(){
-  const inp=document.getElementById('chat-in');
-  const txt=inp.value.trim();if(!txt)return;
-  userMsg(txt);inp.value='';callAI(txt);
-}
+function sendMsg(){const inp=document.getElementById('chat-in');const txt=inp.value.trim();if(!txt)return;userMsg(txt);inp.value='';callAI(txt);}
 function sq(t){userMsg(t);callAI(t);}
 function hk(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
 
-coachMsg("Bienvenue. Démarre ta session quand tu es prêt. Je surveille tes trades MT5 en temps réel.");
+// Init
+coachMsg("Bienvenue sur DisciplineAI. Démarre ta session quand tu es prêt — je surveille tes trades MT5 en temps réel.");
 connectWS();
 updateCapitalBar();
 </script>
