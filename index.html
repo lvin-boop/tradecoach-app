@@ -6,6 +6,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#080A0E">
+<link rel="manifest" href="/manifest.json"/>
+<link rel="apple-touch-icon" href="/logo-cercle.png"/>
+<meta name="apple-mobile-web-app-title" content="DisciplineAI"/>
 <title>DisciplineAI</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -686,9 +689,24 @@ body::before{content:'';position:fixed;width:500px;height:500px;background:radia
         </div>
       </div>
       <div class="settings-section">
+        <div class="settings-ttl">Notifications & Installation</div>
+        <div class="settings-sub">Reçois les alertes sur ton téléphone même quand l'app est fermée</div>
+        <div id="install-btn" style="display:none;align-items:center;gap:10px;background:rgba(0,229,160,0.06);border:1px solid rgba(0,229,160,0.18);border-radius:12px;padding:13px 15px;cursor:pointer;margin-bottom:10px" onclick="installApp()">
+          <span style="font-size:22px">📲</span>
+          <div>
+            <div style="font-size:13px;font-weight:600">Installer DisciplineAI</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--text2);margin-top:2px">Ajouter à l'écran d'accueil</div>
+          </div>
+          <div style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--green)">→</div>
+        </div>
+        <div class="s-btn-row">
+          <button class="s-btn g" onclick="requestNotifPermission()" id="notif-btn">🔔 Activer les notifications</button>
+        </div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:8px;line-height:1.8" id="notif-status">Statut : —</div>
+      </div>
+      <div class="settings-section">
         <div class="settings-ttl">Prochainement</div>
         <div class="cs-list">
-          ○ <span>Alertes push sur téléphone</span><br>
           ○ <span>Alertes TP/SL intelligentes</span><br>
           ○ <span>Connexion cTrader</span><br>
           ○ <span>Mode Prop Firm (FTMO/Topstep)</span>
@@ -1277,6 +1295,114 @@ renderChart();updateAll();connectWS();
 setTimeout(()=>coachAutoMsg('Session démarrée. Bienvenue ultra court, 1 phrase.'),1500);
 const todayKey=new Date().toISOString().split('T')[0];
 if(localStorage.getItem('dai_score_date')!==todayKey){const sc=calcScore();if(sc!==null){scoreHistory.push(sc);if(scoreHistory.length>30)scoreHistory.shift();localStorage.setItem('dai_scores',JSON.stringify(scoreHistory));}localStorage.setItem('dai_score_date',todayKey);}
+
+// ── PWA & NOTIFICATIONS PUSH ───────────────────────────────────────────────
+let swReg=null;
+let deferredInstall=null;
+
+async function initPWA(){
+  if(!('serviceWorker' in navigator))return;
+  try{
+    swReg=await navigator.serviceWorker.register('/sw.js');
+    console.log('[PWA] Service Worker OK');
+    navigator.serviceWorker.addEventListener('message',(e)=>{
+      if(e.data?.type==='NOTIFICATION_CLICK'){goPage('notifs');}
+    });
+  }catch(err){console.error('[PWA] Erreur:',err);}
+  updateNotifStatus();
+}
+
+async function requestNotifPermission(){
+  if(!('Notification' in window)){
+    showFeedback('Notifications non supportées sur ce navigateur','warn');
+    return false;
+  }
+  if(Notification.permission==='granted'){
+    showFeedback('Notifications déjà activées ✓','good');
+    updateNotifStatus();
+    return true;
+  }
+  const p=await Notification.requestPermission();
+  updateNotifStatus();
+  if(p==='granted'){showFeedback('Notifications activées ! 🔔','good');return true;}
+  else{showFeedback('Notifications refusées — active-les dans les paramètres du navigateur','warn');return false;}
+}
+
+function updateNotifStatus(){
+  const el=document.getElementById('notif-status');
+  const btn=document.getElementById('notif-btn');
+  if(!el)return;
+  if(!('Notification' in window)){
+    el.textContent='Statut : Non supporté sur ce navigateur';
+    return;
+  }
+  if(Notification.permission==='granted'){
+    el.textContent='Statut : ✅ Notifications activées';
+    el.style.color='var(--green)';
+    if(btn)btn.textContent='✅ Notifications activées';
+  } else if(Notification.permission==='denied'){
+    el.textContent='Statut : ❌ Bloquées — active-les dans les réglages du navigateur';
+    el.style.color='var(--red)';
+  } else {
+    el.textContent='Statut : ⏳ En attente — clique sur "Activer les notifications"';
+    el.style.color='var(--amber)';
+  }
+}
+
+async function sendPushNotif(title,body,urgent=false){
+  if(Notification.permission!=='granted'){
+    const p=await Notification.requestPermission();
+    if(p!=='granted')return;
+  }
+  if(swReg?.active){
+    swReg.active.postMessage({type:'SHOW_NOTIFICATION',title,body,urgent,tag:'disciplineai-'+Date.now()});
+  } else {
+    try{new Notification(title,{body,icon:'/logo-cercle.png',vibrate:urgent?[200,100,200]:[100]});}catch(e){}
+  }
+}
+
+// Remplace addNotif pour inclure les push
+const _addNotif=addNotif;
+// Override addNotif avec notifications push
+function addNotif(type,title,sub){
+  notifications.unshift({type,title,sub,time:new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})});
+  if(notifications.length>30)notifications.pop();
+  localStorage.setItem('dai_notifs',JSON.stringify(notifications));
+  document.getElementById('nbadge').style.display='block';
+  // Push notification
+  const icons={danger:'🚨',warn:'⚠️',good:'✅'};
+  sendPushNotif(icons[type]+' '+title,sub,type==='danger');
+}
+
+// Bouton installer l'app
+window.addEventListener('beforeinstallprompt',(e)=>{
+  e.preventDefault();deferredInstall=e;
+  const btn=document.getElementById('install-btn');
+  if(btn)btn.style.display='flex';
+});
+
+async function installApp(){
+  if(!deferredInstall){
+    showFeedback('Menu navigateur → "Ajouter à l\'écran d\'accueil"','warn');
+    return;
+  }
+  deferredInstall.prompt();
+  const{outcome}=await deferredInstall.userChoice;
+  if(outcome==='accepted'){
+    showFeedback('DisciplineAI installée ! 🎉','good');
+    deferredInstall=null;
+    const btn=document.getElementById('install-btn');
+    if(btn)btn.style.display='none';
+  }
+}
+
+window.addEventListener('appinstalled',()=>{
+  showFeedback('Application installée avec succès !','good');
+  addNotif('good','DisciplineAI installée','Bienvenue dans l\'app !');
+});
+
+// Init
+initPWA();
 </script>
 </body>
 </html>
