@@ -715,12 +715,92 @@ body::before{content:'';position:fixed;width:500px;height:500px;background:radia
     </div>
   </div>
 
+  <!-- ══ ALERTES TP/SL ══ -->
+  <div class="page" id="page-alerts">
+    <div class="topbar"><span class="page-title">🔔 Alertes TP/SL</span></div>
+    <div class="scroll">
+
+      <!-- AJOUTER UNE ALERTE -->
+      <div style="background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px">
+        <div class="card-hdr" style="margin-bottom:12px">
+          <span class="card-ttl">Nouvelle alerte</span>
+          <span class="card-sub">Surveille ton trade 24h/24</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <div>
+            <div class="modal-lbl" style="margin-bottom:5px">Symbole</div>
+            <input class="modal-inp" type="text" id="alert-sym" placeholder="XAUUSD, BTCUSD..." autocapitalize="characters" style="font-size:13px;padding:10px 12px"/>
+          </div>
+          <div>
+            <div class="modal-lbl" style="margin-bottom:5px">Direction</div>
+            <select class="modal-inp" id="alert-dir" style="font-size:13px;padding:10px 12px">
+              <option value="long">LONG ↑</option>
+              <option value="short">SHORT ↓</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+          <div>
+            <div class="modal-lbl" style="margin-bottom:5px">Entrée</div>
+            <input class="modal-inp" type="number" id="alert-entry" placeholder="Prix" step="0.01" inputmode="decimal" style="font-size:13px;padding:10px 12px"/>
+          </div>
+          <div>
+            <div class="modal-lbl" style="margin-bottom:5px">Take Profit</div>
+            <input class="modal-inp" type="number" id="alert-tp" placeholder="TP" step="0.01" inputmode="decimal" style="font-size:13px;padding:10px 12px"/>
+          </div>
+          <div>
+            <div class="modal-lbl" style="margin-bottom:5px">Stop Loss</div>
+            <input class="modal-inp" type="number" id="alert-sl" placeholder="SL" step="0.01" inputmode="decimal" style="font-size:13px;padding:10px 12px"/>
+          </div>
+        </div>
+        <button onclick="addManualAlert()" style="width:100%;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--purple),var(--green));color:white;border:none;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;letter-spacing:0.05em">
+          👁️ Surveiller ce trade
+        </button>
+      </div>
+
+      <!-- PRIX EN DIRECT -->
+      <div style="background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px">
+        <div class="card-hdr" style="margin-bottom:12px">
+          <span class="card-ttl">Prix en direct</span>
+          <span class="card-sub" id="price-refresh-txt">—</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <input class="modal-inp" type="text" id="price-sym" placeholder="BTCUSD, XAUUSD..." autocapitalize="characters" style="font-size:13px;padding:10px 12px"/>
+          <button onclick="checkLivePrice()" style="height:40px;border-radius:10px;background:var(--glass2);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:11px;cursor:pointer;letter-spacing:0.04em">
+            Vérifier le prix
+          </button>
+        </div>
+        <div id="live-price-result" style="font-family:var(--mono);font-size:13px;color:var(--text3);text-align:center;padding:8px"></div>
+      </div>
+
+      <!-- ALERTES ACTIVES -->
+      <div class="section-hdr" style="margin-bottom:8px">
+        <span class="section-ttl">Alertes actives</span>
+        <span class="section-ttl" id="watchers-count" style="color:var(--text3)">0</span>
+      </div>
+      <div id="watchers-list">
+        <div class="empty-msg">Aucune alerte active<br>Ajoute un trade à surveiller ci-dessus</div>
+      </div>
+
+      <!-- SYMBOLES SUPPORTÉS -->
+      <div style="background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:13px;margin-top:4px">
+        <div class="card-ttl" style="margin-bottom:8px">Symboles supportés</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--text3);line-height:2">
+          <span style="color:var(--green)">Crypto :</span> BTCUSD, ETHUSD, XRPUSD, SOLUSD, BNBUSD<br>
+          <span style="color:var(--amber)">Forex :</span> EURUSD, GBPUSD, USDJPY<br>
+          <span style="color:var(--blue)">Indices :</span> US30, NAS100, SP500<br>
+          <span style="color:var(--purple)">Métaux :</span> XAUUSD (Or)
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
     <div class="nav-item active" id="nav-home" onclick="goPage('home')"><div class="nav-ico">⊞</div><div class="nav-lbl">Dashboard</div></div>
     <div class="nav-item" id="nav-chat" onclick="goPage('chat')"><div class="nav-ico">🧠</div><div class="nav-lbl">Coach</div></div>
+    <div class="nav-item" id="nav-alerts" onclick="goPage('alerts')"><div class="nav-ico">🔔</div><div class="nav-lbl">Alertes</div></div>
     <div class="nav-item" id="nav-stats" onclick="goPage('stats')"><div class="nav-ico">◈</div><div class="nav-lbl">Stats</div></div>
-    <div class="nav-item" id="nav-game" onclick="goPage('game');renderGame()"><div class="nav-ico">🏆</div><div class="nav-lbl">Progression</div></div>
     <div class="nav-item" id="nav-settings" onclick="goPage('settings');syncSettings()"><div class="nav-ico">⚙</div><div class="nav-lbl">Réglages</div></div>
   </nav>
 </div>
@@ -772,6 +852,7 @@ function goPage(page){
   if(page==='settings')syncSettings();
   if(page==='game')renderGame();
   if(page==='chat')initChat();
+  if(page==='alerts')renderWatchers();
 }
 
 // ── WEBSOCKET ──────────────────────────────────────────────────────────────
@@ -1403,6 +1484,212 @@ window.addEventListener('appinstalled',()=>{
 
 // Init
 initPWA();
+
+// ── ALERTES TP/SL ──────────────────────────────────────────────────────────
+let tpslWatchers={}; // { tradeId: { symbol, entry, tp, sl, direction, interval } }
+
+// Map symboles → sources de prix
+const PRICE_SOURCES={
+  // CRYPTO (Binance)
+  'BTCUSD':'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT',
+  'BTCUSDT':'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT',
+  'ETHUSD':'https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT',
+  'ETHUSDT':'https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT',
+  'XRPUSD':'https://api.binance.com/api/v3/ticker/price?symbol=XRPUSDT',
+  'SOLUSD':'https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT',
+  'BNBUSD':'https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT',
+  // FOREX & INDICES (Yahoo Finance via proxy)
+  'XAUUSD':`https://query1.finance.yahoo.com/v8/finance/chart/GC%3DF?interval=1m&range=1d`,
+  'EURUSD':`https://query1.finance.yahoo.com/v8/finance/chart/EURUSD%3DX?interval=1m&range=1d`,
+  'GBPUSD':`https://query1.finance.yahoo.com/v8/finance/chart/GBPUSD%3DX?interval=1m&range=1d`,
+  'USDJPY':`https://query1.finance.yahoo.com/v8/finance/chart/JPY%3DX?interval=1m&range=1d`,
+  'US30':`https://query1.finance.yahoo.com/v8/finance/chart/%5EDJI?interval=1m&range=1d`,
+  'NAS100':`https://query1.finance.yahoo.com/v8/finance/chart/%5EIXIC?interval=1m&range=1d`,
+  'SP500':`https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC?interval=1m&range=1d`,
+};
+
+async function fetchPrice(symbol){
+  const sym=symbol.toUpperCase().replace('/','');
+  const url=PRICE_SOURCES[sym];
+  if(!url)return null;
+  try{
+    const r=await fetch(url,{signal:AbortSignal.timeout(5000)});
+    const d=await r.json();
+    // Binance format
+    if(d.price)return parseFloat(d.price);
+    // Yahoo Finance format
+    if(d.chart?.result?.[0]){
+      const result=d.chart.result[0];
+      const quotes=result.indicators?.quote?.[0];
+      const closes=quotes?.close?.filter(v=>v!=null);
+      if(closes?.length)return closes[closes.length-1];
+    }
+    return null;
+  }catch(e){return null;}
+}
+
+function startTPSLWatcher(trade){
+  if(!trade.tp&&!trade.sl)return;
+  if(tpslWatchers[trade.id])return;
+
+  const THRESHOLD=0.003; // 0.3% du prix = zone d'alerte
+
+  const check=async()=>{
+    const price=await fetchPrice(trade.symbol);
+    if(price===null)return;
+
+    const isLong=trade.direction==='long'||trade.direction==='buy';
+    const entry=trade.price||trade.entry||0;
+    const tp=trade.tp||0;
+    const sl=trade.sl||0;
+
+    // Calcul des zones d'alerte (0.3% avant TP/SL)
+    const tpAlert=tp?(isLong?tp*(1-THRESHOLD):tp*(1+THRESHOLD)):0;
+    const slAlert=sl?(isLong?sl*(1+THRESHOLD):sl*(1-THRESHOLD)):0;
+
+    // TP atteint
+    if(tp&&((isLong&&price>=tp)||((!isLong)&&price<=tp))){
+      sendPushNotif(`✅ TP atteint — ${trade.symbol}`,`Prix: ${price.toFixed(2)} · TP: ${tp} · Sécurise tes profits !`,false);
+      addNotif('good',`TP atteint — ${trade.symbol}`,`Prix ${price.toFixed(2)} a atteint ton objectif ${tp}`);
+      stopTPSLWatcher(trade.id);
+      return;
+    }
+
+    // SL atteint
+    if(sl&&((isLong&&price<=sl)||((!isLong)&&price>=sl))){
+      sendPushNotif(`🚨 SL atteint — ${trade.symbol}`,`Prix: ${price.toFixed(2)} · SL: ${sl} · Trade clôturé`,true);
+      addNotif('danger',`SL atteint — ${trade.symbol}`,`Prix ${price.toFixed(2)} a touché ton stop ${sl}`);
+      stopTPSLWatcher(trade.id);
+      return;
+    }
+
+    // Proche du TP (alerte préventive)
+    if(tp&&tpAlert&&((isLong&&price>=tpAlert&&price<tp)||((!isLong)&&price<=tpAlert&&price>tp))){
+      sendPushNotif(`⚡ TP proche — ${trade.symbol}`,`Prix: ${price.toFixed(2)} · TP: ${tp} · Pense à sécuriser une partie`,false);
+    }
+
+    // Proche du SL (alerte préventive)
+    if(sl&&slAlert&&((isLong&&price<=slAlert&&price>sl)||((!isLong)&&price>=slAlert&&price<sl))){
+      sendPushNotif(`⚠️ SL proche — ${trade.symbol}`,`Prix: ${price.toFixed(2)} · SL: ${sl} · Reste discipliné`,true);
+    }
+  };
+
+  const interval=setInterval(check,30000); // check toutes les 30s
+  tpslWatchers[trade.id]={...trade,interval};
+  check(); // check immédiat
+  console.log(`[TP/SL] Surveillance démarrée: ${trade.symbol} TP:${trade.tp} SL:${trade.sl}`);
+}
+
+function stopTPSLWatcher(tradeId){
+  if(tpslWatchers[tradeId]){
+    clearInterval(tpslWatchers[tradeId].interval);
+    delete tpslWatchers[tradeId];
+    renderWatchers();
+  }
+}
+
+function stopAllWatchers(){
+  Object.keys(tpslWatchers).forEach(id=>stopTPSLWatcher(id));
+}
+
+// Ajoute une alerte manuelle depuis la page Alertes
+function addManualAlert(){
+  const sym=document.getElementById('alert-sym').value.trim();
+  const dir=document.getElementById('alert-dir').value;
+  const entry=parseFloat(document.getElementById('alert-entry').value)||0;
+  const tp=parseFloat(document.getElementById('alert-tp').value)||0;
+  const sl=parseFloat(document.getElementById('alert-sl').value)||0;
+  if(!sym){showFeedback('Entre un symbole','warn');return;}
+  if(!tp&&!sl){showFeedback('Entre au moins un TP ou un SL','warn');return;}
+  const trade={
+    id:crypto.randomUUID(),symbol:sym.toUpperCase(),
+    direction:dir,price:entry,tp,sl,
+    pnl:0,status:'open',source:'manual-alert',
+    time:new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),
+    timestamp:new Date().toISOString()
+  };
+  startTPSLWatcher(trade);
+  renderWatchers();
+  ['alert-sym','alert-entry','alert-tp','alert-sl'].forEach(id=>document.getElementById(id).value='');
+  showFeedback(`Surveillance activée — ${trade.symbol} 👁️`,'good');
+  requestNotifPermission();
+}
+
+function renderWatchers(){
+  const el=document.getElementById('watchers-list');
+  const cnt=document.getElementById('watchers-count');
+  const watchers=Object.values(tpslWatchers);
+  if(cnt)cnt.textContent=watchers.length+' active'+(watchers.length>1?'s':'');
+  if(!el)return;
+  if(!watchers.length){
+    el.innerHTML='<div class="empty-msg">Aucune alerte active<br>Ajoute un trade à surveiller ci-dessus</div>';
+    return;
+  }
+  el.innerHTML=watchers.map(w=>{
+    const isLong=w.direction==='long'||w.direction==='buy';
+    return`<div style="background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:30px;height:30px;border-radius:8px;background:${isLong?'var(--green2)':'var(--red2)'};display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;color:${isLong?'var(--green)':'var(--red)'}">${isLong?'BUY':'SELL'}</div>
+          <div>
+            <div style="font-size:13px;font-weight:600">${w.symbol}</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--text2)">Entrée: ${w.price||'—'}</div>
+          </div>
+        </div>
+        <button onclick="stopTPSLWatcher('${w.id}')" style="font-family:var(--mono);font-size:9px;padding:5px 10px;border-radius:7px;border:1px solid rgba(255,61,90,0.3);background:var(--red2);color:var(--red);cursor:pointer">Arrêter</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        ${w.tp?`<div style="background:rgba(0,229,160,0.06);border:1px solid rgba(0,229,160,0.15);border-radius:8px;padding:7px 10px"><div style="font-family:var(--mono);font-size:8px;color:var(--text3);margin-bottom:2px">TAKE PROFIT</div><div style="font-family:var(--mono);font-size:13px;font-weight:500;color:var(--green)">${w.tp}</div></div>`:''}
+        ${w.sl?`<div style="background:rgba(255,61,90,0.06);border:1px solid rgba(255,61,90,0.15);border-radius:8px;padding:7px 10px"><div style="font-family:var(--mono);font-size:8px;color:var(--text3);margin-bottom:2px">STOP LOSS</div><div style="font-family:var(--mono);font-size:13px;font-weight:500;color:var(--red)">${w.sl}</div></div>`:''}
+      </div>
+      <div style="font-family:var(--mono);font-size:8px;color:var(--text3);margin-top:7px;display:flex;align-items:center;gap:5px">
+        <div style="width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 2s infinite"></div>
+        Surveillance active · Vérification toutes les 30s
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function checkLivePrice(){
+  const sym=document.getElementById('price-sym').value.trim();
+  if(!sym){showFeedback('Entre un symbole','warn');return;}
+  const el=document.getElementById('live-price-result');
+  const refresh=document.getElementById('price-refresh-txt');
+  el.textContent='Récupération du prix...';
+  el.style.color='var(--text3)';
+  const price=await fetchPrice(sym.toUpperCase());
+  if(price){
+    el.textContent=sym.toUpperCase()+' : '+price.toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:5});
+    el.style.color='var(--green)';
+    refresh.textContent=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  }else{
+    el.textContent='Prix indisponible — symbole non supporté ou API hors ligne';
+    el.style.color='var(--red)';
+  }
+}
+
+// Lance la surveillance quand un trade arrive
+const _addTradeUI=addTradeUI;
+function addTradeUI(trade,isNew){
+  if(trades.find(t=>t.id===trade.id))return;
+  if(isNew&&lastTradeTime){
+    const diff=(Date.now()-lastTradeTime)/60000;
+    if(diff<3)trade.behavior='revenge';
+    else if(trades.length>=5)trade.behavior='impulsif';
+    else trade.behavior='normal';
+  }else trade.behavior=trade.behavior||'normal';
+  trades.push(trade);
+  if(isNew){lastTradeTime=Date.now();addXP(trade.behavior==='normal'?10:trade.behavior==='revenge'?-5:2);}
+  renderTrades();
+  // Lance la surveillance TP/SL si le trade a un TP ou SL
+  if(isNew&&(trade.tp||trade.sl)){
+    startTPSLWatcher(trade);
+    showFeedback(`Surveillance TP/SL activée — ${trade.symbol} 👁️`,'good');
+  }
+}
+
+// Arrête la surveillance quand le trade est clôturé
+// (déjà géré dans TRADE_CLOSED via stopTPSLWatcher)
 </script>
 </body>
 </html>
